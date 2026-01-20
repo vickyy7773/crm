@@ -1,27 +1,18 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-// PostgreSQL configuration (Supabase)
-const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 5432,
-  ssl: { rejectUnauthorized: false }, // Supabase requires SSL
-  max: 10, // connection pool size
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-};
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 
-// Create connection pool
-const pool = new Pool(dbConfig);
+  // 🔥 FORCE IPv4 (THIS IS THE FIX)
+  family: 4,
+});
 
-// Test database connection
 const testConnection = async () => {
   try {
     const client = await pool.connect();
-    console.log("✅ PostgreSQL connected successfully");
+    console.log("✅ PostgreSQL connected successfully (IPv4)");
     client.release();
     return true;
   } catch (error) {
@@ -31,4 +22,3 @@ const testConnection = async () => {
 };
 
 module.exports = { pool, testConnection };
-
