@@ -1,0 +1,189 @@
+Complete Edit Modal Code with ALL Fields:
+
+Replace lines 1789-1892 in StudentApplications.jsx with this:
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+
+              {/* Personal Details */}
+              <div className="bg-purple-50 p-4 rounded-xl border-2 border-purple-200">
+                <h3 className="text-md font-bold text-purple-900 mb-3">👤 Personal Details</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">{editFormData._appType === 'other' ? 'First + Middle Name' : 'First Name'}</label>
+                    <input type="text" value={editFormData._appType === 'other' ? (editFormData.first_middle_name || '') : (editFormData.first_name || '')} onChange={(e) => setEditFormData({...editFormData, [editFormData._appType === 'other' ? 'first_middle_name' : 'first_name']: e.target.value})} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Last Name</label>
+                    <input type="text" value={editFormData.last_name || ''} onChange={(e) => setEditFormData({ ...editFormData, last_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Date of Birth</label>
+                    <input type="date" value={editFormData.date_of_birth || ''} onChange={(e) => setEditFormData({ ...editFormData, date_of_birth: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Gender</label>
+                    <select value={editFormData.gender || ''} onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none">
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Nationality</label>
+                    <input type="text" value={editFormData.nationality || ''} onChange={(e) => setEditFormData({ ...editFormData, nationality: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Aadhar Number</label>
+                    <input type="text" value={editFormData.aadhar || ''} onChange={(e) => setEditFormData({ ...editFormData, aadhar: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Details */}
+              <div className="bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
+                <h3 className="text-md font-bold text-blue-900 mb-3">📞 Contact Details</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile</label>
+                    <input type="text" value={editFormData.mobile || ''} onChange={(e) => setEditFormData({ ...editFormData, mobile: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">WhatsApp</label>
+                    <input type="text" value={editFormData.whatsapp || ''} onChange={(e) => setEditFormData({ ...editFormData, whatsapp: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 outline-none" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email</label>
+                    <input type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Family Details */}
+              <div className="bg-green-50 p-4 rounded-xl border-2 border-green-200">
+                <h3 className="text-md font-bold text-green-900 mb-3">👨‍👩‍👦 Family Details</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
+                    <input type="text" value={editFormData.father_name || ''} onChange={(e) => setEditFormData({ ...editFormData, father_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father Mobile</label>
+                    <input type="text" value={editFormData.father_mobile || ''} onChange={(e) => setEditFormData({ ...editFormData, father_mobile: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mother Name</label>
+                    <input type="text" value={editFormData.mother_name || ''} onChange={(e) => setEditFormData({ ...editFormData, mother_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mother Mobile</label>
+                    <input type="text" value={editFormData.mother_mobile || ''} onChange={(e) => setEditFormData({ ...editFormData, mother_mobile: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Address */}
+              <div className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200">
+                <h3 className="text-md font-bold text-yellow-900 mb-3">📍 Address</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Address</label>
+                    <textarea value={editFormData.address || ''} onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })} rows="2" className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-yellow-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
+                    <input type="text" value={editFormData.city || ''} onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-yellow-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Pincode</label>
+                    <input type="text" value={editFormData.pincode || ''} onChange={(e) => setEditFormData({ ...editFormData, pincode: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-yellow-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">State</label>
+                    <input type="text" value={editFormData.state || ''} onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-yellow-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Country</label>
+                    <input type="text" value={editFormData.country || ''} onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-yellow-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 10th Standard */}
+              <div className="bg-pink-50 p-4 rounded-xl border-2 border-pink-200">
+                <h3 className="text-md font-bold text-pink-900 mb-3">📚 10th Standard</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">School Name</label>
+                    <input type="text" value={editFormData.school_10_name || ''} onChange={(e) => setEditFormData({ ...editFormData, school_10_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-pink-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Board</label>
+                    <input type="text" value={editFormData.board_10 || ''} onChange={(e) => setEditFormData({ ...editFormData, board_10: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-pink-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Percentage</label>
+                    <input type="text" value={editFormData.percentage_10 || ''} onChange={(e) => setEditFormData({ ...editFormData, percentage_10: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-pink-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Year</label>
+                    <input type="text" value={editFormData.year_10 || ''} onChange={(e) => setEditFormData({ ...editFormData, year_10: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-pink-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 12th Standard */}
+              <div className="bg-indigo-50 p-4 rounded-xl border-2 border-indigo-200">
+                <h3 className="text-md font-bold text-indigo-900 mb-3">📚 12th Standard</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">School Name</label>
+                    <input type="text" value={editFormData.school_12_name || ''} onChange={(e) => setEditFormData({ ...editFormData, school_12_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Board</label>
+                    <input type="text" value={editFormData.board_12 || ''} onChange={(e) => setEditFormData({ ...editFormData, board_12: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Percentage</label>
+                    <input type="text" value={editFormData.percentage_12 || ''} onChange={(e) => setEditFormData({ ...editFormData, percentage_12: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Year</label>
+                    <input type="text" value={editFormData.year_12 || ''} onChange={(e) => setEditFormData({ ...editFormData, year_12: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Preferences */}
+              <div className="bg-orange-50 p-4 rounded-xl border-2 border-orange-200">
+                <h3 className="text-md font-bold text-orange-900 mb-3">🎯 Preferences</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {editFormData._appType === 'other' ? (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Degree Name</label>
+                        <input type="text" value={editFormData.degree_name || ''} onChange={(e) => setEditFormData({ ...editFormData, degree_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-orange-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Preferred Countries</label>
+                        <input type="text" value={editFormData.preferred_countries || ''} onChange={(e) => setEditFormData({ ...editFormData, preferred_countries: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-orange-500 outline-none" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Preferred Country</label>
+                        <input type="text" value={editFormData.preferred_country || ''} onChange={(e) => setEditFormData({ ...editFormData, preferred_country: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-orange-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Preferred University</label>
+                        <input type="text" value={editFormData.preferred_university || ''} onChange={(e) => setEditFormData({ ...editFormData, preferred_university: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-orange-500 outline-none" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+            </div>

@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "name": "test",
+    "email": "test4@gmail.com",
+    "role": "Manager",
+    "phone": "+919351445876",
+    "department": "Sales",
+    "status": "active",
+    "createdAt": "2025-12-19T19:03:02.999Z",
+    "updatedAt": "2025-12-19T19:03:03.000Z"
+  }
+]

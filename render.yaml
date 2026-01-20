@@ -1,0 +1,57 @@
+# Render Deployment Configuration
+# Deploy both Frontend and Backend to Render with free HTTPS
+
+services:
+  # Backend API Service
+  - type: web
+    name: crm-backend
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: DB_HOST
+        value: 72.60.202.163
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        sync: false  # Set in Render Dashboard
+      - key: DB_PASSWORD
+        sync: false  # Set in Render Dashboard
+      - key: DB_NAME
+        sync: false  # Set in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://crm-frontend.onrender.com  # Update with actual frontend URL
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Frontend Static Site
+  - type: web
+    name: crm-frontend
+    runtime: static
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://crm-backend.onrender.com/api  # Update with actual backend URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    autoDeploy: true

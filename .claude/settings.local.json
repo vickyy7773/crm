@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm start)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(node server.js:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(mysql.exe:*)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe:*)",
+      "Bash(node -e:*)",
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd.exe //c \"taskkill /PID 36724 /F\")",
+      "Bash(timeout 2 bash:*)",
+      "Bash(dir:*)",
+      "Bash(ssh root@72.60.202.163 \"curl -s http://localhost:8080/api/health\")",
+      "Bash(ssh root@72.60.202.163 \"curl -s http://localhost/api/health\")",
+      "Bash(ssh root@72.60.202.163 \"cat /usr/local/lsws/conf/vhosts/crm.pulsembbs.com/vhost.conf | grep -A 5 ''context /api''\")",
+      "Bash(ssh:*)",
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 122856 -Force\")"
+    ]
+  }
+}
