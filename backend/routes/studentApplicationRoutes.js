@@ -161,24 +161,28 @@ router.get('/', async (req, res) => {
 
     let query = 'SELECT * FROM student_applications WHERE 1=1';
     const params = [];
+    let paramCounter = 1;
 
     if (status) {
-      query += ' AND status = ?';
+      query += ` AND status = $${paramCounter}`;
       params.push(status);
+      paramCounter++;
     }
 
     if (course) {
-      query += ' AND course = ?';
+      query += ` AND course = $${paramCounter}`;
       params.push(course);
+      paramCounter++;
     }
 
     if (search) {
-      query += ' AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR mobile LIKE ?)';
       const searchPattern = `%${search}%`;
+      query += ` AND (first_name LIKE $${paramCounter} OR last_name LIKE $${paramCounter+1} OR email LIKE $${paramCounter+2} OR mobile LIKE $${paramCounter+3})`;
       params.push(searchPattern, searchPattern, searchPattern, searchPattern);
+      paramCounter += 4;
     }
 
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    query += ` ORDER BY created_at DESC LIMIT $${paramCounter} OFFSET $${paramCounter+1}`;
     params.push(parseInt(limit), parseInt(offset));
 
     const applicationsResult = await pool.query(query, params);
@@ -187,26 +191,29 @@ router.get('/', async (req, res) => {
     // Get total count
     let countQuery = 'SELECT COUNT(*) as total FROM student_applications WHERE 1=1';
     const countParams = [];
+    let countParamCounter = 1;
 
     if (status) {
-      countQuery += ' AND status = ?';
+      countQuery += ` AND status = $${countParamCounter}`;
       countParams.push(status);
+      countParamCounter++;
     }
 
     if (course) {
-      countQuery += ' AND course = ?';
+      countQuery += ` AND course = $${countParamCounter}`;
       countParams.push(course);
+      countParamCounter++;
     }
 
     if (search) {
-      countQuery += ' AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR mobile LIKE ?)';
       const searchPattern = `%${search}%`;
+      countQuery += ` AND (first_name LIKE $${countParamCounter} OR last_name LIKE $${countParamCounter+1} OR email LIKE $${countParamCounter+2} OR mobile LIKE $${countParamCounter+3})`;
       countParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
     }
 
     const countResultResult = await pool.query(countQuery, countParams);
     const countResult = countResultResult.rows;
-    const total = countResult[0].total;
+    const total = parseInt(countResult[0].total);
 
     res.json({
       success: true,
