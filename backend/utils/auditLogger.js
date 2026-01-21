@@ -38,7 +38,7 @@ async function logAudit({
     await pool.query(
       `INSERT INTO audit_logs
        (user_id, user_name, action, entity_type, entity_id, details, ip_address, user_agent, timestamp)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
       [userId, userName, action, entityType, entityId, detailsJSON, ipAddress, userAgent]
     );
 
