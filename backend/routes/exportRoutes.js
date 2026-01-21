@@ -25,7 +25,8 @@ router.get('/leads-csv', async (req, res) => {
       ORDER BY l.created_at DESC
     `;
 
-    const [leads] = await pool.query(query);
+    const result = await pool.query(query);
+    const leads = result.rows;
 
     // Create CSV header
     const csvHeader = 'ID,Name,Phone,City,Destination,Status,Remark,Assigned To,Next Follow-up,Created At,Updated At\n';

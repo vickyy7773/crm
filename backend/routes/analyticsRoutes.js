@@ -14,7 +14,7 @@ router.get('/telecaller-performance', async (req, res) => {
         COUNT(ch.id) as total_calls,
         SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) as conversions,
         ROUND(
-          (SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) / COUNT(ch.id)) * 100,
+          (SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ch.id), 0)) * 100,
           2
         ) as success_rate,
         SUM(CASE WHEN ch.call_outcome = 'Contacted' THEN 1 ELSE 0 END) as contacted,
@@ -32,40 +32,44 @@ router.get('/telecaller-performance', async (req, res) => {
     `;
 
     const params = [];
+    let paramCounter = 1;
 
     // Add date filters if provided
     if (startDate) {
-      query += ' AND DATE(ch.call_date) >= ?';
+      query += ` AND DATE(ch.call_date) >= $${paramCounter}`;
       params.push(startDate);
+      paramCounter++;
     }
 
     if (endDate) {
-      query += ' AND DATE(ch.call_date) <= ?';
+      query += ` AND DATE(ch.call_date) <= $${paramCounter}`;
       params.push(endDate);
+      paramCounter++;
     }
 
     query += ' GROUP BY u.id, u.name ORDER BY total_calls DESC';
 
-    const [performance] = await pool.query(query, params);
+    const result = await pool.query(query, params);
+    const performance = result.rows;
 
     // Calculate outcomes for each telecaller
     const formattedData = performance.map(tel => ({
       telecaller_id: tel.telecaller_id,
       telecaller_name: tel.telecaller_name,
-      total_calls: tel.total_calls || 0,
-      conversions: tel.conversions || 0,
-      success_rate: tel.success_rate || 0,
+      total_calls: parseInt(tel.total_calls) || 0,
+      conversions: parseInt(tel.conversions) || 0,
+      success_rate: parseFloat(tel.success_rate) || 0,
       outcomes: {
-        Contacted: tel.contacted || 0,
-        Interested: tel.interested || 0,
-        'Call Back': tel.call_back || 0,
-        'Not Interested': tel.not_interested || 0,
-        Converted: tel.conversions || 0,
-        'Wrong Number': tel.wrong_number || 0,
-        'Not Reachable': tel.not_reachable || 0,
-        'Switched Off': tel.switched_off || 0,
-        Busy: tel.busy || 0,
-        'No Answer': tel.no_answer || 0
+        Contacted: parseInt(tel.contacted) || 0,
+        Interested: parseInt(tel.interested) || 0,
+        'Call Back': parseInt(tel.call_back) || 0,
+        'Not Interested': parseInt(tel.not_interested) || 0,
+        Converted: parseInt(tel.conversions) || 0,
+        'Wrong Number': parseInt(tel.wrong_number) || 0,
+        'Not Reachable': parseInt(tel.not_reachable) || 0,
+        'Switched Off': parseInt(tel.switched_off) || 0,
+        Busy: parseInt(tel.busy) || 0,
+        'No Answer': parseInt(tel.no_answer) || 0
       }
     }));
 
@@ -96,23 +100,25 @@ router.get('/performance-trend', async (req, res) => {
         SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) as conversions,
         SUM(CASE WHEN ch.call_outcome = 'Interested' THEN 1 ELSE 0 END) as interested
       FROM call_history ch
-      WHERE ch.call_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+      WHERE ch.call_date >= CURRENT_DATE - INTERVAL '1 day' * $1
     `;
 
     const params = [parseInt(days)];
+    let paramCounter = 2;
 
     if (telecallerId) {
-      query += ' AND ch.caller_id = ?';
+      query += ` AND ch.caller_id = $${paramCounter}`;
       params.push(telecallerId);
+      paramCounter++;
     }
 
     query += ' GROUP BY DATE(ch.call_date) ORDER BY date ASC';
 
-    const [trend] = await pool.query(query, params);
+    const result = await pool.query(query, params);
 
     res.json({
       success: true,
-      data: trend
+      data: result.rows
     });
 
   } catch (error) {
@@ -129,48 +135,57 @@ router.get('/performance-trend', async (req, res) => {
 router.get('/summary', async (req, res) => {
   try {
     // Get overall stats
-    const [totalCalls] = await pool.query('SELECT COUNT(*) as count FROM call_history');
-    const [totalConversions] = await pool.query(
-      "SELECT COUNT(*) as count FROM call_history WHERE call_outcome = 'Converted'"
+    const totalCallsResult = await pool.query('SELECT COUNT(*) as count FROM call_history');
+    const totalConversionsResult = await pool.query(
+      'SELECT COUNT(*) as count FROM call_history WHERE call_outcome = $1',
+      ['Converted']
     );
-    const [totalTelecallers] = await pool.query(
-      "SELECT COUNT(*) as count FROM users WHERE role = 'Telecaller' AND status = 'active'"
+    const totalTelecallersResult = await pool.query(
+      'SELECT COUNT(*) as count FROM users WHERE role = $1 AND status = $2',
+      ['Telecaller', 'active']
     );
 
     // Get today's stats
-    const [todayCalls] = await pool.query(
-      'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURDATE()'
+    const todayCallsResult = await pool.query(
+      'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE'
     );
-    const [todayConversions] = await pool.query(
-      "SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURDATE() AND call_outcome = 'Converted'"
+    const todayConversionsResult = await pool.query(
+      'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE AND call_outcome = $1',
+      ['Converted']
     );
 
     // Get top performer (most conversions this month)
-    const [topPerformer] = await pool.query(`
+    const topPerformerResult = await pool.query(`
       SELECT
         u.name,
         COUNT(ch.id) as conversions
       FROM users u
       INNER JOIN call_history ch ON ch.caller_id = u.id
       WHERE ch.call_outcome = 'Converted'
-        AND MONTH(ch.call_date) = MONTH(CURDATE())
-        AND YEAR(ch.call_date) = YEAR(CURDATE())
+        AND EXTRACT(MONTH FROM ch.call_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+        AND EXTRACT(YEAR FROM ch.call_date) = EXTRACT(YEAR FROM CURRENT_DATE)
       GROUP BY u.id, u.name
       ORDER BY conversions DESC
       LIMIT 1
     `);
 
+    const totalCalls = parseInt(totalCallsResult.rows[0].count);
+    const totalConversions = parseInt(totalConversionsResult.rows[0].count);
+    const totalTelecallers = parseInt(totalTelecallersResult.rows[0].count);
+    const todayCalls = parseInt(todayCallsResult.rows[0].count);
+    const todayConversions = parseInt(todayConversionsResult.rows[0].count);
+
     res.json({
       success: true,
       data: {
-        totalCalls: totalCalls[0].count,
-        totalConversions: totalConversions[0].count,
-        totalTelecallers: totalTelecallers[0].count,
-        todayCalls: todayCalls[0].count,
-        todayConversions: todayConversions[0].count,
-        topPerformer: topPerformer[0] || null,
-        overallSuccessRate: totalCalls[0].count > 0
-          ? ((totalConversions[0].count / totalCalls[0].count) * 100).toFixed(2)
+        totalCalls,
+        totalConversions,
+        totalTelecallers,
+        todayCalls,
+        todayConversions,
+        topPerformer: topPerformerResult.rows[0] || null,
+        overallSuccessRate: totalCalls > 0
+          ? ((totalConversions / totalCalls) * 100).toFixed(2)
           : 0
       }
     });

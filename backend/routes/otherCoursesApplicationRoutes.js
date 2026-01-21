@@ -236,13 +236,14 @@ router.post('/', uploadFields, async (req, res) => {
       course || 'Other Courses', source || 'Other Courses Application Form'
     ];
 
-    const [result] = await pool.query(query, values);
+    const resultResult = await pool.query(query, values);
+    const result = resultResult.rows;
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       data: {
-        applicationId: result.insertId
+        applicationId: result.rows[0].id
       }
     });
   } catch (error) {
@@ -258,10 +259,11 @@ router.post('/', uploadFields, async (req, res) => {
 // Get all other courses applications
 router.get('/', async (req, res) => {
   try {
-    const [applications] = await pool.query(`
+    const applicationsResult = await pool.query(`
       SELECT * FROM other_courses_applications
       ORDER BY created_at DESC
     `);
+    const applications = applicationsResult.rows;
 
     res.json({
       success: true,
@@ -280,14 +282,15 @@ router.get('/', async (req, res) => {
 // Get statistics
 router.get('/stats/overview', async (req, res) => {
   try {
-    const [stats] = await pool.query(`
+    const statsResult = await pool.query(`
       SELECT
         COUNT(*) as total_applications,
-        SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today_applications,
-        SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as this_week_applications,
-        SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as this_month_applications
+        SUM(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_applications,
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 ELSE 0 END) as this_week_applications,
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 ELSE 0 END) as this_month_applications
       FROM other_courses_applications
     `);
+    const stats = statsResult.rows;
 
     res.json({
       success: true,

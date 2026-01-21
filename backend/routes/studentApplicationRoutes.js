@@ -134,13 +134,14 @@ router.post('/', uploadFields, async (req, res) => {
       course || 'MBBS', source || 'MBBS Application Form'
     ];
 
-    const [result] = await pool.query(query, values);
+    const resultResult = await pool.query(query, values);
+    const result = resultResult.rows;
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       data: {
-        applicationId: result.insertId
+        applicationId: result.rows[0].id
       }
     });
   } catch (error) {
@@ -180,7 +181,8 @@ router.get('/', async (req, res) => {
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
 
-    const [applications] = await pool.query(query, params);
+    const applicationsResult = await pool.query(query, params);
+    const applications = applicationsResult.rows;
 
     // Get total count
     let countQuery = 'SELECT COUNT(*) as total FROM student_applications WHERE 1=1';
@@ -202,7 +204,8 @@ router.get('/', async (req, res) => {
       countParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
     }
 
-    const [countResult] = await pool.query(countQuery, countParams);
+    const countResultResult = await pool.query(countQuery, countParams);
+    const countResult = countResultResult.rows;
     const total = countResult[0].total;
 
     res.json({
@@ -229,10 +232,11 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [applications] = await pool.query(
-      'SELECT * FROM student_applications WHERE id = ?',
+    const applicationsResult = await pool.query(
+      'SELECT * FROM student_applications WHERE id = $1',
       [id]
     );
+    const applications = applicationsResult.rows;
 
     if (applications.length === 0) {
       return res.status(404).json({
@@ -276,7 +280,7 @@ router.patch('/:id/status', async (req, res) => {
     }
 
     await pool.query(
-      'UPDATE student_applications SET status = ? WHERE id = ?',
+      'UPDATE student_applications SET status = $1 WHERE id = $2',
       [status, id]
     );
 
@@ -297,18 +301,19 @@ router.patch('/:id/status', async (req, res) => {
 // Get statistics
 router.get('/stats/overview', async (req, res) => {
   try {
-    const [stats] = await pool.query(`
+    const statsResult = await pool.query(`
       SELECT
         COUNT(*) as total_applications,
         SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as this_week_applications,
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 ELSE 0 END) as this_week_applications,
         SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
         SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected,
         SUM(CASE WHEN status = 'Documents Required' THEN 1 ELSE 0 END) as documents_required,
-        SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today_applications,
+        SUM(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_applications,
         SUM(CASE WHEN course = 'MBBS' THEN 1 ELSE 0 END) as mbbs_applications
       FROM student_applications
     `);
+    const stats = statsResult.rows;
 
     res.json({
       success: true,
