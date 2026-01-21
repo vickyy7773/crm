@@ -1,14 +1,6 @@
 # Render Deployment Configuration
-# Deploy Frontend, Backend, and PostgreSQL Database with FREE HTTPS
-
-databases:
-  # PostgreSQL Database (FREE)
-  - name: crm-database
-    databaseName: crm_database
-    user: crm_admin
-    region: singapore
-    plan: free
-    ipAllowList: [] # Allow connections from all Render services
+# Deploy Frontend and Backend with FREE HTTPS
+# Database will be created separately or use existing one
 
 services:
   # Backend API Service
@@ -25,9 +17,7 @@ services:
       - key: PORT
         value: 5001
       - key: DATABASE_URL
-        fromDatabase:
-          name: crm-database
-          property: connectionString
+        sync: false  # Set manually in Render dashboard to existing database
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
