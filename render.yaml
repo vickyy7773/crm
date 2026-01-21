@@ -1,5 +1,14 @@
 # Render Deployment Configuration
-# Deploy both Frontend and Backend to Render with free HTTPS
+# Deploy Frontend, Backend, and PostgreSQL Database with FREE HTTPS
+
+databases:
+  # PostgreSQL Database (FREE)
+  - name: crm-database
+    databaseName: crm_database
+    user: crm_admin
+    region: singapore
+    plan: free
+    ipAllowList: [] # Allow connections from all Render services
 
 services:
   # Backend API Service
@@ -15,20 +24,14 @@ services:
         value: production
       - key: PORT
         value: 5001
-      - key: DB_HOST
-        value: 72.60.202.163
-      - key: DB_PORT
-        value: 3306
-      - key: DB_USER
-        sync: false  # Set in Render Dashboard
-      - key: DB_PASSWORD
-        sync: false  # Set in Render Dashboard
-      - key: DB_NAME
-        sync: false  # Set in Render Dashboard
+      - key: DATABASE_URL
+        fromDatabase:
+          name: crm-database
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://crm-frontend.onrender.com  # Update with actual frontend URL
+        value: https://crm-frontend.onrender.com  # Update with actual frontend URL after deployment
     healthCheckPath: /api/health
     autoDeploy: true
 
@@ -42,7 +45,7 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://crm-backend.onrender.com/api  # Update with actual backend URL
+        value: https://crm-backend.onrender.com/api  # Update with actual backend URL after deployment
     routes:
       - type: rewrite
         source: /*
