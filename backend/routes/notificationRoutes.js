@@ -7,11 +7,12 @@ async function createNotification({ userId = null, type, title, message, leadId 
   try {
     const query = `
       INSERT INTO notifications (user_id, type, title, message, lead_id, lead_name, unread, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, TRUE, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
+      RETURNING id
     `;
 
-    const [result] = await pool.query(query, [userId, type, title, message, leadId, leadName]);
-    return { success: true, notificationId: result.insertId };
+    const result = await pool.query(query, [userId, type, title, message, leadId, leadName]);
+    return { success: true, notificationId: result.rows[0].id };
   } catch (error) {
     console.error('Error creating notification:', error);
     return { success: false, error: error.message };
@@ -29,25 +30,25 @@ router.get('/', async (req, res) => {
       SELECT
         n.*,
         CASE
-          WHEN n.created_at >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, n.created_at, NOW()), ' minutes ago')
-          WHEN n.created_at >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, n.created_at, NOW()), ' minutes ago')
-          WHEN n.created_at >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, n.created_at, NOW()), ' hours ago')
-          WHEN n.created_at >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, n.created_at, NOW()), ' days ago')
-          ELSE DATE_FORMAT(n.created_at, '%b %d at %h:%i %p')
+          WHEN n.created_at >= NOW() - INTERVAL '5 minutes' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 60, ' minutes ago')
+          WHEN n.created_at >= NOW() - INTERVAL '1 hour' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 60, ' minutes ago')
+          WHEN n.created_at >= NOW() - INTERVAL '24 hours' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 3600, ' hours ago')
+          WHEN n.created_at >= NOW() - INTERVAL '7 days' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 86400, ' days ago')
+          ELSE TO_CHAR(n.created_at, 'Mon DD at HH12:MI PM')
         END as time_ago,
-        DATE_FORMAT(n.created_at, '%M %d, %Y at %h:%i %p') as formatted_date
+        TO_CHAR(n.created_at, 'Month DD, YYYY at HH12:MI PM') as formatted_date
       FROM notifications n
-      WHERE (n.user_id = ? OR n.user_id IS NULL)
+      WHERE (n.user_id = $1 OR n.user_id IS NULL)
       ORDER BY n.created_at DESC
-      LIMIT ? OFFSET ?
+      LIMIT $2 OFFSET $3
     `;
 
-    const [notifications] = await pool.query(query, [userId || null, parseInt(limit), parseInt(offset)]);
+    const notifications = await pool.query(query, [userId || null, parseInt(limit), parseInt(offset)]);
 
     res.json({
       success: true,
-      data: notifications,
-      count: notifications.length
+      data: notifications.rows,
+      count: notifications.rows.length
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -67,14 +68,14 @@ router.get('/unread-count', async (req, res) => {
     const query = `
       SELECT COUNT(*) as count
       FROM notifications
-      WHERE (user_id = ? OR user_id IS NULL) AND unread = TRUE
+      WHERE (user_id = $1 OR user_id IS NULL) AND unread = TRUE
     `;
 
-    const [result] = await pool.query(query, [userId || null]);
+    const result = await pool.query(query, [userId || null]);
 
     res.json({
       success: true,
-      count: result[0].count
+      count: result.rows[0].count
     });
   } catch (error) {
     console.error('Error fetching unread count:', error);
@@ -94,7 +95,7 @@ router.put('/:id/read', async (req, res) => {
     const query = `
       UPDATE notifications
       SET unread = FALSE, read_at = NOW()
-      WHERE id = ?
+      WHERE id = $1
     `;
 
     await pool.query(query, [id]);
@@ -121,7 +122,7 @@ router.put('/mark-all-read', async (req, res) => {
     const query = `
       UPDATE notifications
       SET unread = FALSE, read_at = NOW()
-      WHERE (user_id = ? OR user_id IS NULL) AND unread = TRUE
+      WHERE (user_id = $1 OR user_id IS NULL) AND unread = TRUE
     `;
 
     await pool.query(query, [userId || null]);
@@ -145,7 +146,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = `DELETE FROM notifications WHERE id = ?`;
+    const query = `DELETE FROM notifications WHERE id = $1`;
 
     await pool.query(query, [id]);
 
@@ -170,7 +171,7 @@ router.delete('/clear-all', async (req, res) => {
 
     const query = `
       DELETE FROM notifications
-      WHERE (user_id = ? OR user_id IS NULL)
+      WHERE (user_id = $1 OR user_id IS NULL)
     `;
 
     await pool.query(query, [userId || null]);

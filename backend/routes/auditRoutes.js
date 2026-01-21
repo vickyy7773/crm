@@ -29,64 +29,71 @@ router.get('/', async (req, res) => {
         al.user_agent,
         al.timestamp,
         CASE
-          WHEN al.timestamp >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, al.timestamp, NOW()), ' mins ago')
-          WHEN al.timestamp >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, al.timestamp, NOW()), ' mins ago')
-          WHEN al.timestamp >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, al.timestamp, NOW()), ' hours ago')
-          WHEN al.timestamp >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, al.timestamp, NOW()), ' days ago')
-          ELSE DATE_FORMAT(al.timestamp, '%b %d, %Y')
+          WHEN al.timestamp >= NOW() - INTERVAL '5 minutes' THEN EXTRACT(EPOCH FROM (NOW() - al.timestamp))/60 || ' mins ago'
+          WHEN al.timestamp >= NOW() - INTERVAL '1 hour' THEN EXTRACT(EPOCH FROM (NOW() - al.timestamp))/60 || ' mins ago'
+          WHEN al.timestamp >= NOW() - INTERVAL '24 hours' THEN EXTRACT(EPOCH FROM (NOW() - al.timestamp))/3600 || ' hours ago'
+          WHEN al.timestamp >= NOW() - INTERVAL '7 days' THEN EXTRACT(EPOCH FROM (NOW() - al.timestamp))/86400 || ' days ago'
+          ELSE TO_CHAR(al.timestamp, 'Mon DD, YYYY')
         END as time_ago
       FROM audit_logs al
       WHERE 1=1
     `;
 
     const params = [];
+    let paramCount = 1;
 
     // Apply filters
     if (userId) {
-      query += ' AND al.user_id = ?';
+      query += ` AND al.user_id = $${paramCount}`;
       params.push(userId);
+      paramCount++;
     }
 
     if (action) {
-      query += ' AND al.action = ?';
+      query += ` AND al.action = $${paramCount}`;
       params.push(action);
+      paramCount++;
     }
 
     if (entityType) {
-      query += ' AND al.entity_type = ?';
+      query += ` AND al.entity_type = $${paramCount}`;
       params.push(entityType);
+      paramCount++;
     }
 
     if (startDate) {
-      query += ' AND DATE(al.timestamp) >= ?';
+      query += ` AND DATE(al.timestamp) >= $${paramCount}`;
       params.push(startDate);
+      paramCount++;
     }
 
     if (endDate) {
-      query += ' AND DATE(al.timestamp) <= ?';
+      query += ` AND DATE(al.timestamp) <= $${paramCount}`;
       params.push(endDate);
+      paramCount++;
     }
 
     if (search) {
-      query += ' AND (al.user_name LIKE ? OR al.details LIKE ? OR al.ip_address LIKE ?)';
+      query += ` AND (al.user_name LIKE $${paramCount} OR al.details::text LIKE $${paramCount+1} OR al.ip_address LIKE $${paramCount+2})`;
       const searchPattern = `%${search}%`;
       params.push(searchPattern, searchPattern, searchPattern);
+      paramCount += 3;
     }
 
     // Get total count for pagination
     const countQuery = `SELECT COUNT(*) as total FROM (${query}) as filtered`;
-    const [countResult] = await pool.query(countQuery, params);
-    const totalRecords = countResult[0].total;
+    const countResult = await pool.query(countQuery, params);
+    const totalRecords = countResult.rows[0].total;
 
     // Add sorting and pagination
-    query += ' ORDER BY al.timestamp DESC LIMIT ? OFFSET ?';
+    query += ` ORDER BY al.timestamp DESC LIMIT $${paramCount} OFFSET $${paramCount+1}`;
     params.push(parseInt(limit), parseInt(offset));
 
-    const [logs] = await pool.query(query, params);
+    const result = await pool.query(query, params);
 
     res.json({
       success: true,
-      data: logs,
+      data: result.rows,
       pagination: {
         total: totalRecords,
         limit: parseInt(limit),
@@ -109,41 +116,41 @@ router.get('/', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     // Total actions today
-    const [todayCount] = await pool.query(`
+    const todayCount = await pool.query(`
       SELECT COUNT(*) as count
       FROM audit_logs
-      WHERE DATE(timestamp) = CURDATE()
+      WHERE DATE(timestamp) = CURRENT_DATE
     `);
 
     // Actions by type (last 7 days)
-    const [actionsByType] = await pool.query(`
+    const actionsByType = await pool.query(`
       SELECT
         action,
         COUNT(*) as count
       FROM audit_logs
-      WHERE timestamp >= NOW() - INTERVAL 7 DAY
+      WHERE timestamp >= NOW() - INTERVAL '7 days'
       GROUP BY action
       ORDER BY count DESC
     `);
 
     // Actions by entity type (last 7 days)
-    const [actionsByEntity] = await pool.query(`
+    const actionsByEntity = await pool.query(`
       SELECT
         entity_type,
         COUNT(*) as count
       FROM audit_logs
-      WHERE timestamp >= NOW() - INTERVAL 7 DAY
+      WHERE timestamp >= NOW() - INTERVAL '7 days'
       GROUP BY entity_type
       ORDER BY count DESC
     `);
 
     // Most active users (last 7 days)
-    const [mostActiveUsers] = await pool.query(`
+    const mostActiveUsers = await pool.query(`
       SELECT
         user_name,
         COUNT(*) as action_count
       FROM audit_logs
-      WHERE timestamp >= NOW() - INTERVAL 7 DAY
+      WHERE timestamp >= NOW() - INTERVAL '7 days'
         AND user_name IS NOT NULL
         AND user_name != 'System'
       GROUP BY user_name
@@ -152,20 +159,20 @@ router.get('/stats', async (req, res) => {
     `);
 
     // Recent activity (last 24 hours)
-    const [last24Hours] = await pool.query(`
+    const last24Hours = await pool.query(`
       SELECT COUNT(*) as count
       FROM audit_logs
-      WHERE timestamp >= NOW() - INTERVAL 24 HOUR
+      WHERE timestamp >= NOW() - INTERVAL '24 hours'
     `);
 
     res.json({
       success: true,
       data: {
-        todayCount: todayCount[0].count,
-        last24HoursCount: last24Hours[0].count,
-        actionsByType,
-        actionsByEntity,
-        mostActiveUsers
+        todayCount: todayCount.rows[0].count,
+        last24HoursCount: last24Hours.rows[0].count,
+        actionsByType: actionsByType.rows,
+        actionsByEntity: actionsByEntity.rows,
+        mostActiveUsers: mostActiveUsers.rows
       }
     });
 
@@ -184,12 +191,12 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [logs] = await pool.query(
-      'SELECT * FROM audit_logs WHERE id = ?',
+    const result = await pool.query(
+      'SELECT * FROM audit_logs WHERE id = $1',
       [id]
     );
 
-    if (logs.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Audit log not found'
@@ -198,7 +205,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({
       success: true,
-      data: logs[0]
+      data: result.rows[0]
     });
 
   } catch (error) {

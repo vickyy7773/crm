@@ -6,56 +6,59 @@ const { pool } = require('../config/database');
 router.get('/stats', async (req, res) => {
   try {
     // Get total leads count
-    const [totalLeads] = await pool.query('SELECT COUNT(*) as count FROM leads');
+    const totalLeads = await pool.query('SELECT COUNT(*) as count FROM leads');
 
     // Get conversions count
-    const [conversions] = await pool.query(
-      'SELECT COUNT(*) as count FROM leads WHERE status = "Converted"'
+    const conversions = await pool.query(
+      'SELECT COUNT(*) as count FROM leads WHERE status = $1',
+      ['Converted']
     );
 
     // Get pending follow-ups count (where next_followup_date is in future and not null)
-    const [pendingFollowups] = await pool.query(
+    const pendingFollowups = await pool.query(
       `SELECT COUNT(*) as count FROM leads
        WHERE next_followup_date IS NOT NULL
        AND next_followup_date != '0000-00-00 00:00:00'
-       AND next_followup_date >= CURDATE()`
+       AND next_followup_date >= CURRENT_DATE`
     );
 
     // Get active users count
-    const [activeUsers] = await pool.query(
-      'SELECT COUNT(*) as count FROM users WHERE status = "active"'
+    const activeUsers = await pool.query(
+      'SELECT COUNT(*) as count FROM users WHERE status = $1',
+      ['active']
     );
 
     // Get previous month's data for comparison
-    const [prevMonthLeads] = await pool.query(
+    const prevMonthLeads = await pool.query(
       `SELECT COUNT(*) as count FROM leads
-       WHERE created_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), INTERVAL 1 MONTH)
-       AND created_at < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)`
+       WHERE created_at >= (CURRENT_DATE - INTERVAL '2 months')
+       AND created_at < (CURRENT_DATE - INTERVAL '1 month')`
     );
 
-    const [prevMonthConversions] = await pool.query(
+    const prevMonthConversions = await pool.query(
       `SELECT COUNT(*) as count FROM leads
-       WHERE status = "Converted"
-       AND updated_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), INTERVAL 1 MONTH)
-       AND updated_at < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)`
+       WHERE status = $1
+       AND updated_at >= (CURRENT_DATE - INTERVAL '2 months')
+       AND updated_at < (CURRENT_DATE - INTERVAL '1 month')`,
+      ['Converted']
     );
 
     // Calculate percentage changes
-    const leadsChange = prevMonthLeads[0].count > 0
-      ? ((totalLeads[0].count - prevMonthLeads[0].count) / prevMonthLeads[0].count * 100).toFixed(1)
+    const leadsChange = prevMonthLeads.rows[0].count > 0
+      ? ((totalLeads.rows[0].count - prevMonthLeads.rows[0].count) / prevMonthLeads.rows[0].count * 100).toFixed(1)
       : 0;
 
-    const conversionsChange = prevMonthConversions[0].count > 0
-      ? ((conversions[0].count - prevMonthConversions[0].count) / prevMonthConversions[0].count * 100).toFixed(1)
+    const conversionsChange = prevMonthConversions.rows[0].count > 0
+      ? ((conversions.rows[0].count - prevMonthConversions.rows[0].count) / prevMonthConversions.rows[0].count * 100).toFixed(1)
       : 0;
 
     res.json({
       success: true,
       data: {
-        totalLeads: totalLeads[0].count,
-        conversions: conversions[0].count,
-        pendingFollowups: pendingFollowups[0].count,
-        activeUsers: activeUsers[0].count,
+        totalLeads: totalLeads.rows[0].count,
+        conversions: conversions.rows[0].count,
+        pendingFollowups: pendingFollowups.rows[0].count,
+        activeUsers: activeUsers.rows[0].count,
         changes: {
           leads: leadsChange,
           conversions: conversionsChange
@@ -86,24 +89,24 @@ router.get('/activities', async (req, res) => {
         l.name as lead_name,
         l.id as lead_id,
         CASE
-          WHEN ch.call_date >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
-          WHEN ch.call_date >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
-          WHEN ch.call_date >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, ch.call_date, NOW()), ' hours ago')
-          WHEN ch.call_date >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, ch.call_date, NOW()), ' days ago')
-          ELSE DATE_FORMAT(ch.call_date, '%b %d')
+          WHEN ch.call_date >= NOW() - INTERVAL '5 minutes' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 60, ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL '1 hour' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 60, ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL '24 hours' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 3600, ' hours ago')
+          WHEN ch.call_date >= NOW() - INTERVAL '7 days' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 86400, ' days ago')
+          ELSE TO_CHAR(ch.call_date, 'Mon DD')
         END as time_ago,
         'call' as type
       FROM call_history ch
       JOIN leads l ON ch.lead_id = l.id
       ORDER BY ch.call_date DESC
-      LIMIT ?
+      LIMIT $1
     `;
 
-    const [activities] = await pool.query(query, [parseInt(limit)]);
+    const activities = await pool.query(query, [parseInt(limit)]);
 
     res.json({
       success: true,
-      data: activities
+      data: activities.rows
     });
   } catch (error) {
     res.status(500).json({
@@ -126,16 +129,16 @@ router.get('/leads-progress', async (req, res) => {
       GROUP BY status
     `;
 
-    const [progress] = await pool.query(query);
+    const progress = await pool.query(query);
 
     // Calculate total for percentage
-    const total = progress.reduce((sum, item) => sum + item.count, 0);
+    const total = progress.rows.reduce((sum, item) => sum + parseInt(item.count), 0);
 
     // Add percentage to each status
-    const progressWithPercentage = progress.map(item => ({
+    const progressWithPercentage = progress.rows.map(item => ({
       status: item.status,
-      count: item.count,
-      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+      count: parseInt(item.count),
+      percentage: total > 0 ? Math.round((parseInt(item.count) / total) * 100) : 0
     }));
 
     res.json({
