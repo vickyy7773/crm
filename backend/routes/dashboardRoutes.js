@@ -18,7 +18,6 @@ router.get('/stats', async (req, res) => {
     const pendingFollowups = await pool.query(
       `SELECT COUNT(*) as count FROM leads
        WHERE next_followup_date IS NOT NULL
-       AND next_followup_date != '0000-00-00 00:00:00'
        AND next_followup_date >= CURRENT_DATE`
     );
 
