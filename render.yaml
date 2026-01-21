@@ -36,8 +36,9 @@ services:
     autoDeploy: true
 
   # Frontend Static Site
-  - type: static
+  - type: web
     name: crm-frontend
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
