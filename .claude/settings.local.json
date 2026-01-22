@@ -24,7 +24,13 @@
       "Bash(ssh root@72.60.202.163 \"cat /usr/local/lsws/conf/vhosts/crm.pulsembbs.com/vhost.conf | grep -A 5 ''context /api''\")",
       "Bash(ssh:*)",
       "Bash(tasklist:*)",
-      "Bash(powershell -Command \"Stop-Process -Id 122856 -Force\")"
+      "Bash(powershell -Command \"Stop-Process -Id 122856 -Force\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(node fix_mysql_to_postgres.cjs:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)"
     ]
   }
 }

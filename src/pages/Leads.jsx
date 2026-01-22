@@ -16,7 +16,7 @@ const Leads = () => {
   const [cityFilter, setCityFilter] = useState('all');
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
-  const [courseTypeFilter, setCourseTypeFilter] = useState('');
+  const [courseTypeFilter, setCourseTypeFilter] = useState('all');
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -565,6 +565,7 @@ const Leads = () => {
               onChange={(e) => setCourseTypeFilter(e.target.value)}
               className="w-full px-4 py-2.5 border-2 border-purple-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
             >
+              <option value="all">All Leads</option>
               <option value="MBBS">MBBS (NEET)</option>
               <option value="Other">Other (Score)</option>
             </select>
@@ -739,7 +740,7 @@ const Leads = () => {
         }
 
         // Filter by course type (MBBS or Other)
-        if (courseTypeFilter) {
+        if (courseTypeFilter && courseTypeFilter !== 'all') {
           filteredLeads = filteredLeads.filter(lead =>
             lead.course?.toLowerCase() === courseTypeFilter.toLowerCase()
           );
