@@ -16,7 +16,7 @@ const Leads = () => {
   const [cityFilter, setCityFilter] = useState('all');
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
-  const [courseTypeFilter, setCourseTypeFilter] = useState('MBBS');
+  const [courseTypeFilter, setCourseTypeFilter] = useState('');
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
