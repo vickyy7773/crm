@@ -524,7 +524,8 @@ router.post('/:id/call-log', async (req, res) => {
       callOutcome,
       callReason,
       nextFollowUpDate,
-      duration
+      duration,
+      isSuperAdmin // Flag to bypass validations for super admin
     } = req.body;
 
     // Validation
@@ -535,32 +536,34 @@ router.post('/:id/call-log', async (req, res) => {
       });
     }
 
-    // Remark quality validation (min 20 characters)
-    if (callRemark.trim().length < 20) {
+    // Remark quality validation (min 20 characters) - Skip for Super Admin
+    if (!isSuperAdmin && callRemark.trim().length < 20) {
       return res.status(400).json({
         success: false,
         message: 'Call remark must be at least 20 characters long'
       });
     }
 
-    // Block generic/low-quality remarks
-    const blockedWords = ['ok', 'done', 'talked', 'call done', 'called'];
-    const remarkLower = callRemark.toLowerCase().trim();
-    const hasBlockedWord = blockedWords.some(word => {
-      const regex = new RegExp(`\\b${word}\\b`, 'i');
-      return regex.test(remarkLower);
-    });
-
-    if (hasBlockedWord) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide detailed and meaningful remarks about the call'
+    // Block generic/low-quality remarks - Skip for Super Admin
+    if (!isSuperAdmin) {
+      const blockedWords = ['ok', 'done', 'talked', 'call done', 'called'];
+      const remarkLower = callRemark.toLowerCase().trim();
+      const hasBlockedWord = blockedWords.some(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        return regex.test(remarkLower);
       });
+
+      if (hasBlockedWord) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide detailed and meaningful remarks about the call'
+        });
+      }
     }
 
-    // Validate call reason for negative outcomes
+    // Validate call reason for negative outcomes - Skip for Super Admin
     const negativeOutcomes = ['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off'];
-    if (negativeOutcomes.includes(callOutcome) && !callReason) {
+    if (!isSuperAdmin && negativeOutcomes.includes(callOutcome) && !callReason) {
       return res.status(400).json({
         success: false,
         message: 'Call reason is required for negative outcomes (Not Interested, Wrong Number, etc.)'
@@ -583,50 +586,52 @@ router.post('/:id/call-log', async (req, res) => {
       });
     }
 
-    // STATUS CHANGE GUARD - Validate status transitions
+    // STATUS CHANGE GUARD - Validate status transitions (Skip for Super Admin)
     // Treat empty or null status as "New" (data integrity fix)
     const currentStatus = result.rows[0].status || 'New';
     const newStatus = callOutcome;
 
-    // Define allowed transitions
-    const ALLOWED_TRANSITIONS = {
-      'New': ['Contacted'],
-      'Contacted': ['Interested', 'Not Interested', 'Call Back', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Busy', 'No Answer'],
-      'Interested': ['Converted', 'Call Back', 'Contacted'],
-      'Call Back': ['Contacted', 'Interested', 'Not Interested']
-    };
+    if (!isSuperAdmin) {
+      // Define allowed transitions
+      const ALLOWED_TRANSITIONS = {
+        'New': ['Contacted'],
+        'Contacted': ['Interested', 'Not Interested', 'Call Back', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Busy', 'No Answer'],
+        'Interested': ['Converted', 'Call Back', 'Contacted'],
+        'Call Back': ['Contacted', 'Interested', 'Not Interested']
+      };
 
-    // Check if transition is allowed
-    const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || [];
-    if (!allowedNextStates.includes(newStatus) && currentStatus !== newStatus) {
-      // Special case: If trying to mark as negative from "New", show specific error
-      if (currentStatus === 'New' && negativeOutcomes.includes(newStatus)) {
+      // Check if transition is allowed
+      const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || [];
+      if (!allowedNextStates.includes(newStatus) && currentStatus !== newStatus) {
+        // Special case: If trying to mark as negative from "New", show specific error
+        if (currentStatus === 'New' && negativeOutcomes.includes(newStatus)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please contact the lead before closing it. You cannot mark a new lead as "' + newStatus + '" without contacting first.'
+          });
+        }
+
         return res.status(400).json({
           success: false,
-          message: 'Please contact the lead before closing it. You cannot mark a new lead as "' + newStatus + '" without contacting first.'
+          message: `Invalid status transition from "${currentStatus}" to "${newStatus}". Please follow the correct flow.`
         });
       }
 
-      return res.status(400).json({
-        success: false,
-        message: `Invalid status transition from "${currentStatus}" to "${newStatus}". Please follow the correct flow.`
-      });
-    }
+      // Same-day call limit check (max 5 attempts per day per telecaller)
+      const todayCallsResult = await pool.query(
+        `SELECT COUNT(*) as count FROM call_history
+         WHERE lead_id = $1
+         AND caller_id = $2
+         AND DATE(call_date) = CURRENT_DATE`,
+        [leadId, callerId]
+      );
 
-    // Same-day call limit check (max 5 attempts per day per telecaller)
-    const todayCallsResult = await pool.query(
-      `SELECT COUNT(*) as count FROM call_history
-       WHERE lead_id = $1
-       AND caller_id = $2
-       AND DATE(call_date) = CURRENT_DATE`,
-      [leadId, callerId]
-    );
-
-    if (todayCallsResult.rows[0].count >= 5) {
-      return res.status(400).json({
-        success: false,
-        message: 'You have already contacted this lead 5 times today. Please try again tomorrow.'
-      });
+      if (todayCallsResult.rows[0].count >= 5) {
+        return res.status(400).json({
+          success: false,
+          message: 'You have already contacted this lead 5 times today. Please try again tomorrow.'
+        });
+      }
     }
 
     // Capture IP and User Agent for audit

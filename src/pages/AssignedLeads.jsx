@@ -87,7 +87,8 @@ const AssignedLeads = () => {
               callRemark: callLogData.callRemark,
               callOutcome: callLogData.callOutcome,
               callReason: callLogData.callReason || null,
-              nextFollowUpDate: callLogData.nextFollowUpDate || null
+              nextFollowUpDate: callLogData.nextFollowUpDate || null,
+              isSuperAdmin: true // Skip validations for Super Admin
             })
           });
 
