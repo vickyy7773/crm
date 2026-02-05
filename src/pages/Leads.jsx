@@ -662,26 +662,26 @@ const Leads = () => {
 
         {/* Tabs and Actions */}
         <div className="flex items-center justify-between gap-4 mt-6">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div className="flex gap-1 overflow-x-auto pb-2 border-b border-gray-200">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition-all ${
+                className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-[2px] ${
                   activeTab === tab.id
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {tab.label} <span className="ml-2 text-sm opacity-80">({tab.count})</span>
+                {tab.label} ({tab.count})
               </button>
             ))}
           </div>
           <button
             onClick={() => setRangeModalOpen(true)}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold whitespace-nowrap transition-all flex items-center gap-2 shadow-sm"
+            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium whitespace-nowrap transition-all flex items-center gap-2 text-sm"
           >
-            <Target size={18} />
+            <Target size={16} />
             Select Range
           </button>
         </div>
