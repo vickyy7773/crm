@@ -17,6 +17,14 @@ const AssignedLeads = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState(null);
   const [telecallers, setTelecallers] = useState([]);
+  // Call log fields for edit modal
+  const [callLogData, setCallLogData] = useState({
+    callOutcome: '',
+    callRemark: '',
+    nextFollowUpDate: '',
+    callReason: ''
+  });
+  const [addingCallLog, setAddingCallLog] = useState(false);
 
   useEffect(() => {
     fetchAssignedLeads();
@@ -38,6 +46,13 @@ const AssignedLeads = () => {
   // Edit lead handler
   const handleEditLead = (lead) => {
     setEditFormData({ ...lead });
+    // Reset call log data when opening edit modal
+    setCallLogData({
+      callOutcome: '',
+      callRemark: '',
+      nextFollowUpDate: '',
+      callReason: ''
+    });
     setEditModalOpen(true);
   };
 
@@ -46,6 +61,7 @@ const AssignedLeads = () => {
     if (!editFormData) return;
 
     try {
+      // First update the lead data
       const response = await fetch(`${API_URL}/leads/${editFormData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -53,14 +69,49 @@ const AssignedLeads = () => {
       });
 
       const result = await response.json();
-      if (result.success) {
-        alert('Lead updated successfully!');
-        setEditModalOpen(false);
-        setEditFormData(null);
-        fetchAssignedLeads();
-      } else {
+      if (!result.success) {
         alert('Failed to update lead: ' + result.message);
+        return;
       }
+
+      // If call log fields are filled, add a call log entry
+      if (callLogData.callOutcome && callLogData.callRemark) {
+        setAddingCallLog(true);
+        try {
+          const callLogResponse = await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              callerId: user.id,
+              callerName: user.name || 'Super Admin',
+              callRemark: callLogData.callRemark,
+              callOutcome: callLogData.callOutcome,
+              callReason: callLogData.callReason || null,
+              nextFollowUpDate: callLogData.nextFollowUpDate || null
+            })
+          });
+
+          const callLogResult = await callLogResponse.json();
+          if (!callLogResult.success) {
+            alert('Lead updated but call log failed: ' + callLogResult.message);
+            setAddingCallLog(false);
+            setEditModalOpen(false);
+            setEditFormData(null);
+            fetchAssignedLeads();
+            return;
+          }
+        } catch (callLogErr) {
+          console.error('Error adding call log:', callLogErr);
+          alert('Lead updated but call log failed. Check console for details.');
+        }
+        setAddingCallLog(false);
+      }
+
+      alert('Lead updated successfully!');
+      setEditModalOpen(false);
+      setEditFormData(null);
+      setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
+      fetchAssignedLeads();
     } catch (err) {
       console.error('Error updating lead:', err);
       alert('Error updating lead. Check console for details.');
@@ -755,6 +806,77 @@ const AssignedLeads = () => {
                   />
                 </div>
               </div>
+
+              {/* Call Log Section - Add entry to call history */}
+              <div className="mt-6 pt-6 border-t-2 border-purple-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare size={20} className="text-purple-600" />
+                  <h3 className="text-lg font-bold text-purple-800">Add to Call History</h3>
+                  <span className="text-xs text-gray-500">(Optional - fills only if you want to log a call)</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-purple-50 p-4 rounded-xl border border-purple-200">
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-700 mb-2">Call Outcome *</label>
+                    <select
+                      value={callLogData.callOutcome}
+                      onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value })}
+                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                    >
+                      <option value="">-- Select Outcome --</option>
+                      <option value="Contacted">Contacted</option>
+                      <option value="Interested">Interested</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="Not Interested">Not Interested</option>
+                      <option value="Not Reachable">Not Reachable</option>
+                      <option value="Wrong Number">Wrong Number</option>
+                      <option value="Switched Off">Switched Off</option>
+                      <option value="Busy">Busy</option>
+                      <option value="No Answer">No Answer</option>
+                      <option value="Office Visit">Office Visit</option>
+                      <option value="Converted">Converted</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-700 mb-2">Next Follow-up Date</label>
+                    <input
+                      type="datetime-local"
+                      value={callLogData.nextFollowUpDate}
+                      onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
+                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                    />
+                  </div>
+
+                  {['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off'].includes(callLogData.callOutcome) && (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-semibold text-red-700 mb-2">Reason (Required for this outcome) *</label>
+                      <input
+                        type="text"
+                        value={callLogData.callReason}
+                        onChange={(e) => setCallLogData({ ...callLogData, callReason: e.target.value })}
+                        placeholder="Enter reason for this outcome..."
+                        className="w-full px-4 py-2 border-2 border-red-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none bg-white"
+                      />
+                    </div>
+                  )}
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-semibold text-purple-700 mb-2">Call Remark * (min 20 chars)</label>
+                    <textarea
+                      value={callLogData.callRemark}
+                      onChange={(e) => setCallLogData({ ...callLogData, callRemark: e.target.value })}
+                      placeholder="Enter detailed call remarks... (This will appear in call history)"
+                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      rows="3"
+                    />
+                    <p className="text-xs text-purple-600 mt-1">
+                      {callLogData.callRemark.length}/20 characters
+                      {callLogData.callRemark.length >= 20 ? ' ✓' : ' (need more)'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -763,16 +885,19 @@ const AssignedLeads = () => {
                 onClick={() => {
                   setEditModalOpen(false);
                   setEditFormData(null);
+                  setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
                 }}
                 className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                disabled={addingCallLog}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateLead}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
+                disabled={addingCallLog}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
               >
-                Save Changes
+                {addingCallLog ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
