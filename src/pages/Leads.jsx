@@ -506,7 +506,7 @@ const Leads = () => {
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <UserPlus size={20} />
-            Add Qualified Lead
+            Add Lead
           </button>
         </div>
       </div>
@@ -1511,8 +1511,8 @@ const Leads = () => {
                     <Plus size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Add Qualified Lead</h2>
-                    <p className="text-purple-100 text-sm">Add a new qualified lead to the system</p>
+                    <h2 className="text-2xl font-bold">Add Lead</h2>
+                    <p className="text-purple-100 text-sm">Add raw or qualified lead - only Name & Phone required</p>
                   </div>
                 </div>
                 <button
@@ -1541,7 +1541,7 @@ const Leads = () => {
 
               {/* Qualified Lead Details */}
               <div className="bg-purple-50 p-4 rounded-xl border-2 border-purple-200">
-                <h3 className="text-md font-bold text-purple-900 mb-3">📝 Qualified Lead Information</h3>
+                <h3 className="text-md font-bold text-purple-900 mb-3">📝 Lead Information <span className="text-xs font-normal text-purple-600">(Only Name & Phone required)</span></h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
@@ -1599,12 +1599,13 @@ const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Course *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Course</label>
                     <select
                       value={newStudent.course}
                       onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
                       className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
                     >
+                      <option value="">-- Select Course --</option>
                       <option value="MBBS">MBBS</option>
                       <option value="Other">Other</option>
                     </select>
@@ -1671,7 +1672,7 @@ const Leads = () => {
                   type="submit"
                   className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
                 >
-                  Add Qualified Lead
+                  Add Lead
                 </button>
               </div>
             </form>
