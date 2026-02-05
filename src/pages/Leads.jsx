@@ -512,18 +512,17 @@ const Leads = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Summary Bar */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4 flex flex-wrap gap-4 md:gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className={`${stat.bg} p-4 rounded-xl`}>
-                <stat.icon className={stat.iconColor} size={28} />
-              </div>
+          <div key={index} className="flex items-center gap-2">
+            <div className={`${stat.bg} p-2 rounded-lg`}>
+              <stat.icon className={stat.iconColor} size={18} />
             </div>
-            <h3 className="text-gray-600 text-sm font-semibold mb-1">{stat.title}</h3>
-            <p className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</p>
-            <p className="text-sm text-gray-500">{stat.change}</p>
+            <div>
+              <p className="text-xs text-gray-500">{stat.title}</p>
+              <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -662,18 +661,18 @@ const Leads = () => {
 
         {/* Tabs and Actions */}
         <div className="flex items-center justify-between gap-4 mt-6">
-          <div className="flex gap-1 overflow-x-auto pb-2 border-b border-gray-200">
+          <div className="flex gap-2 overflow-x-auto pb-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-[2px] ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all ${
                   activeTab === tab.id
-                    ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {tab.label} ({tab.count})
+                {tab.label} <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-white/20">{tab.count}</span>
               </button>
             ))}
           </div>
