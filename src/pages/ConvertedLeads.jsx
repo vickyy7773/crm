@@ -118,44 +118,44 @@ const ConvertedLeads = () => {
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl p-4 md:p-8 shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-lg border-2 border-white/30">
-              <Award size={32} />
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl md:rounded-2xl p-3 md:p-8 shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="w-10 h-10 md:w-16 md:h-16 bg-white/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-lg border-2 border-white/30">
+              <Award size={20} className="md:w-8 md:h-8" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold mb-2">Converted Leads</h1>
-              <p className="text-green-100 text-lg">Successfully converted students - {filteredLeads.length} total</p>
+              <h1 className="text-xl md:text-4xl font-bold mb-1 md:mb-2">Converted Leads</h1>
+              <p className="text-green-100 text-xs md:text-lg">{filteredLeads.length} converted students</p>
             </div>
           </div>
           <button
             onClick={fetchConvertedLeads}
-            className="flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl font-bold transition-all backdrop-blur-lg border-2 border-white/30"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 text-sm md:text-base bg-white/20 hover:bg-white/30 rounded-lg md:rounded-xl font-bold transition-all backdrop-blur-lg border-2 border-white/30"
           >
-            <RefreshCw size={20} />
+            <RefreshCw size={16} className="md:w-5 md:h-5" />
             Refresh
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl md:rounded-2xl p-3 md:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Total Converted</p>
-              <p className="text-4xl font-bold mt-1">{filteredLeads.length}</p>
+              <p className="text-xs md:text-sm opacity-90">Total Converted</p>
+              <p className="text-2xl md:text-4xl font-bold mt-1">{filteredLeads.length}</p>
             </div>
-            <CheckCircle size={40} className="opacity-80" />
+            <CheckCircle size={24} className="opacity-80 hidden md:block md:w-10 md:h-10" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl md:rounded-2xl p-3 md:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">This Month</p>
-              <p className="text-4xl font-bold mt-1">
+              <p className="text-xs md:text-sm opacity-90">This Month</p>
+              <p className="text-2xl md:text-4xl font-bold mt-1">
                 {filteredLeads.filter(l => {
                   const updatedDate = new Date(l.updated_at);
                   const now = new Date();
@@ -163,15 +163,15 @@ const ConvertedLeads = () => {
                 }).length}
               </p>
             </div>
-            <TrendingUp size={40} className="opacity-80" />
+            <TrendingUp size={24} className="opacity-80 hidden md:block md:w-10 md:h-10" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg">
+        <div className="col-span-2 md:col-span-1 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl md:rounded-2xl p-3 md:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Top Performer</p>
-              <p className="text-lg font-bold mt-1">
+              <p className="text-xs md:text-sm opacity-90">Top Performer</p>
+              <p className="text-sm md:text-lg font-bold mt-1">
                 {leads.length > 0
                   ? Object.entries(
                       leads.reduce((acc, lead) => {
@@ -183,45 +183,45 @@ const ConvertedLeads = () => {
                   : '-'}
               </p>
             </div>
-            <Award size={40} className="opacity-80" />
+            <Award size={24} className="opacity-80 hidden md:block md:w-10 md:h-10" />
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-md p-4">
+      <div className="bg-white rounded-lg md:rounded-xl shadow-md p-3 md:p-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"
-            placeholder="Search by name, phone, city, or telecaller..."
+            placeholder="Search name, phone, city..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+            className="w-full pl-9 md:pl-12 pr-4 py-2 md:py-3 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
           />
         </div>
       </div>
 
       {/* Admin Note */}
       {user.role === 'Super Admin' && (
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertTriangle className="text-blue-600 flex-shrink-0 mt-1" size={20} />
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg md:rounded-xl p-3 md:p-4 flex items-start gap-2 md:gap-3">
+          <AlertTriangle className="text-blue-600 flex-shrink-0 mt-0.5" size={16} />
           <div>
-            <p className="text-blue-900 font-semibold">Admin Privilege</p>
-            <p className="text-blue-700 text-sm">
-              As a Super Admin, you can change the status of converted leads. Click the edit icon to revert a lead to active status.
+            <p className="text-blue-900 font-semibold text-sm md:text-base">Admin Privilege</p>
+            <p className="text-blue-700 text-xs md:text-sm">
+              Click edit icon to revert a lead to active status.
             </p>
           </div>
         </div>
       )}
 
       {/* Leads Table */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg md:rounded-xl shadow-md overflow-hidden">
         {filteredLeads.length === 0 ? (
-          <div className="text-center py-16">
-            <Award className="mx-auto text-gray-300 mb-4" size={64} />
-            <p className="text-gray-500 text-lg font-semibold">No converted leads yet</p>
-            <p className="text-gray-400 text-sm mt-2">Converted leads will appear here</p>
+          <div className="text-center py-12 md:py-16">
+            <Award className="mx-auto text-gray-300 mb-4" size={48} />
+            <p className="text-gray-500 text-base md:text-lg font-semibold">No converted leads yet</p>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">Converted leads will appear here</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
