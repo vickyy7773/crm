@@ -760,24 +760,6 @@ const AssignedLeads = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                  <select
-                    value={editFormData.status || 'New'}
-                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                  >
-                    <option value="New">New</option>
-                    <option value="Contacted">Contacted</option>
-                    <option value="Interested">Interested</option>
-                    <option value="Call Back">Call Back</option>
-                    <option value="Not Interested">Not Interested</option>
-                    <option value="Not Reachable">Not Reachable</option>
-                    <option value="Office Visit">Office Visit</option>
-                    <option value="Drop">Drop</option>
-                    <option value="Converted">Converted</option>
-                  </select>
-                </div>
-                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Assigned To</label>
                   <select
                     value={editFormData.assigned_to || ''}
@@ -796,15 +778,6 @@ const AssignedLeads = () => {
                       <option key={tc.id} value={tc.id}>{tc.name}</option>
                     ))}
                   </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Remark</label>
-                  <textarea
-                    value={editFormData.remark || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                    rows="3"
-                  />
                 </div>
               </div>
 
