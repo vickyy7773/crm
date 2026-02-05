@@ -512,17 +512,18 @@ const Leads = () => {
         </div>
       </div>
 
-      {/* Stats Summary Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4 flex flex-wrap gap-4 md:gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         {stats.map((stat, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <div className={`${stat.bg} p-2 rounded-lg`}>
-              <stat.icon className={stat.iconColor} size={18} />
+          <div key={index} className="bg-white rounded-xl md:rounded-2xl shadow-md md:shadow-lg p-4 md:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="flex items-start justify-between mb-2 md:mb-4">
+              <div className={`${stat.bg} p-2 md:p-4 rounded-lg md:rounded-xl`}>
+                <stat.icon className={stat.iconColor} size={20} />
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">{stat.title}</p>
-              <p className="text-lg font-bold text-gray-900">{stat.value}</p>
-            </div>
+            <h3 className="text-gray-600 text-xs md:text-sm font-semibold mb-1">{stat.title}</h3>
+            <p className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">{stat.value}</p>
+            <p className="text-xs md:text-sm text-gray-500">{stat.change}</p>
           </div>
         ))}
       </div>
