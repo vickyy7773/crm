@@ -753,87 +753,87 @@ const StudentApplications = () => {
 
       {/* Stats Overview */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white rounded-xl p-5 border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <GraduationCap size={20} className="text-purple-600" />
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-5 border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-1 md:mb-2">
+              <div className="p-1.5 md:p-2 bg-purple-100 rounded-lg">
+                <GraduationCap size={16} className="text-purple-600 md:w-5 md:h-5" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{stats.total_applications}</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">{stats.total_applications}</span>
             </div>
-            <p className="text-sm font-medium text-gray-600">Total Applications</p>
-            <p className="text-xs text-gray-400 mt-1">All submitted forms</p>
+            <p className="text-xs md:text-sm font-medium text-gray-600">Total Applications</p>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 hidden md:block">All submitted forms</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock size={20} className="text-yellow-600" />
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-5 border-2 border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-1 md:mb-2">
+              <div className="p-1.5 md:p-2 bg-yellow-100 rounded-lg">
+                <Clock size={16} className="text-yellow-600 md:w-5 md:h-5" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{stats.pending}</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">{stats.pending}</span>
             </div>
-            <p className="text-sm font-medium text-gray-600">Pending</p>
-            <p className="text-xs text-gray-400 mt-1">Awaiting review</p>
+            <p className="text-xs md:text-sm font-medium text-gray-600">Pending</p>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 hidden md:block">Awaiting review</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar size={20} className="text-purple-600" />
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-5 border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-1 md:mb-2">
+              <div className="p-1.5 md:p-2 bg-purple-100 rounded-lg">
+                <Calendar size={16} className="text-purple-600 md:w-5 md:h-5" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{stats.this_week_applications}</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">{stats.this_week_applications}</span>
             </div>
-            <p className="text-sm font-medium text-gray-600">This Week</p>
-            <p className="text-xs text-gray-400 mt-1">Last 7 days</p>
+            <p className="text-xs md:text-sm font-medium text-gray-600">This Week</p>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 hidden md:block">Last 7 days</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle2 size={20} className="text-green-600" />
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-5 border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-1 md:mb-2">
+              <div className="p-1.5 md:p-2 bg-green-100 rounded-lg">
+                <CheckCircle2 size={16} className="text-green-600 md:w-5 md:h-5" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{stats.approved}</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">{stats.approved}</span>
             </div>
-            <p className="text-sm font-medium text-gray-600">Approved</p>
-            <p className="text-xs text-gray-400 mt-1">Successfully verified</p>
+            <p className="text-xs md:text-sm font-medium text-gray-600">Approved</p>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 hidden md:block">Successfully verified</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-orange-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <FileWarning size={20} className="text-orange-600" />
+          <div className="col-span-2 lg:col-span-1 bg-white rounded-lg md:rounded-xl p-3 md:p-5 border-2 border-orange-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-1 md:mb-2">
+              <div className="p-1.5 md:p-2 bg-orange-100 rounded-lg">
+                <FileWarning size={16} className="text-orange-600 md:w-5 md:h-5" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{stats.documents_required}</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">{stats.documents_required}</span>
             </div>
-            <p className="text-sm font-medium text-gray-600">Docs Required</p>
-            <p className="text-xs text-gray-400 mt-1">Need more info</p>
+            <p className="text-xs md:text-sm font-medium text-gray-600">Docs Required</p>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 hidden md:block">Need more info</p>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={20} className="text-gray-600" />
-          <h3 className="text-lg font-bold text-gray-900">Filters</h3>
+      <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-6 shadow-lg border border-gray-100">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
+          <Filter size={16} className="text-gray-600 md:w-5 md:h-5" />
+          <h3 className="text-sm md:text-lg font-bold text-gray-900">Filters</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+          <div className="relative md:col-span-2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
               placeholder="Search by name, email, mobile..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
+              className="w-full pl-9 md:pl-10 pr-4 py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
             />
           </div>
 
-<select
+          <select
             value={filters.course}
             onChange={(e) => handleFilterChange('course', e.target.value)}
-            className="px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
+            className="px-3 md:px-4 py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
           >
             <option value="">All Courses</option>
             <option value="MBBS">MBBS</option>
@@ -843,10 +843,10 @@ const StudentApplications = () => {
       </div>
 
       {/* Applications Table */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900">Applications List</h3>
-          <p className="text-sm text-gray-500 mt-1">
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-3 md:p-6 border-b border-gray-200">
+          <h3 className="text-sm md:text-lg font-bold text-gray-900">Applications List</h3>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">
             Showing {applications.length} of {pagination.total} applications
           </p>
         </div>
@@ -968,22 +968,22 @@ const StudentApplications = () => {
 
         {/* Pagination */}
         {!loading && applications.length > 0 && (
-          <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="p-3 md:p-4 border-t border-gray-200 flex items-center justify-between">
             <button
               onClick={handlePrevPage}
               disabled={pagination.offset === 0}
-              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            <span className="text-sm text-gray-600">
+            <span className="text-xs md:text-sm text-gray-600">
               Page {Math.floor(pagination.offset / pagination.limit) + 1} of{' '}
               {Math.ceil(pagination.total / pagination.limit)}
             </span>
             <button
               onClick={handleNextPage}
               disabled={pagination.offset + pagination.limit >= pagination.total}
-              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
@@ -993,144 +993,145 @@ const StudentApplications = () => {
 
       {/* Details Modal */}
       {showDetails && selectedApplication && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-2 md:p-4">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] md:max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-xl border-2 border-white/30">
-                  {(selectedApplication.first_name || selectedApplication.first_middle_name || '').charAt(0)}{(selectedApplication.last_name || '').charAt(0)}
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 md:p-6 rounded-t-xl md:rounded-t-2xl shrink-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 md:gap-4">
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-sm md:text-xl border-2 border-white/30">
+                    {(selectedApplication.first_name || selectedApplication.first_middle_name || '').charAt(0)}{(selectedApplication.last_name || '').charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-base md:text-2xl font-bold">
+                      {selectedApplication.first_name || selectedApplication.first_middle_name} {selectedApplication.last_name}
+                    </h2>
+                    <p className="text-purple-100 text-[10px] md:text-sm flex items-center gap-1 md:gap-2 flex-wrap">
+                      <span>ID: #{selectedApplication.id}</span>
+                      <span className="hidden md:inline">•</span>
+                      <span>{selectedApplication.course}</span>
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    {selectedApplication.first_name || selectedApplication.first_middle_name} {selectedApplication.last_name}
-                  </h2>
-                  <p className="text-purple-100 text-sm flex items-center gap-2">
-                    <span>ID: #{selectedApplication.id}</span>
-                    <span>•</span>
-                    <span>{selectedApplication.course}</span>
-                    <span>•</span>
-                    <span>{selectedApplication.nationality}</span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleEditApplication(selectedApplication)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-lg transition-all border-2 border-white/30 font-semibold text-sm"
-                  title="Edit Application"
-                >
-                  <Edit2 size={18} />
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteApplication(selectedApplication.id, selectedApplication._appType)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500/90 backdrop-blur-sm hover:bg-red-600 rounded-lg transition-all border-2 border-red-400/50 font-semibold text-sm"
-                  title="Delete Application"
-                >
-                  <Trash2 size={18} />
-                  Delete
-                </button>
-                <button
-                  onClick={() => generatePDF(selectedApplication)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-lg transition-all border-2 border-white/30 font-semibold text-sm"
-                  title="Download Application PDF"
-                >
-                  <Download size={18} />
-                  Download PDF
-                </button>
                 <button
                   onClick={() => {
                     setShowDetails(false);
                     setActiveTab('personal');
                   }}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-1.5 md:p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={20} className="md:w-6 md:h-6" />
+                </button>
+              </div>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
+                <button
+                  onClick={() => handleEditApplication(selectedApplication)}
+                  className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-lg transition-all border border-white/30 font-semibold text-xs md:text-sm"
+                  title="Edit Application"
+                >
+                  <Edit2 size={14} className="md:w-[18px] md:h-[18px]" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteApplication(selectedApplication.id, selectedApplication._appType)}
+                  className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 bg-red-500/90 backdrop-blur-sm hover:bg-red-600 rounded-lg transition-all border border-red-400/50 font-semibold text-xs md:text-sm"
+                  title="Delete Application"
+                >
+                  <Trash2 size={14} className="md:w-[18px] md:h-[18px]" />
+                  Delete
+                </button>
+                <button
+                  onClick={() => generatePDF(selectedApplication)}
+                  className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-lg transition-all border border-white/30 font-semibold text-xs md:text-sm"
+                  title="Download Application PDF"
+                >
+                  <Download size={14} className="md:w-[18px] md:h-[18px]" />
+                  <span className="hidden md:inline">Download</span> PDF
                 </button>
               </div>
             </div>
 
             {/* Tab Navigation */}
-            <div className="border-b border-gray-200 bg-gray-50 px-6 shrink-0">
-              <div className="flex gap-2 overflow-x-auto">
+            <div className="border-b border-gray-200 bg-gray-50 px-3 md:px-6 shrink-0">
+              <div className="flex gap-1 md:gap-2 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab('personal')}
-                  className={`px-4 py-3 font-semibold text-sm transition-all border-b-2 whitespace-nowrap ${
+                  className={`px-2 md:px-4 py-2 md:py-3 font-semibold text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${
                     activeTab === 'personal'
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <User2 size={16} />
-                    Personal Details
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <User2 size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden md:inline">Personal</span> Details
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab('family')}
-                  className={`px-4 py-3 font-semibold text-sm transition-all border-b-2 whitespace-nowrap ${
+                  className={`px-2 md:px-4 py-2 md:py-3 font-semibold text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${
                     activeTab === 'family'
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Users2 size={16} />
-                    Family & Address
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Users2 size={14} className="md:w-4 md:h-4" />
+                    Family
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab('academic')}
-                  className={`px-4 py-3 font-semibold text-sm transition-all border-b-2 whitespace-nowrap ${
+                  className={`px-2 md:px-4 py-2 md:py-3 font-semibold text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${
                     activeTab === 'academic'
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Award size={16} />
-                    Academic Records
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Award size={14} className="md:w-4 md:h-4" />
+                    Academic
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab('preferences')}
-                  className={`px-4 py-3 font-semibold text-sm transition-all border-b-2 whitespace-nowrap ${
+                  className={`px-2 md:px-4 py-2 md:py-3 font-semibold text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${
                     activeTab === 'preferences'
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Globe size={16} />
-                    Preferences
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Globe size={14} className="md:w-4 md:h-4" />
+                    Prefs
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab('documents')}
-                  className={`px-4 py-3 font-semibold text-sm transition-all border-b-2 whitespace-nowrap ${
+                  className={`px-2 md:px-4 py-2 md:py-3 font-semibold text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${
                     activeTab === 'documents'
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <FileText size={16} />
-                    Documents
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <FileText size={14} className="md:w-4 md:h-4" />
+                    Docs
                   </div>
                 </button>
               </div>
             </div>
 
             {/* Tab Content */}
-            <div className="p-8 overflow-y-auto flex-1 bg-gray-50">
+            <div className="p-3 md:p-8 overflow-y-auto flex-1 bg-gray-50">
 
               {/* Personal Details Tab */}
               {activeTab === 'personal' && (
-                <div className="space-y-6">
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Basic Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3 md:space-y-6">
+                  <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm border border-gray-200">
+                    <h3 className="text-sm md:text-lg font-bold text-gray-900 mb-2 md:mb-4 pb-2 border-b">Basic Information</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
                       <div>
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date of Birth</label>
                         <p className="font-semibold text-gray-900 mt-1">{new Date(selectedApplication.date_of_birth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
@@ -1841,18 +1842,18 @@ const StudentApplications = () => {
 
       {/* Edit Application Modal */}
       {editModalOpen && editFormData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-4xl w-full my-4 md:my-8">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 md:p-6 rounded-t-xl md:rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
-                    <Edit2 size={24} />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <Edit2 size={16} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Edit Application</h2>
-                    <p className="text-purple-100 text-sm">Update student application details</p>
+                    <h2 className="text-base md:text-2xl font-bold">Edit Application</h2>
+                    <p className="text-purple-100 text-xs md:text-sm">Update student details</p>
                   </div>
                 </div>
                 <button
@@ -1860,15 +1861,15 @@ const StudentApplications = () => {
                     setEditModalOpen(false);
                     setEditFormData(null);
                   }}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
                 >
-                  <X size={20} />
+                  <X size={16} className="md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-3 md:p-6 space-y-3 md:space-y-4 max-h-[70vh] overflow-y-auto">
 
               {/* Personal Details */}
               <div className="bg-purple-50 p-4 rounded-xl border-2 border-purple-200">
@@ -2152,21 +2153,21 @@ const StudentApplications = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-end gap-3">
+            <div className="bg-gray-50 border-t border-gray-200 p-3 md:p-4 rounded-b-xl md:rounded-b-2xl flex items-center justify-end gap-2 md:gap-3">
               <button
                 onClick={() => {
                   setEditModalOpen(false);
                   setEditFormData(null);
                 }}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateApplication}
-                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
+                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
               >
-                Save Changes
+                Save
               </button>
             </div>
           </div>
@@ -2175,18 +2176,18 @@ const StudentApplications = () => {
 
       {/* Add New Student Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-3xl w-full my-4 md:my-8">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 md:p-6 rounded-t-xl md:rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
-                    <Plus size={24} />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <Plus size={16} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Add New Student</h2>
-                    <p className="text-purple-100 text-sm">Create a new student application</p>
+                    <h2 className="text-base md:text-2xl font-bold">Add New Student</h2>
+                    <p className="text-purple-100 text-xs md:text-sm">Create new application</p>
                   </div>
                 </div>
                 <button
@@ -2206,15 +2207,15 @@ const StudentApplications = () => {
                       status: 'Pending'
                     });
                   }}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
                 >
-                  <X size={20} />
+                  <X size={16} className="md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleAddStudent} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <form onSubmit={handleAddStudent} className="p-3 md:p-6 space-y-3 md:space-y-4 max-h-[70vh] overflow-y-auto">
 
               {/* Personal Details */}
               <div className="bg-purple-50 p-4 rounded-xl border-2 border-purple-200">
@@ -2353,7 +2354,7 @@ const StudentApplications = () => {
               </div>
 
               {/* Form Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-2 md:gap-3 pt-3 md:pt-4 border-t">
                 <button
                   type="button"
                   onClick={() => {
@@ -2372,13 +2373,13 @@ const StudentApplications = () => {
                       status: 'Pending'
                     });
                   }}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
+                  className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
+                  className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
                 >
                   Add Student
                 </button>
