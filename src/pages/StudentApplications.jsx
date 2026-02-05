@@ -729,22 +729,22 @@ const StudentApplications = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <GraduationCap size={36} className="text-purple-600" />
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <GraduationCap size={28} className="text-purple-600 md:w-9 md:h-9" />
             Student Applications
           </h1>
-          <p className="text-gray-500 mt-1">Manage and track all student course applications</p>
+          <p className="text-gray-500 text-sm md:text-base mt-1">Manage and track all student course applications</p>
         </div>
         <button
           onClick={() => {
             console.log('Button clicked! Opening modal...');
             setAddModalOpen(true);
           }}
-          className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
+          className="px-4 md:px-6 py-2 md:py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 font-medium shadow-md hover:shadow-lg text-sm md:text-base"
         >
           <Plus size={20} />
           Add New Student

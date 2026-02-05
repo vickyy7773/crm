@@ -163,10 +163,10 @@ const AssignedLeads = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Assigned Leads</h1>
             <p className="text-gray-600 text-lg">Track all leads assigned to telecallers</p>

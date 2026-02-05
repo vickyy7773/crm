@@ -491,22 +491,22 @@ const Leads = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Leads</h1>
-            <p className="text-gray-600 text-lg">Manage all leads - raw and qualified students</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Leads</h1>
+            <p className="text-gray-600 text-sm md:text-lg">Manage all leads - raw and qualified students</p>
           </div>
           <button
             onClick={() => {
               console.log('Button clicked! Opening modal...');
               setAddModalOpen(true);
             }}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg text-sm md:text-base"
           >
-            <UserPlus size={20} />
+            <UserPlus size={18} />
             Add Lead
           </button>
         </div>
@@ -529,7 +529,7 @@ const Leads = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-gray-100 mb-6">
         {/* Search Bar */}
         <div className="relative w-full mb-6">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -557,7 +557,7 @@ const Leads = () => {
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {/* Lead Type Filter - Raw/Qualified/All */}
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-2">Lead Type:</label>

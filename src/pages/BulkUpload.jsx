@@ -97,11 +97,11 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-          <Upload size={40} className="text-purple-600" />
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 mb-2">
+          <Upload size={28} className="text-purple-600 md:w-10 md:h-10" />
           Bulk Upload Leads
         </h1>
         <p className="text-gray-600 text-lg">Upload multiple leads at once using CSV file</p>

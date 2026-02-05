@@ -116,11 +116,11 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600 text-lg">Welcome back! Here's what's happening today.</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <p className="text-gray-600 text-sm md:text-lg">Welcome back! Here's what's happening today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -168,7 +168,7 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
+          <div className="grid grid-cols-3 gap-2 md:gap-4 mt-6 pt-6 border-t border-gray-200">
             <div className="text-center">
               <div className="text-3xl font-bold text-gray-900">68%</div>
               <div className="text-sm text-gray-600 mt-1">Response Rate</div>

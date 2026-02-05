@@ -36,6 +36,7 @@ const Layout = () => {
   const [reportsOpen, setReportsOpen] = useState(false);
   const [usersOpen, setUsersOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const notificationRef = useRef(null);
@@ -153,6 +154,7 @@ const Layout = () => {
         ) : (
           <Link
             to={to}
+            onClick={() => setMobileMenuOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/10 rounded-xl mx-2 transition-all ${
               isActive ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : ''
             }`}
@@ -174,6 +176,7 @@ const Layout = () => {
     return (
       <Link
         to={to}
+        onClick={() => setMobileMenuOpen(false)}
         className={`flex items-center gap-3 pl-12 pr-4 py-3 text-gray-400 hover:bg-white/5 rounded-xl mx-2 transition-all ${
           isActive ? 'bg-white/10 text-white font-semibold' : ''
         }`}
@@ -186,8 +189,21 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col shadow-2xl transition-all duration-300`}>
+      <aside className={`
+        ${sidebarCollapsed ? 'w-20' : 'w-72'}
+        bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col shadow-2xl transition-all duration-300
+        fixed md:relative inset-y-0 left-0 z-50
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+      `}>
         {/* Brand Section */}
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center justify-between gap-3 mb-6">
@@ -371,9 +387,17 @@ const Layout = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative flex-1 max-w-xl">
+        <header className="bg-white border-b border-gray-200 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-2 md:gap-4 flex-1">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors md:hidden"
+            >
+              <Menu size={24} className="text-gray-600" />
+            </button>
+
+            <div className="relative flex-1 max-w-xl hidden sm:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"

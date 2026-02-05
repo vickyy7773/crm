@@ -458,13 +458,13 @@ const RawLeads = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Raw Leads</h1>
-            <p className="text-gray-600 text-lg">Basic leads with name, phone, and city only</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Raw Leads</h1>
+            <p className="text-gray-600 text-sm md:text-lg">Basic leads with name, phone, and city only</p>
           </div>
         </div>
       </div>

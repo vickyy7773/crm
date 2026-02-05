@@ -253,14 +253,14 @@ const TelecallerRawLeads = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-          <User size={40} className="text-blue-600" />
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-4xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 mb-2">
+          <User size={28} className="text-blue-600 md:w-10 md:h-10" />
           Raw Leads - Qualify Students
         </h1>
-        <p className="text-gray-600 text-lg">
+        <p className="text-gray-600 text-sm md:text-lg">
           Convert raw leads into qualified students by adding their details
         </p>
       </div>
