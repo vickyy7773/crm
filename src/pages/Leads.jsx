@@ -1542,56 +1542,20 @@ const Leads = () => {
             <form onSubmit={handleAddStudent} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
 
               {/* Lead Type Selection */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-300">
-                <label className="block text-sm font-bold text-gray-800 mb-3">🎯 Select Lead Type:</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setNewLeadType('raw')}
-                    className={`px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                      newLeadType === 'raw'
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105'
-                        : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-orange-400'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-lg">🔴</span>
-                      <span>Raw Lead</span>
-                    </div>
-                    <p className="text-xs mt-1 opacity-90">Basic info only</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewLeadType('qualified')}
-                    className={`px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                      newLeadType === 'qualified'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105'
-                        : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-green-400'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-lg">✅</span>
-                      <span>Qualified Lead</span>
-                    </div>
-                    <p className="text-xs mt-1 opacity-90">Complete details</p>
-                  </button>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Lead Type *</label>
+                <select
+                  value={newLeadType}
+                  onChange={(e) => setNewLeadType(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                >
+                  <option value="raw">Raw Lead (Basic info)</option>
+                  <option value="qualified">Qualified Lead (Complete details)</option>
+                </select>
               </div>
 
-              {/* Qualified Lead Details */}
-              <div className={`p-4 rounded-xl border-2 ${
-                newLeadType === 'raw'
-                  ? 'bg-orange-50 border-orange-200'
-                  : 'bg-green-50 border-green-200'
-              }`}>
-                <h3 className={`text-md font-bold mb-3 ${
-                  newLeadType === 'raw' ? 'text-orange-900' : 'text-green-900'
-                }`}>
-                  📝 {newLeadType === 'raw' ? 'Raw Lead' : 'Qualified Lead'} Information
-                  <span className="text-xs font-normal ml-2 opacity-75">
-                    ({newLeadType === 'raw' ? 'Only Name & Phone required' : 'Fill all available details'})
-                  </span>
-                </h3>
+              {/* Lead Details */}
+              <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
