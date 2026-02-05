@@ -673,18 +673,18 @@ const AssignedLeads = () => {
 
       {/* Edit Lead Modal */}
       {editModalOpen && editFormData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-2xl w-full my-4 md:my-8">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 md:p-6 rounded-t-xl md:rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
-                    <Edit2 size={24} />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <Edit2 size={16} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Edit Lead</h2>
-                    <p className="text-blue-100 text-sm">Update lead information</p>
+                    <h2 className="text-lg md:text-2xl font-bold">Edit Lead</h2>
+                    <p className="text-blue-100 text-xs md:text-sm">Update lead information</p>
                   </div>
                 </div>
                 <button
@@ -692,58 +692,58 @@ const AssignedLeads = () => {
                     setEditModalOpen(false);
                     setEditFormData(null);
                   }}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
                 >
-                  <X size={20} />
+                  <X size={16} className="md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 md:p-6 space-y-3 md:space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 md:gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Name *</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Name *</label>
                   <input
                     type="text"
                     value={editFormData.name || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Phone *</label>
                   <input
                     type="text"
                     value={editFormData.phone || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">City</label>
                   <input
                     type="text"
                     value={editFormData.city || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">NEET Score</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">NEET Score</label>
                   <input
                     type="text"
                     value={editFormData.neet || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Course</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Course</label>
                   <select
                     value={editFormData.course || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, course: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   >
                     <option value="">-- Select --</option>
                     <option value="MBBS">MBBS</option>
@@ -751,16 +751,16 @@ const AssignedLeads = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Source</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Source</label>
                   <input
                     type="text"
                     value={editFormData.source || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, source: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Assigned To</label>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Assigned To</label>
                   <select
                     value={editFormData.assigned_to || ''}
                     onChange={(e) => {
@@ -771,7 +771,7 @@ const AssignedLeads = () => {
                         assigned_to_name: telecaller ? telecaller.name : null
                       });
                     }}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   >
                     <option value="">-- Unassigned --</option>
                     {telecallers.map((tc) => (
@@ -782,22 +782,22 @@ const AssignedLeads = () => {
               </div>
 
               {/* Call Log Section - Add entry to call history */}
-              <div className="mt-6 pt-6 border-t-2 border-purple-200">
-                <div className="flex items-center gap-2 mb-4">
-                  <MessageSquare size={20} className="text-purple-600" />
-                  <h3 className="text-lg font-bold text-purple-800">Add to Call History</h3>
-                  <span className="text-xs text-gray-500">(Optional - fills only if you want to log a call)</span>
+              <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t-2 border-purple-200">
+                <div className="flex items-center gap-1 md:gap-2 mb-3 md:mb-4">
+                  <MessageSquare size={16} className="text-purple-600 md:w-5 md:h-5" />
+                  <h3 className="text-sm md:text-lg font-bold text-purple-800">Add to Call History</h3>
+                  <span className="text-[10px] md:text-xs text-gray-500 hidden md:inline">(Optional)</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-purple-50 p-4 rounded-xl border border-purple-200">
+                <div className="grid grid-cols-2 gap-2 md:gap-4 bg-purple-50 p-2 md:p-4 rounded-lg md:rounded-xl border border-purple-200">
                   <div>
-                    <label className="block text-sm font-semibold text-purple-700 mb-2">Call Outcome *</label>
+                    <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Outcome *</label>
                     <select
                       value={callLogData.callOutcome}
                       onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                     >
-                      <option value="">-- Select Outcome --</option>
+                      <option value="">-- Select --</option>
                       <option value="Contacted">Contacted</option>
                       <option value="Interested">Interested</option>
                       <option value="Call Back">Call Back</option>
@@ -813,40 +813,40 @@ const AssignedLeads = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-purple-700 mb-2">Next Follow-up Date</label>
+                    <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Follow-up</label>
                     <input
                       type="datetime-local"
                       value={callLogData.nextFollowUpDate}
                       onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
-                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                     />
                   </div>
 
                   {['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off'].includes(callLogData.callOutcome) && (
                     <div className="col-span-2">
-                      <label className="block text-sm font-semibold text-red-700 mb-2">Reason (Required for this outcome) *</label>
+                      <label className="block text-xs md:text-sm font-semibold text-red-700 mb-1 md:mb-2">Reason *</label>
                       <input
                         type="text"
                         value={callLogData.callReason}
                         onChange={(e) => setCallLogData({ ...callLogData, callReason: e.target.value })}
-                        placeholder="Enter reason for this outcome..."
-                        className="w-full px-4 py-2 border-2 border-red-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none bg-white"
+                        placeholder="Enter reason..."
+                        className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-red-200 rounded-lg md:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none bg-white"
                       />
                     </div>
                   )}
 
                   <div className="col-span-2">
-                    <label className="block text-sm font-semibold text-purple-700 mb-2">Call Remark * (min 20 chars)</label>
+                    <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Remark *</label>
                     <textarea
                       value={callLogData.callRemark}
                       onChange={(e) => setCallLogData({ ...callLogData, callRemark: e.target.value })}
-                      placeholder="Enter detailed call remarks... (This will appear in call history)"
-                      className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
-                      rows="3"
+                      placeholder="Enter call remarks..."
+                      className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      rows="2"
                     />
-                    <p className="text-xs text-purple-600 mt-1">
-                      {callLogData.callRemark.length}/20 characters
-                      {callLogData.callRemark.length >= 20 ? ' ✓' : ' (need more)'}
+                    <p className="text-[10px] md:text-xs text-purple-600 mt-1">
+                      {callLogData.callRemark.length}/20 chars
+                      {callLogData.callRemark.length >= 20 ? ' ✓' : ''}
                     </p>
                   </div>
                 </div>
@@ -854,14 +854,14 @@ const AssignedLeads = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-end gap-3">
+            <div className="bg-gray-50 border-t border-gray-200 p-3 md:p-4 rounded-b-xl md:rounded-b-2xl flex items-center justify-end gap-2 md:gap-3">
               <button
                 onClick={() => {
                   setEditModalOpen(false);
                   setEditFormData(null);
                   setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
                 }}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
                 disabled={addingCallLog}
               >
                 Cancel
@@ -869,9 +869,9 @@ const AssignedLeads = () => {
               <button
                 onClick={handleUpdateLead}
                 disabled={addingCallLog}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
+                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
               >
-                {addingCallLog ? 'Saving...' : 'Save Changes'}
+                {addingCallLog ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
