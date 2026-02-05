@@ -99,30 +99,30 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 mb-2">
-          <Upload size={28} className="text-purple-600 md:w-10 md:h-10" />
+      <div className="mb-4 md:mb-8">
+        <h1 className="text-xl md:text-4xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+          <Upload size={24} className="text-purple-600 md:w-10 md:h-10" />
           Bulk Upload Leads
         </h1>
-        <p className="text-gray-600 text-lg">Upload multiple leads at once using CSV file</p>
+        <p className="text-gray-600 text-sm md:text-lg">Upload multiple leads at once using CSV</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-2 md:gap-4 mb-4 md:mb-6">
         <button
           onClick={() => {
             setActiveTab('raw');
             setFile(null);
             setResult(null);
           }}
-          className={`flex-1 px-6 py-4 rounded-xl font-bold text-lg transition-all ${
+          className={`flex-1 px-3 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl font-bold text-sm md:text-lg transition-all ${
             activeTab === 'raw'
               ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
               : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-blue-400'
           }`}
         >
           📝 Raw Leads
-          <p className="text-sm font-normal mt-1 opacity-90">Simple upload (Name, Phone, City)</p>
+          <p className="text-[10px] md:text-sm font-normal mt-0.5 md:mt-1 opacity-90">Name, Phone, City</p>
         </button>
         <button
           onClick={() => {
@@ -130,90 +130,90 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
             setFile(null);
             setResult(null);
           }}
-          className={`flex-1 px-6 py-4 rounded-xl font-bold text-lg transition-all ${
+          className={`flex-1 px-3 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl font-bold text-sm md:text-lg transition-all ${
             activeTab === 'qualified'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-purple-400'
           }`}
         >
           ⭐ Qualified Leads
-          <p className="text-sm font-normal mt-1 opacity-90">Detailed upload (8 fields)</p>
+          <p className="text-[10px] md:text-sm font-normal mt-0.5 md:mt-1 opacity-90">8 fields</p>
         </button>
       </div>
 
       {/* Instructions Card */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <FileText className={activeTab === 'raw' ? 'text-blue-600' : 'text-purple-600'} size={24} />
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 mb-4 md:mb-6 border border-gray-200">
+        <h2 className="text-base md:text-xl font-bold text-gray-900 mb-2 md:mb-4 flex items-center gap-2">
+          <FileText className={activeTab === 'raw' ? 'text-blue-600' : 'text-purple-600'} size={20} />
           Instructions
         </h2>
         {activeTab === 'raw' ? (
-          <div className="space-y-3 text-gray-700">
+          <div className="space-y-2 md:space-y-3 text-xs md:text-base text-gray-700">
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">1.</span>
-              Download the Raw Leads sample CSV file below
+              Download the sample CSV file below
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">2.</span>
-              Add your leads data with <strong>3 columns: name, phone, city</strong>
+              Add data with <strong>3 columns: name, phone, city</strong>
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">3.</span>
-              Phone numbers should be 10 digits (no country code)
+              Phone: 10 digits (no country code)
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">4.</span>
-              Upload the CSV file and click "Upload Leads"
+              Upload and click "Upload Leads"
             </p>
           </div>
         ) : (
-          <div className="space-y-3 text-gray-700">
+          <div className="space-y-2 md:space-y-3 text-xs md:text-base text-gray-700">
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">1.</span>
-              Download the Qualified Leads sample CSV file below
+              Download the sample CSV file below
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">2.</span>
-              Add your leads with <strong>8 columns: name, phone, city, neet, course, destination, remark, source</strong>
+              <span>Add with <strong>8 columns</strong></span>
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">3.</span>
-              All columns are required for qualified leads
+              All columns are required
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">4.</span>
-              Upload the CSV file and click "Upload Leads"
+              Upload and click "Upload Leads"
             </p>
           </div>
         )}
 
         <button
           onClick={downloadSample}
-          className={`mt-4 flex items-center gap-2 px-6 py-3 text-white rounded-lg font-semibold transition-all shadow-md ${
+          className={`mt-3 md:mt-4 flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-white rounded-lg font-semibold transition-all shadow-md ${
             activeTab === 'raw'
               ? 'bg-blue-600 hover:bg-blue-700'
               : 'bg-purple-600 hover:bg-purple-700'
           }`}
         >
-          <Download size={20} />
-          Download Sample CSV ({activeTab === 'raw' ? 'Raw' : 'Qualified'})
+          <Download size={16} className="md:w-5 md:h-5" />
+          Download Sample CSV
         </button>
       </div>
 
       {/* Upload Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Upload CSV File</h2>
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-8 mb-4 md:mb-6 border border-gray-200">
+        <h2 className="text-base md:text-xl font-bold text-gray-900 mb-3 md:mb-6">Upload CSV File</h2>
 
-        <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center bg-gray-50 hover:border-purple-400 hover:bg-purple-50 transition-all">
-          <Upload className="mx-auto mb-4 text-gray-400" size={48} />
+        <div className="border-2 border-dashed border-gray-300 rounded-lg md:rounded-xl p-6 md:p-12 text-center bg-gray-50 hover:border-purple-400 hover:bg-purple-50 transition-all">
+          <Upload className="mx-auto mb-3 md:mb-4 text-gray-400" size={36} />
 
           {!file ? (
             <>
-              <p className="text-lg font-semibold text-gray-700 mb-2">
+              <p className="text-sm md:text-lg font-semibold text-gray-700 mb-1 md:mb-2">
                 Select CSV file to upload
               </p>
-              <p className="text-sm text-gray-500 mb-4">Only CSV files with name, phone, city columns</p>
-              <label className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold cursor-pointer hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg">
+              <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">Only CSV files accepted</p>
+              <label className="inline-block px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl font-bold cursor-pointer hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg">
                 Choose File
                 <input
                   type="file"
@@ -224,21 +224,21 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
               </label>
             </>
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-3 text-green-600">
-                <CheckCircle size={24} />
-                <span className="font-semibold text-lg">{file.name}</span>
+            <div className="space-y-3 md:space-y-4">
+              <div className="flex items-center justify-center gap-2 md:gap-3 text-green-600">
+                <CheckCircle size={20} className="md:w-6 md:h-6" />
+                <span className="font-semibold text-sm md:text-lg truncate max-w-[150px] md:max-w-none">{file.name}</span>
                 <button
                   onClick={() => setFile(null)}
                   className="p-1 hover:bg-red-100 rounded-full transition-all"
                 >
-                  <X size={20} className="text-red-600" />
+                  <X size={18} className="text-red-600" />
                 </button>
               </div>
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl font-bold hover:from-green-700 hover:to-teal-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 md:px-8 py-2 md:py-3 text-sm md:text-base bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg md:rounded-xl font-bold hover:from-green-700 hover:to-teal-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploading ? 'Uploading...' : 'Upload Leads'}
               </button>
@@ -249,28 +249,28 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
 
       {/* Result Message */}
       {result && (
-        <div className={`rounded-xl p-6 shadow-lg flex items-start gap-4 ${
+        <div className={`rounded-lg md:rounded-xl p-3 md:p-6 mb-4 md:mb-6 shadow-lg flex items-start gap-2 md:gap-4 ${
           result.type === 'success'
             ? 'bg-green-50 border-2 border-green-200'
             : 'bg-red-50 border-2 border-red-200'
         }`}>
           {result.type === 'success' ? (
-            <CheckCircle className="text-green-600 flex-shrink-0" size={32} />
+            <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
           ) : (
-            <AlertCircle className="text-red-600 flex-shrink-0" size={32} />
+            <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
           )}
           <div className="flex-1">
-            <p className={`font-bold text-xl mb-2 ${
+            <p className={`font-bold text-sm md:text-xl mb-1 md:mb-2 ${
               result.type === 'success' ? 'text-green-800' : 'text-red-800'
             }`}>
               {result.message}
             </p>
             {result.details && (
-              <div className="space-y-1 text-sm text-green-700">
-                <p>✓ Total rows in file: {result.details.total}</p>
-                <p>✓ Successfully imported: {result.details.imported}</p>
+              <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-green-700">
+                <p>✓ Total rows: {result.details.total}</p>
+                <p>✓ Imported: {result.details.imported}</p>
                 {result.details.duplicates > 0 && (
-                  <p>⚠ Duplicates skipped: {result.details.duplicates}</p>
+                  <p>⚠ Skipped: {result.details.duplicates}</p>
                 )}
               </div>
             )}
@@ -279,31 +279,26 @@ Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Go
       )}
 
       {/* Info Box */}
-      <div className={`rounded-xl p-6 border ${activeTab === 'raw' ? 'bg-blue-50 border-blue-200' : 'bg-purple-50 border-purple-200'}`}>
-        <h3 className={`font-bold mb-2 flex items-center gap-2 ${activeTab === 'raw' ? 'text-blue-900' : 'text-purple-900'}`}>
-          <Users size={20} />
+      <div className={`rounded-lg md:rounded-xl p-3 md:p-6 border ${activeTab === 'raw' ? 'bg-blue-50 border-blue-200' : 'bg-purple-50 border-purple-200'}`}>
+        <h3 className={`font-bold text-sm md:text-base mb-2 flex items-center gap-2 ${activeTab === 'raw' ? 'text-blue-900' : 'text-purple-900'}`}>
+          <Users size={16} className="md:w-5 md:h-5" />
           CSV Format Requirements
         </h3>
         {activeTab === 'raw' ? (
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• First row must be headers: <strong>name,phone,city</strong></li>
-            <li>• Name: Full name of the student (Required)</li>
-            <li>• Phone: 10-digit mobile number (Required)</li>
+          <ul className="text-xs md:text-sm text-blue-800 space-y-0.5 md:space-y-1">
+            <li>• Headers: <strong>name,phone,city</strong></li>
+            <li>• Name: Student name (Required)</li>
+            <li>• Phone: 10-digit number (Required)</li>
             <li>• City: City name (Optional)</li>
-            <li>• Duplicate phone numbers will be automatically skipped</li>
+            <li>• Duplicates will be skipped</li>
           </ul>
         ) : (
-          <ul className="text-sm text-purple-800 space-y-1">
-            <li>• First row must be headers: <strong>name,phone,city,neet,course,destination,remark,source</strong></li>
-            <li>• Name: Full name of the student (Required)</li>
-            <li>• Phone: 10-digit mobile number (Required)</li>
-            <li>• City: City name (Required)</li>
-            <li>• NEET: NEET score (Required)</li>
-            <li>• Course: MBBS or Other (Required)</li>
-            <li>• Destination: Country name (Required)</li>
-            <li>• Remark: Additional notes (Optional)</li>
-            <li>• Source: Lead source (Optional)</li>
-            <li>• Duplicate phone numbers will be automatically skipped</li>
+          <ul className="text-xs md:text-sm text-purple-800 space-y-0.5 md:space-y-1">
+            <li>• Headers: <strong className="text-[10px] md:text-sm">name,phone,city,neet,course,destination,remark,source</strong></li>
+            <li>• Name, Phone, City: Required</li>
+            <li>• NEET, Course, Destination: Required</li>
+            <li>• Remark, Source: Optional</li>
+            <li>• Duplicates will be skipped</li>
           </ul>
         )}
       </div>
