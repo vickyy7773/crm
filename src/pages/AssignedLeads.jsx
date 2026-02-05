@@ -328,44 +328,44 @@ const AssignedLeads = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Total Assigned</p>
-              <p className="text-4xl font-bold text-gray-900">{counts.all}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Total Assigned</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">{counts.all}</p>
             </div>
-            <UserCheck className="text-blue-500" size={40} />
+            <UserCheck className="text-blue-500 hidden md:block" size={40} />
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Raw Leads</p>
-              <p className="text-4xl font-bold text-gray-900">{rawCount}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Raw Leads</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">{rawCount}</p>
             </div>
-            <Target className="text-orange-500" size={40} />
+            <Target className="text-orange-500 hidden md:block" size={40} />
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Qualified Leads</p>
-              <p className="text-4xl font-bold text-gray-900">{qualifiedCount}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Qualified Leads</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">{qualifiedCount}</p>
             </div>
-            <CheckCircle className="text-green-500" size={40} />
+            <CheckCircle className="text-green-500 hidden md:block" size={40} />
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-purple-500">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border-l-4 border-purple-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Interested</p>
-              <p className="text-4xl font-bold text-gray-900">{counts.Interested}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Interested</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">{counts.Interested}</p>
             </div>
-            <UserCheck className="text-purple-500" size={40} />
+            <UserCheck className="text-purple-500 hidden md:block" size={40} />
           </div>
         </div>
       </div>
