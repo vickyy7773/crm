@@ -292,36 +292,36 @@ const AssignedLeads = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-4 md:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Assigned Leads</h1>
-            <p className="text-gray-600 text-lg">Track all leads assigned to telecallers</p>
+            <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Assigned Leads</h1>
+            <p className="text-gray-600 text-xs md:text-lg">Track all leads assigned to telecallers</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Lead Type Dropdown Filter */}
             <div className="relative">
               <select
                 value={leadTypeFilter}
                 onChange={(e) => setLeadTypeFilter(e.target.value)}
-                className="appearance-none bg-white border-2 border-purple-300 rounded-xl px-5 py-3 pr-10 font-bold text-gray-700 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 shadow-md cursor-pointer"
+                className="appearance-none bg-white border-2 border-purple-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-3 pr-8 md:pr-10 text-sm md:text-base font-bold text-gray-700 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 shadow-md cursor-pointer"
               >
-                <option value="all">All Leads ({assignedLeads.length})</option>
-                <option value="raw">Raw Leads ({rawCount})</option>
-                <option value="qualified">Qualified Leads ({qualifiedCount})</option>
+                <option value="all">All ({assignedLeads.length})</option>
+                <option value="raw">Raw ({rawCount})</option>
+                <option value="qualified">Qualified ({qualifiedCount})</option>
               </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
             <button
               onClick={fetchAssignedLeads}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl text-sm md:text-base font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
             >
-              <RefreshCw size={20} />
-              Refresh
+              <RefreshCw size={16} className="md:w-5 md:h-5" />
+              <span className="hidden md:inline">Refresh</span>
             </button>
           </div>
         </div>
