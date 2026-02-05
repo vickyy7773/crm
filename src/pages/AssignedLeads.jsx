@@ -321,7 +321,7 @@ const AssignedLeads = () => {
               className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl text-sm md:text-base font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
             >
               <RefreshCw size={16} className="md:w-5 md:h-5" />
-              <span className="hidden md:inline">Refresh</span>
+              Refresh
             </button>
           </div>
         </div>
