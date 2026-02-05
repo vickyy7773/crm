@@ -244,12 +244,14 @@ const Layout = () => {
               </NavItem>
 
               <NavItem to="/leads" icon={Target}>
-                Qualified Leads
+                Leads
               </NavItem>
 
+              {/* Raw Leads merged into Leads page
               <NavItem to="/raw-leads" icon={Users}>
                 Raw Leads
               </NavItem>
+              */}
 
               <NavItem to="/assigned-leads" icon={UserCheck}>
                 Assigned Leads

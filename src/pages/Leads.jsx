@@ -17,6 +17,7 @@ const Leads = () => {
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
   const [courseTypeFilter, setCourseTypeFilter] = useState('all');
+  const [leadTypeFilter, setLeadTypeFilter] = useState('all'); // All/Raw/Qualified filter
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -68,14 +69,12 @@ const Leads = () => {
       const result = await response.json();
 
       if (result.success) {
-        // Filter to show ALL QUALIFIED leads (whether assigned or not)
+        // Show ALL leads (both raw and qualified)
         // Exclude converted leads (they appear in Converted Leads page)
-        // Exclude raw leads (they appear in Raw Leads page)
-        const qualifiedLeads = result.data.filter(lead =>
-          lead.status !== 'Converted' &&
-          !isRawLead(lead) // Only show qualified leads (has NEET, Course, Destination)
+        const allLeads = result.data.filter(lead =>
+          lead.status !== 'Converted'
         );
-        setLeads(qualifiedLeads);
+        setLeads(allLeads);
       } else {
         setError('Failed to fetch leads');
       }
@@ -496,8 +495,8 @@ const Leads = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Qualified Leads</h1>
-            <p className="text-gray-600 text-lg">Manage qualified students interested in studying abroad</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Leads</h1>
+            <p className="text-gray-600 text-lg">Manage all leads - raw and qualified students</p>
           </div>
           <button
             onClick={() => {
@@ -547,7 +546,8 @@ const Leads = () => {
               setCityFilter('all');
               setDestinationFilter('all');
               setAssignedFilter('all');
-              setCourseTypeFilter('MBBS');
+              setCourseTypeFilter('all');
+              setLeadTypeFilter('all');
             }}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
           >
@@ -556,7 +556,21 @@ const Leads = () => {
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Lead Type Filter - Raw/Qualified/All */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Lead Type:</label>
+            <select
+              value={leadTypeFilter}
+              onChange={(e) => setLeadTypeFilter(e.target.value)}
+              className="w-full px-4 py-2.5 border-2 border-blue-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium bg-white"
+            >
+              <option value="all">All Leads</option>
+              <option value="raw">Raw Leads</option>
+              <option value="qualified">Qualified Leads</option>
+            </select>
+          </div>
+
           {/* Course Type Filter - for NEET/Score Label */}
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-2">View As:</label>
@@ -704,6 +718,19 @@ const Leads = () => {
         if (activeTab !== 'all') {
           const tabStatus = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
           filteredLeads = filteredLeads.filter(lead => lead.status === tabStatus);
+        }
+
+        // Filter by lead type (Raw/Qualified)
+        if (leadTypeFilter && leadTypeFilter !== 'all') {
+          filteredLeads = filteredLeads.filter(lead => {
+            const leadIsRaw = isRawLead(lead);
+            if (leadTypeFilter === 'raw') {
+              return leadIsRaw;
+            } else if (leadTypeFilter === 'qualified') {
+              return !leadIsRaw;
+            }
+            return true;
+          });
         }
 
         // Filter by search query
