@@ -178,6 +178,99 @@ app.get('/api/migrate', async (req, res) => {
   }
 });
 
+// Debug endpoint - check leads table status column
+app.get('/api/debug/leads-status', async (req, res) => {
+  const { pool } = require('./config/database');
+  try {
+    // Get status column info
+    const statusInfo = await pool.query(`
+      SELECT column_name, data_type, udt_name, is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'leads' AND column_name = 'status'
+    `);
+
+    // Check if lead_status enum exists
+    const enumCheck = await pool.query(`
+      SELECT typname, enumlabel
+      FROM pg_type t
+      JOIN pg_enum e ON t.oid = e.enumtypid
+      WHERE typname = 'lead_status'
+      ORDER BY enumsortorder
+    `);
+
+    // Try test update
+    let testUpdate = 'Not tested';
+    try {
+      await pool.query('BEGIN');
+      await pool.query(`UPDATE leads SET status = 'Office Meeting' WHERE id = 1`);
+      testUpdate = 'UPDATE works!';
+      await pool.query('ROLLBACK');
+    } catch (updateErr) {
+      await pool.query('ROLLBACK');
+      testUpdate = 'UPDATE FAILED: ' + updateErr.message;
+    }
+
+    res.json({
+      statusColumn: statusInfo.rows,
+      enumValues: enumCheck.rows,
+      testUpdate: testUpdate
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Force fix leads status - drop and recreate
+app.get('/api/fix-leads-status', async (req, res) => {
+  const { pool } = require('./config/database');
+  try {
+    // Check current type
+    const check = await pool.query(`
+      SELECT data_type, udt_name FROM information_schema.columns
+      WHERE table_name = 'leads' AND column_name = 'status'
+    `);
+
+    if (check.rows.length === 0) {
+      return res.json({ message: 'status column not found', check: check.rows });
+    }
+
+    const udtName = check.rows[0].udt_name;
+
+    if (udtName === 'lead_status' || check.rows[0].data_type === 'USER-DEFINED') {
+      // It's still an ENUM, force convert
+      await pool.query(`ALTER TABLE leads ADD COLUMN status_temp VARCHAR(100)`);
+      await pool.query(`UPDATE leads SET status_temp = status::text`);
+      await pool.query(`ALTER TABLE leads DROP COLUMN status`);
+      await pool.query(`ALTER TABLE leads RENAME COLUMN status_temp TO status`);
+
+      // Also drop the enum type
+      try {
+        await pool.query(`DROP TYPE IF EXISTS lead_status`);
+      } catch (e) {
+        // Ignore if can't drop
+      }
+
+      res.json({
+        success: true,
+        message: 'Fixed! status column converted from ENUM to VARCHAR',
+        oldType: udtName
+      });
+    } else {
+      res.json({
+        success: true,
+        message: 'status column is already VARCHAR',
+        currentType: check.rows[0]
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      detail: error.detail
+    });
+  }
+});
+
 // Debug endpoint - check call_history table structure
 app.get('/api/debug/call-history', async (req, res) => {
   const { pool } = require('./config/database');
