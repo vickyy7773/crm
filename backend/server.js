@@ -157,6 +157,55 @@ app.get('/api/migrate', async (req, res) => {
   }
 });
 
+// Debug endpoint - check call_history table structure
+app.get('/api/debug/call-history', async (req, res) => {
+  const { pool } = require('./config/database');
+  try {
+    // Get table columns
+    const columns = await pool.query(`
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns
+      WHERE table_name = 'call_history'
+      ORDER BY ordinal_position
+    `);
+
+    // Get table constraints
+    const constraints = await pool.query(`
+      SELECT constraint_name, constraint_type
+      FROM information_schema.table_constraints
+      WHERE table_name = 'call_history'
+    `);
+
+    // Try a test insert (will rollback)
+    let testInsertResult = 'Not tested';
+    try {
+      await pool.query('BEGIN');
+      await pool.query(`
+        INSERT INTO call_history (lead_id, caller_id, caller_name, call_date, call_remark, call_outcome)
+        VALUES (1, 1, 'Test', NOW(), 'Test remark for debugging', 'Contacted')
+      `);
+      testInsertResult = 'INSERT works!';
+      await pool.query('ROLLBACK');
+    } catch (insertErr) {
+      await pool.query('ROLLBACK');
+      testInsertResult = 'INSERT FAILED: ' + insertErr.message + ' | Code: ' + insertErr.code + ' | Detail: ' + insertErr.detail;
+    }
+
+    res.json({
+      success: true,
+      columns: columns.rows,
+      constraints: constraints.rows,
+      testInsert: testInsertResult
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      detail: error.detail
+    });
+  }
+});
+
 // Database health check endpoint
 app.get('/api/health/db', async (req, res) => {
   const isConnected = await testConnection();
