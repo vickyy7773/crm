@@ -424,7 +424,7 @@ const Layout = () => {
 
               {/* Notification Dropdown */}
               {notificationOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[500px] overflow-hidden">
+                <div className="fixed sm:absolute top-16 sm:top-auto right-4 sm:right-0 mt-0 sm:mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[70vh] sm:max-h-[500px] overflow-hidden">
                   {/* Header */}
                   <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-gray-900">Notifications</h3>

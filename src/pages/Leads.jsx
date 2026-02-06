@@ -232,11 +232,11 @@ const Leads = () => {
     }
   };
 
-  // Bulk selection handlers
-  const handleSelectAll = (e) => {
+  // Bulk selection handlers - now uses filtered leads
+  const handleSelectAll = (e, currentFilteredLeads) => {
     if (e.target.checked) {
-      const allLeadIds = leads.map(lead => lead.id);
-      setSelectedLeads(allLeadIds);
+      const filteredLeadIds = currentFilteredLeads.map(lead => lead.id);
+      setSelectedLeads(filteredLeadIds);
     } else {
       setSelectedLeads([]);
     }
@@ -385,6 +385,86 @@ const Leads = () => {
   };
 
   const stats = calculateStats();
+
+  // Calculate filtered leads (moved outside JSX for accessibility)
+  const getFilteredLeads = () => {
+    let filtered = [...leads];
+
+    // Filter by active tab (status)
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(lead => lead.status?.toLowerCase() === activeTab.toLowerCase());
+    }
+
+    // Filter by lead type (Raw/Qualified)
+    if (leadTypeFilter && leadTypeFilter !== 'all') {
+      filtered = filtered.filter(lead => {
+        const leadIsRaw = isRawLead(lead);
+        if (leadTypeFilter === 'raw') {
+          return leadIsRaw;
+        } else if (leadTypeFilter === 'qualified') {
+          return !leadIsRaw;
+        }
+        return true;
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(lead =>
+        lead.name?.toLowerCase().includes(query) ||
+        lead.phone?.includes(query) ||
+        lead.city?.toLowerCase().includes(query) ||
+        lead.source?.toLowerCase().includes(query) ||
+        lead.assigned_to_name?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by status dropdown
+    if (statusFilter && statusFilter !== 'all') {
+      filtered = filtered.filter(lead =>
+        lead.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    // Filter by city
+    if (cityFilter && cityFilter !== 'all') {
+      filtered = filtered.filter(lead =>
+        lead.city?.toLowerCase() === cityFilter.toLowerCase()
+      );
+    }
+
+    // Filter by destination (course)
+    if (destinationFilter && destinationFilter !== 'all') {
+      filtered = filtered.filter(lead =>
+        lead.course?.toLowerCase() === destinationFilter.toLowerCase()
+      );
+    }
+
+    // Filter by course type (MBBS or Other)
+    if (courseTypeFilter && courseTypeFilter !== 'all') {
+      filtered = filtered.filter(lead =>
+        lead.course?.toLowerCase() === courseTypeFilter.toLowerCase()
+      );
+    }
+
+    // Filter by assigned to
+    if (assignedFilter && assignedFilter !== 'all') {
+      if (assignedFilter === 'Unassigned') {
+        filtered = filtered.filter(lead =>
+          !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
+        );
+      } else {
+        filtered = filtered.filter(lead =>
+          lead.assigned_to_name?.toLowerCase() === assignedFilter.toLowerCase()
+        );
+      }
+    }
+
+    return filtered;
+  };
+
+  const filteredLeads = getFilteredLeads();
 
   const getStatusBadge = (status) => {
     // Normalize status to handle case variations
@@ -720,86 +800,8 @@ const Leads = () => {
         )}
       </div>
 
-      {/* Apply Filters */}
-      {(() => {
-        let filteredLeads = [...leads];
-
-        // Filter by active tab (status)
-        if (activeTab !== 'all') {
-          const tabStatus = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
-          filteredLeads = filteredLeads.filter(lead => lead.status === tabStatus);
-        }
-
-        // Filter by lead type (Raw/Qualified)
-        if (leadTypeFilter && leadTypeFilter !== 'all') {
-          filteredLeads = filteredLeads.filter(lead => {
-            const leadIsRaw = isRawLead(lead);
-            if (leadTypeFilter === 'raw') {
-              return leadIsRaw;
-            } else if (leadTypeFilter === 'qualified') {
-              return !leadIsRaw;
-            }
-            return true;
-          });
-        }
-
-        // Filter by search query
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          filteredLeads = filteredLeads.filter(lead =>
-            lead.name?.toLowerCase().includes(query) ||
-            lead.phone?.includes(query) ||
-            lead.city?.toLowerCase().includes(query) ||
-            lead.source?.toLowerCase().includes(query) ||
-            lead.assigned_to_name?.toLowerCase().includes(query)
-          );
-        }
-
-        // Filter by status dropdown
-        if (statusFilter && statusFilter !== 'all') {
-          filteredLeads = filteredLeads.filter(lead =>
-            lead.status?.toLowerCase() === statusFilter.toLowerCase()
-          );
-        }
-
-        // Filter by city (case-insensitive)
-        if (cityFilter && cityFilter !== 'all') {
-          filteredLeads = filteredLeads.filter(lead =>
-            lead.city?.toLowerCase() === cityFilter.toLowerCase()
-          );
-        }
-
-        // Filter by destination (course) (case-insensitive)
-        if (destinationFilter && destinationFilter !== 'all') {
-          filteredLeads = filteredLeads.filter(lead =>
-            lead.course?.toLowerCase() === destinationFilter.toLowerCase()
-          );
-        }
-
-        // Filter by course type (MBBS or Other)
-        if (courseTypeFilter && courseTypeFilter !== 'all') {
-          filteredLeads = filteredLeads.filter(lead =>
-            lead.course?.toLowerCase() === courseTypeFilter.toLowerCase()
-          );
-        }
-
-        // Filter by assigned to (case-insensitive)
-        if (assignedFilter && assignedFilter !== 'all') {
-          if (assignedFilter === 'Unassigned') {
-            filteredLeads = filteredLeads.filter(lead =>
-              !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
-            );
-          } else {
-            filteredLeads = filteredLeads.filter(lead =>
-              lead.assigned_to_name?.toLowerCase() === assignedFilter.toLowerCase()
-            );
-          }
-        }
-
-        return (
-          <>
-            {/* Leads Table */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Leads Table */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -809,7 +811,7 @@ const Leads = () => {
                           type="checkbox"
                           className="w-3.5 h-3.5 rounded border-white/30 text-purple-600 bg-white/20 cursor-pointer"
                           checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
-                          onChange={handleSelectAll}
+                          onChange={(e) => handleSelectAll(e, filteredLeads)}
                         />
                       </th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
@@ -968,9 +970,6 @@ const Leads = () => {
           </div>
         )}
       </div>
-          </>
-        );
-      })()}
 
       {/* Assignment Modal */}
       {assignModalOpen && (
