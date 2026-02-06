@@ -65,6 +65,27 @@ app.get('/api/migrate', async (req, res) => {
   const results = [];
 
   try {
+    // FIX LEADS TABLE - Convert status from ENUM to VARCHAR
+    try {
+      const leadsStatusCheck = await pool.query(`
+        SELECT data_type FROM information_schema.columns
+        WHERE table_name = 'leads' AND column_name = 'status'
+      `);
+
+      if (leadsStatusCheck.rows.length > 0 && leadsStatusCheck.rows[0].data_type === 'USER-DEFINED') {
+        // Create temp column, copy data, drop old, rename new
+        await pool.query(`ALTER TABLE leads ADD COLUMN status_new VARCHAR(100)`);
+        await pool.query(`UPDATE leads SET status_new = status::text`);
+        await pool.query(`ALTER TABLE leads DROP COLUMN status`);
+        await pool.query(`ALTER TABLE leads RENAME COLUMN status_new TO status`);
+        results.push({ step: 'Fix leads.status (ENUM to VARCHAR)', status: 'success' });
+      } else {
+        results.push({ step: 'leads.status already VARCHAR or not found', status: 'skipped' });
+      }
+    } catch (e) {
+      results.push({ step: 'Fix leads.status', status: 'error', error: e.message });
+    }
+
     // Check if call_history table exists
     const tableCheck = await pool.query(`
       SELECT EXISTS (
