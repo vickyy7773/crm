@@ -62,35 +62,63 @@ app.get('/api/health', (req, res) => {
 // Database migration endpoint - adds missing columns
 app.get('/api/migrate', async (req, res) => {
   const { pool } = require('./config/database');
+  const results = [];
+
   try {
-    // Add call_reason column to call_history
-    await pool.query(`
-      ALTER TABLE call_history
-      ADD COLUMN IF NOT EXISTS call_reason VARCHAR(100) NULL
+    // Check if call_history table exists
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'call_history'
+      )
     `);
+    results.push({ step: 'Table check', exists: tableCheck.rows[0].exists });
+
+    // Add call_reason column to call_history
+    try {
+      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS call_reason VARCHAR(100) NULL`);
+      results.push({ step: 'Add call_reason', status: 'success' });
+    } catch (e) {
+      results.push({ step: 'Add call_reason', status: 'error', error: e.message });
+    }
 
     // Add created_ip column to call_history
-    await pool.query(`
-      ALTER TABLE call_history
-      ADD COLUMN IF NOT EXISTS created_ip VARCHAR(45) NULL
-    `);
+    try {
+      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS created_ip VARCHAR(45) NULL`);
+      results.push({ step: 'Add created_ip', status: 'success' });
+    } catch (e) {
+      results.push({ step: 'Add created_ip', status: 'error', error: e.message });
+    }
 
     // Add user_agent column to call_history
-    await pool.query(`
-      ALTER TABLE call_history
-      ADD COLUMN IF NOT EXISTS user_agent TEXT NULL
+    try {
+      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS user_agent TEXT NULL`);
+      results.push({ step: 'Add user_agent', status: 'success' });
+    } catch (e) {
+      results.push({ step: 'Add user_agent', status: 'error', error: e.message });
+    }
+
+    // Get current columns in call_history
+    const columnsResult = await pool.query(`
+      SELECT column_name, data_type
+      FROM information_schema.columns
+      WHERE table_name = 'call_history'
+      ORDER BY ordinal_position
     `);
 
     res.json({
       success: true,
-      message: 'Migration completed successfully! Added call_reason, created_ip, and user_agent columns to call_history table.'
+      message: 'Migration completed!',
+      results: results,
+      currentColumns: columnsResult.rows
     });
   } catch (error) {
     console.error('Migration error:', error);
     res.status(500).json({
       success: false,
       message: 'Migration failed',
-      error: error.message
+      error: error.message,
+      results: results
     });
   }
 });
