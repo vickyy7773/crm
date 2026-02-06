@@ -10,6 +10,7 @@ const AssignedLeads = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [leadTypeFilter, setLeadTypeFilter] = useState('all'); // 'all', 'raw', 'qualified'
+  const [courseFilter, setCourseFilter] = useState('all'); // 'all', 'MBBS', 'Other'
   const [remarkModal, setRemarkModal] = useState(false);
   const [selectedRemark, setSelectedRemark] = useState(null);
   const [callHistory, setCallHistory] = useState([]);
@@ -171,7 +172,7 @@ const AssignedLeads = () => {
     return isEmpty(lead.neet) && isEmpty(lead.course) && isEmpty(lead.destination);
   };
 
-  // Filter leads based on active tab and lead type filter
+  // Filter leads based on active tab, lead type filter, and course filter
   const getFilteredLeads = () => {
     let filtered = assignedLeads;
 
@@ -180,6 +181,13 @@ const AssignedLeads = () => {
       filtered = filtered.filter(lead => isRawLead(lead));
     } else if (leadTypeFilter === 'qualified') {
       filtered = filtered.filter(lead => !isRawLead(lead));
+    }
+
+    // Filter by course type (MBBS/Other)
+    if (courseFilter !== 'all') {
+      filtered = filtered.filter(lead =>
+        lead.course?.toLowerCase() === courseFilter.toLowerCase()
+      );
     }
 
     // Then filter by status tab
@@ -195,6 +203,10 @@ const AssignedLeads = () => {
   // Calculate raw and qualified counts
   const rawCount = assignedLeads.filter(lead => isRawLead(lead)).length;
   const qualifiedCount = assignedLeads.filter(lead => !isRawLead(lead)).length;
+
+  // Calculate MBBS and Other counts
+  const mbbsCount = assignedLeads.filter(lead => lead.course?.toLowerCase() === 'mbbs').length;
+  const otherCount = assignedLeads.filter(lead => lead.course?.toLowerCase() === 'other').length;
 
   // Calculate counts for tabs (Converted leads removed - see Converted Leads page)
   const counts = {
@@ -302,6 +314,23 @@ const AssignedLeads = () => {
             <p className="text-gray-600 text-xs md:text-lg">Track all leads assigned to telecallers</p>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            {/* Course Type Dropdown Filter */}
+            <div className="relative">
+              <select
+                value={courseFilter}
+                onChange={(e) => setCourseFilter(e.target.value)}
+                className="appearance-none bg-white border-2 border-indigo-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-3 pr-8 md:pr-10 text-sm md:text-base font-bold text-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 shadow-md cursor-pointer"
+              >
+                <option value="all">All Courses</option>
+                <option value="MBBS">MBBS ({mbbsCount})</option>
+                <option value="Other">Other ({otherCount})</option>
+              </select>
+              <div className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             {/* Lead Type Dropdown Filter */}
             <div className="relative">
               <select
