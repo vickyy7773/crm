@@ -663,13 +663,13 @@ const Leads = () => {
 
           {/* Course Type Filter - for NEET/Score Label */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">View As:</label>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Course:</label>
             <select
               value={courseTypeFilter}
               onChange={(e) => setCourseTypeFilter(e.target.value)}
               className="w-full px-4 py-2.5 border-2 border-purple-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
             >
-              <option value="all">All Leads</option>
+              <option value="all">All Course</option>
               <option value="MBBS">MBBS (NEET)</option>
               <option value="Other">Other (Score)</option>
             </select>
@@ -706,24 +706,6 @@ const Leads = () => {
                 .sort()
                 .map(city => (
                   <option key={city} value={city}>{city}</option>
-                ))
-              }
-            </select>
-          </div>
-
-          {/* Course Filter */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Course:</label>
-            <select
-              value={destinationFilter}
-              onChange={(e) => setDestinationFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
-            >
-              <option value="all">All Courses</option>
-              {[...new Set(leads.map(lead => lead.course).filter(course => course))]
-                .sort()
-                .map(course => (
-                  <option key={course} value={course}>{course}</option>
                 ))
               }
             </select>
