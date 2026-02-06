@@ -74,12 +74,28 @@ app.get('/api/migrate', async (req, res) => {
     `);
     results.push({ step: 'Table check', exists: tableCheck.rows[0].exists });
 
-    // Add call_reason column to call_history
+    // Fix call_reason column - change from ENUM to VARCHAR if it exists as ENUM
     try {
-      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS call_reason VARCHAR(100) NULL`);
-      results.push({ step: 'Add call_reason', status: 'success' });
+      // First check if it's an ENUM type
+      const typeCheck = await pool.query(`
+        SELECT data_type FROM information_schema.columns
+        WHERE table_name = 'call_history' AND column_name = 'call_reason'
+      `);
+
+      if (typeCheck.rows.length > 0 && typeCheck.rows[0].data_type === 'USER-DEFINED') {
+        // Drop and recreate as VARCHAR
+        await pool.query(`ALTER TABLE call_history DROP COLUMN IF EXISTS call_reason`);
+        await pool.query(`ALTER TABLE call_history ADD COLUMN call_reason VARCHAR(100) NULL`);
+        results.push({ step: 'Fix call_reason (ENUM to VARCHAR)', status: 'success' });
+      } else if (typeCheck.rows.length === 0) {
+        // Column doesn't exist, add it
+        await pool.query(`ALTER TABLE call_history ADD COLUMN call_reason VARCHAR(100) NULL`);
+        results.push({ step: 'Add call_reason', status: 'success' });
+      } else {
+        results.push({ step: 'call_reason already VARCHAR', status: 'skipped' });
+      }
     } catch (e) {
-      results.push({ step: 'Add call_reason', status: 'error', error: e.message });
+      results.push({ step: 'Fix call_reason', status: 'error', error: e.message });
     }
 
     // Add created_ip column to call_history
