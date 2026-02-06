@@ -623,22 +623,51 @@ router.post('/:id/call-log', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
     const userAgent = req.headers['user-agent'] || null;
 
+    // DEBUG: Log all values before insert
+    console.log('=== CALL LOG DEBUG START ===');
+    console.log('leadId:', leadId, typeof leadId);
+    console.log('callerId:', callerId, typeof callerId);
+    console.log('callerName:', callerName);
+    console.log('callRemark length:', callRemark?.length);
+    console.log('callOutcome:', callOutcome);
+    console.log('callReason:', callReason);
+    console.log('nextFollowUpDate:', nextFollowUpDate);
+    console.log('duration:', duration);
+    console.log('clientIp:', clientIp);
+
     // Insert call log with audit fields and call_reason
-    await pool.query(
-      `INSERT INTO call_history (
-        lead_id, caller_id, caller_name, call_date, call_remark, call_outcome, call_reason,
-        next_followup_date, duration, created_ip, user_agent
-      ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)`,
-      [leadId, callerId, callerName, callRemark, callOutcome, callReason || null, nextFollowUpDate || null, duration || null, clientIp, userAgent]
-    );
+    try {
+      console.log('Attempting INSERT into call_history...');
+      await pool.query(
+        `INSERT INTO call_history (
+          lead_id, caller_id, caller_name, call_date, call_remark, call_outcome, call_reason,
+          next_followup_date, duration, created_ip, user_agent
+        ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)`,
+        [leadId, callerId, callerName, callRemark, callOutcome, callReason || null, nextFollowUpDate || null, duration || null, clientIp, userAgent]
+      );
+      console.log('INSERT successful!');
+    } catch (insertError) {
+      console.error('INSERT FAILED:', insertError.message);
+      console.error('INSERT error detail:', insertError.detail);
+      console.error('INSERT error code:', insertError.code);
+      throw insertError;
+    }
 
     // Update lead
-    await pool.query(
-      `UPDATE leads
-       SET status = $1, last_call_date = NOW(), next_followup_date = $2, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3`,
-      [callOutcome, nextFollowUpDate || null, leadId]
-    );
+    try {
+      console.log('Attempting UPDATE leads...');
+      await pool.query(
+        `UPDATE leads
+         SET status = $1, last_call_date = NOW(), next_followup_date = $2, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $3`,
+        [callOutcome, nextFollowUpDate || null, leadId]
+      );
+      console.log('UPDATE successful!');
+    } catch (updateError) {
+      console.error('UPDATE FAILED:', updateError.message);
+      throw updateError;
+    }
+    console.log('=== CALL LOG DEBUG END ===');
 
     // Get updated lead with call history
     const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
