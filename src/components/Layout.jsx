@@ -199,55 +199,33 @@ const Layout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        ${sidebarCollapsed ? 'w-20' : 'w-72'}
+        w-72
         bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col shadow-2xl transition-all duration-300
         fixed md:relative inset-y-0 left-0 z-50
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
       `}>
         {/* Brand Section */}
         <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center justify-between gap-3 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex-shrink-0">
-                <Sparkles className="text-white" size={24} />
-              </div>
-              {!sidebarCollapsed && (
-                <div>
-                  <h1 className="text-xl font-bold">Pulse Education</h1>
-                  <p className="text-xs text-gray-400">ERP System</p>
-                </div>
-              )}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex-shrink-0">
+              <Sparkles className="text-white" size={24} />
             </div>
-
-            {/* Toggle Button - Top Right */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex-shrink-0"
-              title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              {sidebarCollapsed ? <Menu size={18} /> : <X size={18} />}
-            </button>
+            <div>
+              <h1 className="text-xl font-bold">Pulse Education</h1>
+              <p className="text-xs text-gray-400">ERP System</p>
+            </div>
           </div>
 
           {/* User Profile */}
-          {!sidebarCollapsed && (
-            <div className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-lg rounded-xl border border-white/10">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                <UserCircle className="text-white" size={24} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-white text-sm truncate">{user?.name || 'Admin User'}</h3>
-                <p className="text-xs text-gray-300">{user?.role || 'Admin'}</p>
-              </div>
+          <div className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-lg rounded-xl border border-white/10">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <UserCircle className="text-white" size={24} />
             </div>
-          )}
-          {sidebarCollapsed && (
-            <div className="flex justify-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <UserCircle className="text-white" size={24} />
-              </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-white text-sm truncate">{user?.name || 'Admin User'}</h3>
+              <p className="text-xs text-gray-300">{user?.role || 'Admin'}</p>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Navigation */}
