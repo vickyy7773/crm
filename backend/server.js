@@ -59,6 +59,42 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'CRM Backend API is running' });
 });
 
+// Database migration endpoint - adds missing columns
+app.get('/api/migrate', async (req, res) => {
+  const { pool } = require('./config/database');
+  try {
+    // Add call_reason column to call_history
+    await pool.query(`
+      ALTER TABLE call_history
+      ADD COLUMN IF NOT EXISTS call_reason VARCHAR(100) NULL
+    `);
+
+    // Add created_ip column to call_history
+    await pool.query(`
+      ALTER TABLE call_history
+      ADD COLUMN IF NOT EXISTS created_ip VARCHAR(45) NULL
+    `);
+
+    // Add user_agent column to call_history
+    await pool.query(`
+      ALTER TABLE call_history
+      ADD COLUMN IF NOT EXISTS user_agent TEXT NULL
+    `);
+
+    res.json({
+      success: true,
+      message: 'Migration completed successfully! Added call_reason, created_ip, and user_agent columns to call_history table.'
+    });
+  } catch (error) {
+    console.error('Migration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Migration failed',
+      error: error.message
+    });
+  }
+});
+
 // Database health check endpoint
 app.get('/api/health/db', async (req, res) => {
   const isConnected = await testConnection();
