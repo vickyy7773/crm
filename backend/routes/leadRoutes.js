@@ -592,28 +592,43 @@ router.post('/:id/call-log', async (req, res) => {
     const newStatus = callOutcome;
 
     if (!isSuperAdmin) {
-      // Define allowed transitions
+      // Define allowed transitions - all outcomes allowed from most statuses
+      const ALL_OUTCOMES = ['Contacted', 'Interested', 'Not Interested', 'Call Back', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Busy', 'No Answer', 'Converted', 'Office Visit', 'Drop'];
+
       const ALLOWED_TRANSITIONS = {
-        'New': ['Contacted'],
-        'Contacted': ['Interested', 'Not Interested', 'Call Back', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Busy', 'No Answer'],
-        'Interested': ['Converted', 'Call Back', 'Contacted'],
-        'Call Back': ['Contacted', 'Interested', 'Not Interested']
+        'New': ['Contacted'], // New leads must be contacted first
+        'Contacted': ALL_OUTCOMES,
+        'Interested': ALL_OUTCOMES,
+        'Call Back': ALL_OUTCOMES,
+        'Not Interested': ALL_OUTCOMES,
+        'Not Reachable': ALL_OUTCOMES,
+        'Office Visit': ALL_OUTCOMES,
+        'Drop': [], // Dropped leads cannot be changed
+        'Converted': [] // Converted leads cannot be changed
       };
 
       // Check if transition is allowed
-      const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || [];
+      const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || ALL_OUTCOMES;
       if (!allowedNextStates.includes(newStatus) && currentStatus !== newStatus) {
         // Special case: If trying to mark as negative from "New", show specific error
-        if (currentStatus === 'New' && negativeOutcomes.includes(newStatus)) {
+        if (currentStatus === 'New' && newStatus !== 'Contacted') {
           return res.status(400).json({
             success: false,
-            message: 'Please contact the lead before closing it. You cannot mark a new lead as "' + newStatus + '" without contacting first.'
+            message: 'Pehle lead ko contact karo. New lead ko directly "' + newStatus + '" nahi mark kar sakte.'
+          });
+        }
+
+        // Special case: Converted or Dropped leads
+        if (currentStatus === 'Converted' || currentStatus === 'Drop') {
+          return res.status(400).json({
+            success: false,
+            message: `"${currentStatus}" lead ka status change nahi ho sakta.`
           });
         }
 
         return res.status(400).json({
           success: false,
-          message: `Invalid status transition from "${currentStatus}" to "${newStatus}". Please follow the correct flow.`
+          message: `"${currentStatus}" se "${newStatus}" me change nahi ho sakta.`
         });
       }
 
@@ -685,10 +700,17 @@ router.post('/:id/call-log', async (req, res) => {
     });
   } catch (error) {
     console.error('Add call log error:', error);
+    console.error('Error details:', {
+      leadId: req.params.id,
+      body: req.body,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
     res.status(500).json({
       success: false,
       message: 'Error adding call log',
-      error: error.message
+      error: error.message,
+      details: error.detail || null
     });
   }
 });
