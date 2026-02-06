@@ -45,7 +45,7 @@ const Leads = () => {
     course: '',
     remark: '',
     source: '',
-    status: 'New'
+    status: 'Followup'
   });
 
   // Fetch leads from API
@@ -220,7 +220,7 @@ const Leads = () => {
           course: '',
           remark: '',
           source: '',
-          status: 'New'
+          status: 'Followup'
         });
         fetchLeads(); // Refresh the leads list
       } else {
@@ -388,54 +388,58 @@ const Leads = () => {
 
   const getStatusBadge = (status) => {
     // Normalize status to handle case variations
-    const normalizedStatus = status ? status.toLowerCase() : 'new';
+    const normalizedStatus = status ? status.toLowerCase() : 'followup';
 
     const styles = {
-      new: {
+      followup: {
         bg: 'bg-gradient-to-r from-blue-500 to-blue-600',
-        icon: '🆕',
-        text: 'New'
+        icon: '📋',
+        text: 'Followup'
       },
-      contacted: {
-        bg: 'bg-gradient-to-r from-yellow-500 to-orange-500',
-        icon: '📞',
-        text: 'Contacted'
-      },
-      interested: {
-        bg: 'bg-gradient-to-r from-purple-500 to-pink-500',
-        icon: '⭐',
-        text: 'Interested'
+      'after result': {
+        bg: 'bg-gradient-to-r from-amber-500 to-amber-600',
+        icon: '📊',
+        text: 'After Result'
       },
       'call back': {
         bg: 'bg-gradient-to-r from-orange-500 to-amber-500',
         icon: '🔄',
         text: 'Call Back'
       },
+      'office meeting': {
+        bg: 'bg-gradient-to-r from-teal-500 to-teal-600',
+        icon: '🏢',
+        text: 'Office Meeting'
+      },
+      interested: {
+        bg: 'bg-gradient-to-r from-purple-500 to-pink-500',
+        icon: '⭐',
+        text: 'Interested'
+      },
+      'india first': {
+        bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
+        icon: '🇮🇳',
+        text: 'India First'
+      },
+      'other course': {
+        bg: 'bg-gradient-to-r from-cyan-500 to-cyan-600',
+        icon: '📚',
+        text: 'Other Course'
+      },
       'not interested': {
         bg: 'bg-gradient-to-r from-gray-500 to-gray-600',
         icon: '✖',
         text: 'Not Interested'
       },
-      'wrong number': {
-        bg: 'bg-gradient-to-r from-red-500 to-red-600',
-        icon: '📵',
-        text: 'Wrong Number'
+      drop: {
+        bg: 'bg-gradient-to-r from-rose-500 to-rose-600',
+        icon: '❌',
+        text: 'Drop'
       },
       converted: {
         bg: 'bg-gradient-to-r from-green-500 to-emerald-500',
         icon: '✓',
         text: 'Converted'
-      },
-      // Legacy status support
-      qualified: {
-        bg: 'bg-gradient-to-r from-purple-500 to-pink-500',
-        icon: '✨',
-        text: 'Qualified'
-      },
-      enrolled: {
-        bg: 'bg-gradient-to-r from-green-500 to-emerald-500',
-        icon: '✓',
-        text: 'Enrolled'
       },
     };
 
@@ -455,10 +459,15 @@ const Leads = () => {
 
   const tabs = [
     { id: 'all', label: 'All Leads', count: leads.length },
-    { id: 'new', label: 'New', count: leads.filter(l => l.status?.toLowerCase() === 'new').length },
-    { id: 'contacted', label: 'Contacted', count: leads.filter(l => l.status?.toLowerCase() === 'contacted').length },
+    { id: 'followup', label: 'Followup', count: leads.filter(l => l.status?.toLowerCase() === 'followup').length },
+    { id: 'after result', label: 'After Result', count: leads.filter(l => l.status?.toLowerCase() === 'after result').length },
+    { id: 'call back', label: 'Call Back', count: leads.filter(l => l.status?.toLowerCase() === 'call back').length },
+    { id: 'office meeting', label: 'Office Meeting', count: leads.filter(l => l.status?.toLowerCase() === 'office meeting').length },
     { id: 'interested', label: 'Interested', count: leads.filter(l => l.status?.toLowerCase() === 'interested').length },
-    { id: 'converted', label: 'Converted', count: leads.filter(l => l.status?.toLowerCase() === 'converted').length },
+    { id: 'india first', label: 'India First', count: leads.filter(l => l.status?.toLowerCase() === 'india first').length },
+    { id: 'other course', label: 'Other Course', count: leads.filter(l => l.status?.toLowerCase() === 'other course').length },
+    { id: 'not interested', label: 'Not Interested', count: leads.filter(l => l.status?.toLowerCase() === 'not interested').length },
+    { id: 'drop', label: 'Drop', count: leads.filter(l => l.status?.toLowerCase() === 'drop').length },
   ];
 
   // Loading state
@@ -1452,17 +1461,19 @@ const Leads = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
                   <select
-                    value={editFormData.status || 'New'}
+                    value={editFormData.status || 'Followup'}
                     onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
                   >
-                    <option value="New">New</option>
-                    <option value="Contacted">Contacted</option>
-                    <option value="Qualified">Qualified</option>
-                    <option value="Proposal Sent">Proposal Sent</option>
-                    <option value="Negotiation">Negotiation</option>
-                    <option value="Won">Won</option>
-                    <option value="Lost">Lost</option>
+                    <option value="Followup">Followup</option>
+                    <option value="After Result">After Result</option>
+                    <option value="Call Back">Call Back</option>
+                    <option value="Office Meeting">Office Meeting</option>
+                    <option value="Interested">Interested</option>
+                    <option value="India First">India First</option>
+                    <option value="Other Course">Other Course</option>
+                    <option value="Not Interested">Not Interested</option>
+                    <option value="Drop">Drop</option>
                   </select>
                 </div>
               </div>
@@ -1528,7 +1539,7 @@ const Leads = () => {
                       course: '',
                       remark: '',
                       source: '',
-                      status: 'New'
+                      status: 'Followup'
                     });
                   }}
                   className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
@@ -1645,11 +1656,15 @@ const Leads = () => {
                           onChange={(e) => setNewStudent({...newStudent, status: e.target.value})}
                           className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
                         >
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
+                          <option value="Followup">Followup</option>
+                          <option value="After Result">After Result</option>
+                          <option value="Call Back">Call Back</option>
+                          <option value="Office Meeting">Office Meeting</option>
                           <option value="Interested">Interested</option>
-                          <option value="Follow-up">Follow-up</option>
+                          <option value="India First">India First</option>
+                          <option value="Other Course">Other Course</option>
                           <option value="Not Interested">Not Interested</option>
+                          <option value="Drop">Drop</option>
                         </select>
                       </div>
                       <div className="col-span-2">
@@ -1681,7 +1696,7 @@ const Leads = () => {
                       course: '',
                       remark: '',
                       source: '',
-                      status: 'New'
+                      status: 'Followup'
                     });
                   }}
                   className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"

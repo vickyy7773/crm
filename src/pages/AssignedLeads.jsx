@@ -199,25 +199,27 @@ const AssignedLeads = () => {
   // Calculate counts for tabs (Converted leads removed - see Converted Leads page)
   const counts = {
     all: assignedLeads.length,
-    New: assignedLeads.filter(l => l.status === 'New').length,
-    Contacted: assignedLeads.filter(l => l.status === 'Contacted').length,
-    Interested: assignedLeads.filter(l => l.status === 'Interested').length,
+    'Followup': assignedLeads.filter(l => l.status === 'Followup').length,
+    'After Result': assignedLeads.filter(l => l.status === 'After Result').length,
     'Call Back': assignedLeads.filter(l => l.status === 'Call Back').length,
+    'Office Meeting': assignedLeads.filter(l => l.status === 'Office Meeting').length,
+    'Interested': assignedLeads.filter(l => l.status === 'Interested').length,
+    'India First': assignedLeads.filter(l => l.status === 'India First').length,
+    'Other Course': assignedLeads.filter(l => l.status === 'Other Course').length,
     'Not Interested': assignedLeads.filter(l => l.status === 'Not Interested').length,
-    'Not Reachable': assignedLeads.filter(l => l.status === 'Not Reachable').length,
-    'Office Visit': assignedLeads.filter(l => l.status === 'Office Visit').length,
     'Drop': assignedLeads.filter(l => l.status === 'Drop').length,
   };
 
   const tabs = [
     { id: 'all', label: 'All Assigned', count: counts.all },
-    { id: 'New', label: 'New', count: counts.New },
-    { id: 'Contacted', label: 'Contacted', count: counts.Contacted },
-    { id: 'Interested', label: 'Interested', count: counts.Interested },
+    { id: 'Followup', label: 'Followup', count: counts['Followup'] },
+    { id: 'After Result', label: 'After Result', count: counts['After Result'] },
     { id: 'Call Back', label: 'Call Back', count: counts['Call Back'] },
+    { id: 'Office Meeting', label: 'Office Meeting', count: counts['Office Meeting'] },
+    { id: 'Interested', label: 'Interested', count: counts['Interested'] },
+    { id: 'India First', label: 'India First', count: counts['India First'] },
+    { id: 'Other Course', label: 'Other Course', count: counts['Other Course'] },
     { id: 'Not Interested', label: 'Not Interested', count: counts['Not Interested'] },
-    { id: 'Not Reachable', label: 'Not Reachable', count: counts['Not Reachable'] },
-    { id: 'Office Visit', label: 'Office Visit', count: counts['Office Visit'] },
     { id: 'Drop', label: 'Drop', count: counts['Drop'] },
   ];
 
@@ -254,15 +256,16 @@ const AssignedLeads = () => {
 
   const getStatusBadge = (status) => {
     const statusColors = {
-      'New': 'bg-blue-100 text-blue-800 border-blue-300',
-      'Contacted': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      'Interested': 'bg-purple-100 text-purple-800 border-purple-300',
-      'Converted': 'bg-green-100 text-green-800 border-green-300',
-      'Not Interested': 'bg-gray-100 text-gray-800 border-gray-300',
+      'Followup': 'bg-blue-100 text-blue-800 border-blue-300',
+      'After Result': 'bg-amber-100 text-amber-800 border-amber-300',
       'Call Back': 'bg-orange-100 text-orange-800 border-orange-300',
-      'Not Reachable': 'bg-red-100 text-red-800 border-red-300',
-      'Office Visit': 'bg-teal-100 text-teal-800 border-teal-300',
+      'Office Meeting': 'bg-teal-100 text-teal-800 border-teal-300',
+      'Interested': 'bg-purple-100 text-purple-800 border-purple-300',
+      'India First': 'bg-indigo-100 text-indigo-800 border-indigo-300',
+      'Other Course': 'bg-cyan-100 text-cyan-800 border-cyan-300',
+      'Not Interested': 'bg-gray-100 text-gray-800 border-gray-300',
       'Drop': 'bg-rose-100 text-rose-800 border-rose-300',
+      'Converted': 'bg-green-100 text-green-800 border-green-300',
     };
 
     return (
@@ -798,16 +801,15 @@ const AssignedLeads = () => {
                       className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                     >
                       <option value="">-- Select --</option>
-                      <option value="Contacted">Contacted</option>
-                      <option value="Interested">Interested</option>
+                      <option value="Followup">Followup</option>
+                      <option value="After Result">After Result</option>
                       <option value="Call Back">Call Back</option>
+                      <option value="Office Meeting">Office Meeting</option>
+                      <option value="Interested">Interested</option>
+                      <option value="India First">India First</option>
+                      <option value="Other Course">Other Course</option>
                       <option value="Not Interested">Not Interested</option>
-                      <option value="Not Reachable">Not Reachable</option>
-                      <option value="Wrong Number">Wrong Number</option>
-                      <option value="Switched Off">Switched Off</option>
-                      <option value="Busy">Busy</option>
-                      <option value="No Answer">No Answer</option>
-                      <option value="Office Visit">Office Visit</option>
+                      <option value="Drop">Drop</option>
                       <option value="Converted">Converted</option>
                     </select>
                   </div>
@@ -869,9 +871,9 @@ const AssignedLeads = () => {
               <button
                 onClick={handleUpdateLead}
                 disabled={addingCallLog}
-                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
               >
-                {addingCallLog ? 'Saving...' : 'Save'}
+                {addingCallLog ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
