@@ -592,43 +592,13 @@ router.post('/:id/call-log', async (req, res) => {
     const newStatus = callOutcome;
 
     if (!isSuperAdmin) {
-      // Define allowed transitions - all outcomes allowed from most statuses
-      const ALL_OUTCOMES = ['Contacted', 'Interested', 'Not Interested', 'Call Back', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Busy', 'No Answer', 'Converted', 'Office Visit', 'Drop'];
-
-      const ALLOWED_TRANSITIONS = {
-        'New': ['Contacted'], // New leads must be contacted first
-        'Contacted': ALL_OUTCOMES,
-        'Interested': ALL_OUTCOMES,
-        'Call Back': ALL_OUTCOMES,
-        'Not Interested': ALL_OUTCOMES,
-        'Not Reachable': ALL_OUTCOMES,
-        'Office Visit': ALL_OUTCOMES,
-        'Drop': [], // Dropped leads cannot be changed
-        'Converted': [] // Converted leads cannot be changed
-      };
-
-      // Check if transition is allowed
-      const allowedNextStates = ALLOWED_TRANSITIONS[currentStatus] || ALL_OUTCOMES;
-      if (!allowedNextStates.includes(newStatus) && currentStatus !== newStatus) {
-        // Special case: If trying to mark as negative from "New", show specific error
-        if (currentStatus === 'New' && newStatus !== 'Contacted') {
-          return res.status(400).json({
-            success: false,
-            message: 'Pehle lead ko contact karo. New lead ko directly "' + newStatus + '" nahi mark kar sakte.'
-          });
-        }
-
-        // Special case: Converted or Dropped leads
-        if (currentStatus === 'Converted' || currentStatus === 'Drop') {
-          return res.status(400).json({
-            success: false,
-            message: `"${currentStatus}" lead ka status change nahi ho sakta.`
-          });
-        }
-
+      // Status transition validation temporarily disabled for flexibility
+      // Only block Converted and Drop leads from being changed
+      const finalStatuses = ['converted', 'drop'];
+      if (finalStatuses.includes(currentStatus.toLowerCase())) {
         return res.status(400).json({
           success: false,
-          message: `"${currentStatus}" se "${newStatus}" me change nahi ho sakta.`
+          message: `"${currentStatus}" lead ka status change nahi ho sakta.`
         });
       }
 
