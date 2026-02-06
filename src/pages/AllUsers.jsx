@@ -185,50 +185,50 @@ const AllUsers = () => {
           </div>
           <button
             onClick={() => navigate('/users/add')}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+            className="flex items-center gap-1 md:gap-2 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
           >
-            <UserPlus size={20} />
-            Add New User
+            <UserPlus size={16} className="md:w-5 md:h-5" />
+            <span className="hidden sm:inline">Add New</span> User
           </button>
         </div>
       </div>
 
       {/* Stats Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-50 p-4 rounded-xl">
-              <Users className="text-blue-600" size={28} />
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="bg-blue-50 p-2 md:p-4 rounded-lg md:rounded-xl">
+              <Users className="text-blue-600" size={20} />
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Total Users</p>
-              <p className="text-4xl font-bold text-gray-900">{users.length}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Total Users</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">{users.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-green-50 p-4 rounded-xl">
-              <CheckCircle className="text-green-600" size={28} />
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="bg-green-50 p-2 md:p-4 rounded-lg md:rounded-xl">
+              <CheckCircle className="text-green-600" size={20} />
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Active Users</p>
-              <p className="text-4xl font-bold text-gray-900">
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Active</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">
                 {users.filter(u => u.status === 'active').length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-purple-50 p-4 rounded-xl">
-              <Briefcase className="text-purple-600" size={28} />
+        <div className="col-span-2 lg:col-span-1 bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="bg-purple-50 p-2 md:p-4 rounded-lg md:rounded-xl">
+              <Briefcase className="text-purple-600" size={20} />
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-semibold">Departments</p>
-              <p className="text-4xl font-bold text-gray-900">
+              <p className="text-gray-600 text-xs md:text-sm font-semibold">Departments</p>
+              <p className="text-2xl md:text-4xl font-bold text-gray-900">
                 {new Set(users.map(u => u.department).filter(d => d)).size}
               </p>
             </div>
@@ -238,34 +238,34 @@ const AllUsers = () => {
 
       {/* Users Table */}
       {users.length > 0 ? (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">User</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider">User</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider hidden md:table-cell">Contact</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider hidden lg:table-cell">Role</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider hidden lg:table-cell">Dept</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-blue-50 transition-all duration-200">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    <td className="px-3 md:px-6 py-2 md:py-4">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-md flex-shrink-0">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <div className="font-bold text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">ID: #{user.id}</div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-gray-900 text-sm md:text-base truncate">{user.name}</div>
+                          <div className="text-xs text-gray-500 md:hidden truncate">{user.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-2 md:py-4 hidden md:table-cell">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
                           <Mail size={14} className="text-gray-400" />
@@ -279,10 +279,10 @@ const AllUsers = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-2 md:py-4 hidden lg:table-cell">
                       {getRoleBadge(user.role)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-2 md:py-4 hidden lg:table-cell">
                       {user.department ? (
                         <div className="flex items-center gap-2">
                           <Building2 size={16} className="text-gray-400" />
@@ -292,28 +292,28 @@ const AllUsers = () => {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-2 md:py-4">
                       {getStatusBadge(user.status)}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow">
-                          <Edit2 size={14} />
-                          Edit
+                    <td className="px-3 md:px-6 py-2 md:py-4">
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <button className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow">
+                          <Edit2 size={14} className="md:hidden" />
+                          <span className="hidden md:inline-flex items-center gap-1"><Edit2 size={14} />Edit</span>
                         </button>
                         <button
                           onClick={() => openResetPasswordModal(user)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow"
+                          className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow"
                         >
-                          <Key size={14} />
-                          Reset
+                          <Key size={14} className="md:hidden" />
+                          <span className="hidden md:inline-flex items-center gap-1"><Key size={14} />Reset</span>
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow"
+                          className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow"
                         >
-                          <Trash2 size={14} />
-                          Delete
+                          <Trash2 size={14} className="md:hidden" />
+                          <span className="hidden md:inline-flex items-center gap-1"><Trash2 size={14} />Delete</span>
                         </button>
                       </div>
                     </td>
@@ -324,15 +324,15 @@ const AllUsers = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-          <Users className="mx-auto mb-4 text-gray-300" size={64} />
-          <h3 className="text-xl font-bold text-gray-700 mb-2">No users yet</h3>
-          <p className="text-gray-500 mb-4">Add your first team member to get started!</p>
+        <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-8 md:p-12 text-center">
+          <Users className="mx-auto mb-4 text-gray-300" size={48} />
+          <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-2">No users yet</h3>
+          <p className="text-gray-500 text-sm md:text-base mb-4">Add your first team member to get started!</p>
           <button
             onClick={() => navigate('/users/add')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
-            <UserPlus size={20} />
+            <UserPlus size={18} />
             Add First User
           </button>
         </div>
@@ -340,40 +340,40 @@ const AllUsers = () => {
 
       {/* Reset Password Modal */}
       {resetPasswordModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-md w-full">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-3 md:p-6 rounded-t-xl md:rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
-                    <Key size={24} />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <Key size={20} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Reset Password</h2>
-                    <p className="text-green-100 text-sm">for {selectedUser.name}</p>
+                    <h2 className="text-lg md:text-2xl font-bold">Reset Password</h2>
+                    <p className="text-green-100 text-xs md:text-sm">for {selectedUser.name}</p>
                   </div>
                 </div>
                 <button
                   onClick={closeResetPasswordModal}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
                 >
-                  <X size={20} />
+                  <X size={18} className="md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <p className="text-yellow-800 text-sm font-semibold">
+            <div className="p-3 md:p-6 space-y-3 md:space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg md:rounded-xl p-3 md:p-4">
+                <p className="text-yellow-800 text-xs md:text-sm font-semibold">
                   ⚠️ This will reset the password for {selectedUser.email}
                 </p>
               </div>
 
               {/* New Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1 md:mb-2">
                   New Password <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -381,14 +381,14 @@ const AllUsers = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
                 />
-                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                <p className="text-[10px] md:text-xs text-gray-500 mt-1">Minimum 6 characters</p>
               </div>
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1 md:mb-2">
                   Confirm New Password <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -396,34 +396,34 @@ const AllUsers = () => {
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
                   placeholder="Re-enter new password"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
                 />
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-end gap-3">
+            <div className="bg-gray-50 border-t border-gray-200 p-3 md:p-4 rounded-b-xl md:rounded-b-2xl flex items-center justify-end gap-2 md:gap-3">
               <button
                 onClick={closeResetPasswordModal}
                 disabled={resetting}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="px-4 md:px-6 py-2 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetPassword}
                 disabled={resetting}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 md:gap-2 px-4 md:px-6 py-2 md:py-3 text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {resetting ? (
                   <>
-                    <Loader className="animate-spin" size={18} />
-                    Resetting...
+                    <Loader className="animate-spin" size={16} />
+                    <span className="hidden md:inline">Resetting...</span>
                   </>
                 ) : (
                   <>
-                    <Key size={18} />
-                    Reset Password
+                    <Key size={16} />
+                    Reset
                   </>
                 )}
               </button>
