@@ -582,18 +582,18 @@ const Leads = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Leads</h1>
-            <p className="text-gray-600 text-sm md:text-lg">Manage all leads - raw and qualified students</p>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 mb-1">Leads</h1>
+            <p className="text-gray-500 text-xs md:text-sm">Manage all leads - raw and qualified students</p>
           </div>
           <button
             onClick={() => {
               console.log('Button clicked! Opening modal...');
               setAddModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg text-sm md:text-base"
+            className="flex items-center justify-center gap-1 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md text-xs md:text-sm"
           >
             <UserPlus size={18} />
             Add Lead
@@ -602,32 +602,32 @@ const Leads = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl md:rounded-2xl shadow-md md:shadow-lg p-4 md:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-2 md:mb-4">
-              <div className={`${stat.bg} p-2 md:p-4 rounded-lg md:rounded-xl`}>
-                <stat.icon className={stat.iconColor} size={20} />
+          <div key={index} className="bg-white rounded-lg md:rounded-xl shadow-md p-2 md:p-4 border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div className="flex items-start justify-between mb-1 md:mb-2">
+              <div className={`${stat.bg} p-1.5 md:p-2 rounded-lg`}>
+                <stat.icon className={stat.iconColor} size={16} />
               </div>
             </div>
-            <h3 className="text-gray-600 text-xs md:text-sm font-semibold mb-1">{stat.title}</h3>
-            <p className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">{stat.value}</p>
-            <p className="text-xs md:text-sm text-gray-500">{stat.change}</p>
+            <h3 className="text-gray-600 text-[10px] md:text-xs font-semibold mb-0.5">{stat.title}</h3>
+            <p className="text-xl md:text-2xl font-bold text-gray-900 mb-0.5">{stat.value}</p>
+            <p className="text-[10px] md:text-xs text-gray-500">{stat.change}</p>
           </div>
         ))}
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-gray-100 mb-6">
+      <div className="bg-white rounded-lg md:rounded-xl shadow-md p-2 md:p-4 border border-gray-100 mb-4">
         {/* Search Bar */}
-        <div className="relative w-full mb-6">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <div className="relative w-full mb-3">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"
             placeholder="Search by name, phone, city, source, or assigned to..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-40 py-3.5 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
+            className="w-full pl-9 pr-28 py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm"
           />
           <button
             onClick={() => {
@@ -639,21 +639,21 @@ const Leads = () => {
               setCourseTypeFilter('all');
               setLeadTypeFilter('all');
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 text-purple-600 hover:text-purple-700 font-semibold text-xs border border-purple-300 rounded hover:bg-purple-50 transition-all"
           >
             Clear Filters
           </button>
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
           {/* Lead Type Filter - Raw/Qualified/All */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Lead Type:</label>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Lead Type:</label>
             <select
               value={leadTypeFilter}
               onChange={(e) => setLeadTypeFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-blue-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-blue-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Leads</option>
               <option value="raw">Raw Leads</option>
@@ -663,11 +663,11 @@ const Leads = () => {
 
           {/* Course Type Filter - for NEET/Score Label */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Course:</label>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Course:</label>
             <select
               value={courseTypeFilter}
               onChange={(e) => setCourseTypeFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-purple-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-purple-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Course</option>
               <option value="MBBS">MBBS (NEET)</option>
@@ -677,11 +677,11 @@ const Leads = () => {
 
           {/* Status Filter */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Status:</label>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Status:</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Statuses</option>
               {[...new Set(leads.map(lead => lead.status).filter(status => status))]
@@ -695,11 +695,11 @@ const Leads = () => {
 
           {/* City Filter */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">City:</label>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">City:</label>
             <select
               value={cityFilter}
               onChange={(e) => setCityFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Cities</option>
               {[...new Set(leads.map(lead => lead.city).filter(city => city))]
@@ -713,11 +713,11 @@ const Leads = () => {
 
           {/* Assigned To Filter */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Assigned To:</label>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Assigned To:</label>
             <select
               value={assignedFilter}
               onChange={(e) => setAssignedFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Users</option>
               <option value="Unassigned">Unassigned</option>
@@ -732,25 +732,25 @@ const Leads = () => {
         </div>
 
         {/* Tabs and Actions */}
-        <div className="flex items-center justify-between gap-4 mt-6">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex items-center justify-between gap-3 mt-3">
+          <div className="flex gap-1 overflow-x-auto pb-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all ${
+                className={`px-2 md:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   activeTab === tab.id
-                    ? 'bg-purple-600 text-white shadow-md'
+                    ? 'bg-purple-600 text-white shadow-sm'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {tab.label} <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-white/20">{tab.count}</span>
+                {tab.label} <span className="ml-0.5 text-[10px] opacity-80">({tab.count})</span>
               </button>
             ))}
           </div>
           <button
             onClick={() => setRangeModalOpen(true)}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium whitespace-nowrap transition-all flex items-center gap-2 text-sm"
+            className="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium whitespace-nowrap transition-all flex items-center gap-1 text-xs"
           >
             <Target size={16} />
             Select Range
