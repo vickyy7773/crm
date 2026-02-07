@@ -11,6 +11,9 @@ const AssignedLeads = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [leadTypeFilter, setLeadTypeFilter] = useState('all'); // 'all', 'raw', 'qualified'
   const [courseFilter, setCourseFilter] = useState('all'); // 'all', 'MBBS', 'Other'
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [cityFilter, setCityFilter] = useState('all');
+  const [assignedFilter, setAssignedFilter] = useState('all');
   const [remarkModal, setRemarkModal] = useState(false);
   const [selectedRemark, setSelectedRemark] = useState(null);
   const [callHistory, setCallHistory] = useState([]);
@@ -172,7 +175,7 @@ const AssignedLeads = () => {
     return isEmpty(lead.neet) && isEmpty(lead.course) && isEmpty(lead.destination);
   };
 
-  // Filter leads based on active tab, lead type filter, and course filter
+  // Filter leads based on active tab, lead type filter, course filter, status, city, and assigned to
   const getFilteredLeads = () => {
     let filtered = assignedLeads;
 
@@ -188,6 +191,21 @@ const AssignedLeads = () => {
       filtered = filtered.filter(lead =>
         lead.course?.toLowerCase() === courseFilter.toLowerCase()
       );
+    }
+
+    // Filter by status dropdown
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.status === statusFilter);
+    }
+
+    // Filter by city
+    if (cityFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.city === cityFilter);
+    }
+
+    // Filter by assigned to
+    if (assignedFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.assigned_to_name === assignedFilter);
     }
 
     // Then filter by status tab
@@ -307,56 +325,125 @@ const AssignedLeads = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-4 md:mb-8">
+      <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
           <div>
             <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-1 md:mb-2">Assigned Leads</h1>
             <p className="text-gray-600 text-xs md:text-lg">Track all leads assigned to telecallers</p>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Course Type Dropdown Filter */}
-            <div className="relative">
-              <select
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
-                className="appearance-none bg-white border-2 border-indigo-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-3 pr-8 md:pr-10 text-sm md:text-base font-bold text-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 shadow-md cursor-pointer"
-              >
-                <option value="all">All Courses</option>
-                <option value="MBBS">MBBS ({mbbsCount})</option>
-                <option value="Other">Other ({otherCount})</option>
-              </select>
-              <div className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            {/* Lead Type Dropdown Filter */}
-            <div className="relative">
-              <select
-                value={leadTypeFilter}
-                onChange={(e) => setLeadTypeFilter(e.target.value)}
-                className="appearance-none bg-white border-2 border-purple-300 rounded-lg md:rounded-xl px-3 md:px-5 py-2 md:py-3 pr-8 md:pr-10 text-sm md:text-base font-bold text-gray-700 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 shadow-md cursor-pointer"
-              >
-                <option value="all">All ({assignedLeads.length})</option>
-                <option value="raw">Raw ({rawCount})</option>
-                <option value="qualified">Qualified ({qualifiedCount})</option>
-              </select>
-              <div className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            <button
-              onClick={fetchAssignedLeads}
-              className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl text-sm md:text-base font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+          <button
+            onClick={fetchAssignedLeads}
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg md:rounded-xl text-sm md:text-base font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+          >
+            <RefreshCw size={16} className="md:w-5 md:h-5" />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Section */}
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 mb-4 md:mb-6 border border-gray-100">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+          {/* Lead Type Filter */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Lead Type:</label>
+            <select
+              value={leadTypeFilter}
+              onChange={(e) => setLeadTypeFilter(e.target.value)}
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 border-2 border-blue-300 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium bg-white"
             >
-              <RefreshCw size={16} className="md:w-5 md:h-5" />
-              Refresh
-            </button>
+              <option value="all">All Leads</option>
+              <option value="raw">Raw ({rawCount})</option>
+              <option value="qualified">Qualified ({qualifiedCount})</option>
+            </select>
+          </div>
+
+          {/* Course Filter */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Course:</label>
+            <select
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 border-2 border-purple-300 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+            >
+              <option value="all">All Course</option>
+              <option value="MBBS">MBBS ({mbbsCount})</option>
+              <option value="Other">Other ({otherCount})</option>
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Status:</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+            >
+              <option value="all">All Statuses</option>
+              {[...new Set(assignedLeads.map(lead => lead.status).filter(status => status))]
+                .sort()
+                .map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* City Filter */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">City:</label>
+            <select
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+            >
+              <option value="all">All Cities</option>
+              {[...new Set(assignedLeads.map(lead => lead.city).filter(city => city))]
+                .sort()
+                .map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* Assigned To Filter */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Assigned To:</label>
+            <select
+              value={assignedFilter}
+              onChange={(e) => setAssignedFilter(e.target.value)}
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-medium bg-white"
+            >
+              <option value="all">All Users</option>
+              {[...new Set(assignedLeads.map(lead => lead.assigned_to_name).filter(name => name))]
+                .sort()
+                .map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))
+              }
+            </select>
           </div>
         </div>
+
+        {/* Clear Filters Button */}
+        {(leadTypeFilter !== 'all' || courseFilter !== 'all' || statusFilter !== 'all' || cityFilter !== 'all' || assignedFilter !== 'all') && (
+          <div className="mt-3 md:mt-4 flex justify-end">
+            <button
+              onClick={() => {
+                setLeadTypeFilter('all');
+                setCourseFilter('all');
+                setStatusFilter('all');
+                setCityFilter('all');
+                setAssignedFilter('all');
+              }}
+              className="px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
