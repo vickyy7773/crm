@@ -1633,36 +1633,14 @@ const Leads = () => {
                   {newLeadType === 'qualified' && (
                     <>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Score</label>
-                        <input
-                          type="text"
-                          value={newStudent.neet}
-                          onChange={(e) => setNewStudent({...newStudent, neet: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="NEET marks/rank"
-                        />
-                      </div>
-                      <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Country</label>
                         <input
                           type="text"
                           value={newStudent.country}
                           onChange={(e) => setNewStudent({...newStudent, country: e.target.value})}
                           className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="e.g. India, USA, etc."
+                          placeholder="e.g. Russia, Kazakhstan, etc."
                         />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Course</label>
-                        <select
-                          value={newStudent.course}
-                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                        >
-                          <option value="">-- Select Course --</option>
-                          <option value="MBBS">MBBS</option>
-                          <option value="Other">Other</option>
-                        </select>
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Source</label>
@@ -1674,6 +1652,32 @@ const Leads = () => {
                           placeholder="e.g. Google, Facebook, Referral"
                         />
                       </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
+                        <select
+                          value={newStudent.course}
+                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="">-- Select Course --</option>
+                          <option value="MBBS">MBBS</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      {newStudent.course && (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            {newStudent.course === 'MBBS' ? 'NEET Score' : 'Score'}
+                          </label>
+                          <input
+                            type="text"
+                            value={newStudent.neet}
+                            onChange={(e) => setNewStudent({...newStudent, neet: e.target.value})}
+                            className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                            placeholder={newStudent.course === 'MBBS' ? 'Enter NEET marks/rank' : 'Enter score'}
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
                         <select
