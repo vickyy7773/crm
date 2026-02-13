@@ -96,6 +96,13 @@ const Dashboard = () => {
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
+  // Format time for display
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
   // Map dashboard stats to display format
   const stats = dashboardStats ? [
     {
@@ -370,13 +377,21 @@ const Dashboard = () => {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                          <div className={`flex flex-col items-center px-3 py-2 rounded-lg ${
                             formatDate(lead.next_followup_date) === 'Today' ? 'bg-red-100 text-red-700' :
                             formatDate(lead.next_followup_date) === 'Tomorrow' ? 'bg-orange-100 text-orange-700' :
                             'bg-purple-100 text-purple-700'
                           }`}>
-                            <Calendar size={16} />
-                            <span className="font-medium text-sm">{formatDate(lead.next_followup_date)}</span>
+                            <div className="flex items-center gap-1">
+                              <Calendar size={14} />
+                              <span className="font-medium text-sm">{formatDate(lead.next_followup_date)}</span>
+                            </div>
+                            {formatTime(lead.next_followup_date) && (
+                              <div className="flex items-center gap-1 text-xs mt-0.5">
+                                <Clock size={12} />
+                                <span>{formatTime(lead.next_followup_date)}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
