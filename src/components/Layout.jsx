@@ -56,28 +56,48 @@ const Layout = () => {
 
   const fetchNotifications = async () => {
     try {
-      // Fetch unread count
-      const countResponse = await fetch(`${API_URL}/notifications/unread-count?userId=${user.id}`);
-      const countData = await countResponse.json();
-      if (countData.success) {
-        setUnreadCount(countData.count);
-      }
-
-      // Fetch recent notifications (limit to 5 for dropdown)
+      // Fetch regular notifications
       const response = await fetch(`${API_URL}/notifications?userId=${user.id}&limit=5`);
       const data = await response.json();
 
+      // Fetch follow-up notifications
+      const followupResponse = await fetch(`${API_URL}/notifications/followups-today?userId=${user.id}&userRole=${user.role}`);
+      const followupData = await followupResponse.json();
+
+      let allNotifications = [];
+
       if (data.success) {
         const mappedNotifications = data.data.map(notif => ({
-          id: notif.id,
+          id: `notif-${notif.id}`,
           type: notif.type,
           title: notif.title,
           message: notif.message,
           time: notif.time_ago,
           unread: notif.unread
         }));
-        setNotifications(mappedNotifications);
+        allNotifications = [...mappedNotifications];
       }
+
+      if (followupData.success && followupData.data.length > 0) {
+        const mappedFollowups = followupData.data.map(followup => ({
+          id: `followup-${followup.id}`,
+          type: 'followup',
+          title: followup.title,
+          message: followup.message,
+          time: followup.time_ago,
+          unread: true,
+          leadId: followup.id
+        }));
+        allNotifications = [...allNotifications, ...mappedFollowups];
+      }
+
+      // Sort by time and limit to 10
+      setNotifications(allNotifications.slice(0, 10));
+
+      // Update unread count
+      const totalUnread = allNotifications.filter(n => n.unread).length;
+      setUnreadCount(totalUnread);
+
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -435,10 +455,13 @@ const Layout = () => {
                                 ? 'bg-green-100'
                                 : notification.type === 'assignment'
                                 ? 'bg-purple-100'
+                                : notification.type === 'followup'
+                                ? 'bg-orange-100'
                                 : 'bg-blue-100'
                             }`}>
                               {notification.type === 'new_lead' && <Target size={16} className="text-green-600" />}
                               {notification.type === 'assignment' && <Users size={16} className="text-purple-600" />}
+                              {notification.type === 'followup' && <Clock size={16} className="text-orange-600" />}
                               {notification.type === 'status_change' && <BarChart3 size={16} className="text-blue-600" />}
                             </div>
                             <div className="flex-1 min-w-0">

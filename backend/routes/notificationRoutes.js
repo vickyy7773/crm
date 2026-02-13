@@ -190,6 +190,91 @@ router.delete('/clear-all', async (req, res) => {
   }
 });
 
+// GET today's follow-ups as notifications
+router.get('/followups-today', async (req, res) => {
+  try {
+    const { userId, userRole } = req.query;
+
+    // Query for today's follow-ups
+    // If telecaller, show only their assigned leads
+    // If admin, show all leads
+    let query;
+    let queryParams;
+
+    if (userRole === 'telecaller') {
+      query = `
+        SELECT
+          l.id,
+          l.name,
+          l.phone,
+          l.next_followup_date,
+          l.assigned_to_name,
+          'followup' as type,
+          'Follow-up Reminder' as title,
+          CONCAT('Follow-up with ', l.name, ' (', l.phone, ')') as message,
+          CASE
+            WHEN l.next_followup_date::date = CURRENT_DATE THEN 'Today'
+            WHEN l.next_followup_date::date < CURRENT_DATE THEN 'Overdue'
+            ELSE TO_CHAR(l.next_followup_date, 'Mon DD')
+          END as time_ago,
+          TRUE as unread,
+          l.next_followup_date as created_at
+        FROM leads l
+        WHERE l.assigned_to = $1
+          AND l.next_followup_date::date <= CURRENT_DATE
+          AND l.status NOT IN ('Converted', 'Drop', 'Not Interested')
+        ORDER BY l.next_followup_date ASC
+        LIMIT 10
+      `;
+      queryParams = [userId];
+    } else {
+      // Admin sees all follow-ups
+      query = `
+        SELECT
+          l.id,
+          l.name,
+          l.phone,
+          l.next_followup_date,
+          l.assigned_to_name,
+          'followup' as type,
+          'Follow-up Reminder' as title,
+          CONCAT('Follow-up with ', l.name, ' (', l.phone, ')',
+            CASE WHEN l.assigned_to_name IS NOT NULL
+            THEN CONCAT(' - Assigned to ', l.assigned_to_name)
+            ELSE '' END) as message,
+          CASE
+            WHEN l.next_followup_date::date = CURRENT_DATE THEN 'Today'
+            WHEN l.next_followup_date::date < CURRENT_DATE THEN 'Overdue'
+            ELSE TO_CHAR(l.next_followup_date, 'Mon DD')
+          END as time_ago,
+          TRUE as unread,
+          l.next_followup_date as created_at
+        FROM leads l
+        WHERE l.next_followup_date::date <= CURRENT_DATE
+          AND l.status NOT IN ('Converted', 'Drop', 'Not Interested')
+        ORDER BY l.next_followup_date ASC
+        LIMIT 20
+      `;
+      queryParams = [];
+    }
+
+    const result = await pool.query(query, queryParams);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching followup notifications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch followup notifications',
+      error: error.message
+    });
+  }
+});
+
 // Export both the router and the createNotification helper function
 module.exports = router;
 module.exports.createNotification = createNotification;
