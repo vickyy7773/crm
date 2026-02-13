@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import API_URL from '../config/api';
+import { useAuth } from '../context/AuthContext';
 import {
   Users, Zap, Target, UserCheck, Search, Filter,
   MoreVertical, Phone, Mail, Eye, GraduationCap,
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 
 const Leads = () => {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightedLeadId = searchParams.get('highlight');
   const [highlightId, setHighlightId] = useState(null);
@@ -173,6 +175,46 @@ const Leads = () => {
       }
     } catch (err) {
       console.error('Error assigning lead:', err);
+      alert('Error assigning lead. Check console for details.');
+    }
+  };
+
+  // Self-assign lead to current admin
+  const handleSelfAssign = async () => {
+    if (!user) {
+      alert('User not found');
+      return;
+    }
+
+    const leadIds = bulkAssignMode ? selectedLeads : [assignLeadId];
+
+    try {
+      for (const leadId of leadIds) {
+        const response = await fetch(`${API_URL}/leads/${leadId}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assignedTo: user.id,
+            assignedToName: user.name
+          })
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          alert('Failed to self-assign lead: ' + (result.message || 'Unknown error'));
+          return;
+        }
+      }
+
+      alert(bulkAssignMode ? `${selectedLeads.length} leads assigned to you!` : 'Lead assigned to you!');
+      setAssignModalOpen(false);
+      setSelectedTelecaller('');
+      setAssignLeadId(null);
+      setBulkAssignMode(false);
+      setSelectedLeads([]);
+      fetchLeads();
+    } catch (err) {
+      console.error('Error self-assigning lead:', err);
       alert('Error assigning lead. Check console for details.');
     }
   };
@@ -1096,26 +1138,35 @@ const Leads = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-end gap-3">
+            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-between gap-3">
               <button
-                onClick={() => {
-                  setAssignModalOpen(false);
-                  setSelectedTelecaller('');
-                  setAssignLeadId(null);
-                  setBulkAssignMode(false);
-                  setSelectedLeads([]);
-                }}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                onClick={handleSelfAssign}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow flex items-center gap-2"
               >
-                Cancel
+                <UserCircle size={18} />
+                Self-assign to Me
               </button>
-              <button
-                onClick={bulkAssignMode ? handleBulkAssignSubmit : handleAssignLead}
-                disabled={!selectedTelecaller}
-                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {bulkAssignMode ? `Assign ${selectedLeads.length} Leads` : 'Assign Lead'}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setAssignModalOpen(false);
+                    setSelectedTelecaller('');
+                    setAssignLeadId(null);
+                    setBulkAssignMode(false);
+                    setSelectedLeads([]);
+                  }}
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={bulkAssignMode ? handleBulkAssignSubmit : handleAssignLead}
+                  disabled={!selectedTelecaller}
+                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkAssignMode ? `Assign ${selectedLeads.length} Leads` : 'Assign Lead'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
