@@ -44,6 +44,14 @@ const Leads = () => {
   const [editFormData, setEditFormData] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newLeadType, setNewLeadType] = useState('raw'); // 'raw' or 'qualified'
+  const [qualifyFormData, setQualifyFormData] = useState({
+    course: '',
+    neet: '',
+    destination: '',
+    source: '',
+    remark: ''
+  });
+  const [qualifyingSaving, setQualifyingSaving] = useState(false);
   const [newStudent, setNewStudent] = useState({
     name: '',
     phone: '',
@@ -174,6 +182,42 @@ const Leads = () => {
     } catch (err) {
       console.error('Error assigning lead:', err);
       alert('Error assigning lead. Check console for details.');
+    }
+  };
+
+  // Qualify lead handler - convert raw lead to qualified
+  const handleQualifyLead = async () => {
+    if (!selectedLead) return;
+
+    setQualifyingSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/leads/${selectedLead.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...selectedLead,
+          course: qualifyFormData.course || selectedLead.course,
+          neet: qualifyFormData.neet || selectedLead.neet,
+          destination: qualifyFormData.destination || selectedLead.destination,
+          source: qualifyFormData.source || selectedLead.source,
+          remark: qualifyFormData.remark || selectedLead.remark
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert('Lead qualified successfully!');
+        setViewModalOpen(false);
+        setQualifyFormData({ course: '', neet: '', destination: '', source: '', remark: '' });
+        fetchLeads();
+      } else {
+        alert('Failed to qualify lead: ' + result.message);
+      }
+    } catch (err) {
+      console.error('Error qualifying lead:', err);
+      alert('Error qualifying lead. Check console for details.');
+    } finally {
+      setQualifyingSaving(false);
     }
   };
 
@@ -1277,6 +1321,83 @@ const Leads = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Qualify Lead Form - Show only for raw leads */}
+              {isRawLead(selectedLead) && (
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-sm border-2 border-green-300 p-6">
+                  <h3 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                    <Target size={24} />
+                    Qualify This Lead
+                  </h3>
+                  <p className="text-green-700 text-sm mb-4">Add qualification details to convert this raw lead to a qualified lead.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-green-700 mb-1">Course Type *</label>
+                      <select
+                        value={qualifyFormData.course}
+                        onChange={(e) => setQualifyFormData({...qualifyFormData, course: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border-2 border-green-200 rounded-lg focus:border-green-500 outline-none bg-white"
+                      >
+                        <option value="">-- Select Course --</option>
+                        <option value="MBBS">MBBS</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-green-700 mb-1">
+                        {qualifyFormData.course === 'MBBS' ? 'NEET Score' : qualifyFormData.course === 'Other' ? 'Score' : 'NEET/Score'}
+                      </label>
+                      <input
+                        type="text"
+                        value={qualifyFormData.neet}
+                        onChange={(e) => setQualifyFormData({...qualifyFormData, neet: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border-2 border-green-200 rounded-lg focus:border-green-500 outline-none"
+                        placeholder={qualifyFormData.course === 'MBBS' ? 'Enter NEET marks/rank' : 'Enter score'}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-green-700 mb-1">Country/Destination</label>
+                      <input
+                        type="text"
+                        value={qualifyFormData.destination}
+                        onChange={(e) => setQualifyFormData({...qualifyFormData, destination: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border-2 border-green-200 rounded-lg focus:border-green-500 outline-none"
+                        placeholder="e.g. Russia, Kazakhstan"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-green-700 mb-1">Source</label>
+                      <input
+                        type="text"
+                        value={qualifyFormData.source}
+                        onChange={(e) => setQualifyFormData({...qualifyFormData, source: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border-2 border-green-200 rounded-lg focus:border-green-500 outline-none"
+                        placeholder="e.g. Google, Facebook, Referral"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-semibold text-green-700 mb-1">Remark</label>
+                      <textarea
+                        value={qualifyFormData.remark}
+                        onChange={(e) => setQualifyFormData({...qualifyFormData, remark: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border-2 border-green-200 rounded-lg focus:border-green-500 outline-none"
+                        placeholder="Any additional notes..."
+                        rows="2"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <button
+                        onClick={handleQualifyLead}
+                        disabled={!qualifyFormData.course || qualifyingSaving}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Target size={18} />
+                        {qualifyingSaving ? 'Saving...' : 'Qualify Lead'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-sm border border-gray-200 p-6">
