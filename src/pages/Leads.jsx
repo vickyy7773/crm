@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import API_URL from '../config/api';
 import {
   Users, Zap, Target, UserCheck, Search, Filter,
@@ -8,6 +9,11 @@ import {
 } from 'lucide-react';
 
 const Leads = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightedLeadId = searchParams.get('highlight');
+  const [highlightId, setHighlightId] = useState(null);
+  const leadRefs = useRef({});
+
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -53,6 +59,36 @@ const Leads = () => {
     fetchLeads();
     fetchTelecallers();
   }, []);
+
+  // Handle highlighted lead from URL parameter
+  useEffect(() => {
+    if (highlightedLeadId && leads.length > 0) {
+      const leadId = parseInt(highlightedLeadId);
+      setHighlightId(leadId);
+
+      // Find and open the lead
+      const lead = leads.find(l => l.id === leadId);
+      if (lead) {
+        setSelectedLead(lead);
+        setViewModalOpen(true);
+
+        // Scroll to the lead row after a short delay
+        setTimeout(() => {
+          if (leadRefs.current[leadId]) {
+            leadRefs.current[leadId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+
+      // Clear the URL parameter after handling
+      setSearchParams({});
+
+      // Remove highlight after 5 seconds
+      setTimeout(() => {
+        setHighlightId(null);
+      }, 5000);
+    }
+  }, [highlightedLeadId, leads]);
 
   // Helper function to check if a lead is raw (not qualified)
   // A lead is "raw" if it doesn't have NEET, Course, and Destination filled
@@ -810,7 +846,15 @@ const Leads = () => {
                   </thead>
                   <tbody className="bg-gray-50">
                     {filteredLeads.map((lead, index) => (
-                <tr key={lead.id} className="bg-white border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-blue-50 transition-all duration-200 hover:shadow-sm group">
+                <tr
+                  key={lead.id}
+                  ref={(el) => leadRefs.current[lead.id] = el}
+                  className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-blue-50 transition-all duration-200 hover:shadow-sm group ${
+                    highlightId === lead.id
+                      ? 'bg-yellow-100 ring-2 ring-yellow-400 animate-pulse'
+                      : 'bg-white'
+                  }`}
+                >
                   <td className="px-3 py-2.5">
                     <input
                       type="checkbox"
