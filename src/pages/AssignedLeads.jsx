@@ -551,6 +551,9 @@ const AssignedLeads = () => {
                 <tr className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Phone</th>
+                  {isSuperAdmin(user) && (
+                    <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
+                  )}
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Course</th>
@@ -558,9 +561,6 @@ const AssignedLeads = () => {
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Source</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
-                  {isSuperAdmin(user) && (
-                    <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
-                  )}
                 </tr>
               </thead>
               <tbody className="bg-gray-50">
@@ -591,6 +591,26 @@ const AssignedLeads = () => {
                         <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
                       </div>
                     </td>
+                    {isSuperAdmin(user) && (
+                      <td className="px-3 py-2.5">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleEditLead(lead)}
+                            className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all"
+                            title="Edit Lead"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLead(lead.id)}
+                            className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all"
+                            title="Delete Lead"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                     <td className="px-3 py-2.5">
                       <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
                         <Target size={11} />
@@ -643,26 +663,6 @@ const AssignedLeads = () => {
                         <span className="text-[10px] font-bold text-green-700">{lead.assigned_to_name}</span>
                       </div>
                     </td>
-                    {isSuperAdmin(user) && (
-                      <td className="px-3 py-2.5">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleEditLead(lead)}
-                            className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all"
-                            title="Edit Lead"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteLead(lead.id)}
-                            className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all"
-                            title="Delete Lead"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
