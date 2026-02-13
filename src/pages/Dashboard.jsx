@@ -355,10 +355,10 @@ const Dashboard = () => {
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
+                            <a href={`tel:${lead.phone}`} className="flex items-center gap-1 hover:text-blue-600 hover:underline" onClick={(e) => e.stopPropagation()}>
                               <Phone size={14} />
                               {lead.phone}
-                            </span>
+                            </a>
                             {lead.city && (
                               <span className="flex items-center gap-1">
                                 <MapPin size={14} />

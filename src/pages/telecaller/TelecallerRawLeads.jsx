@@ -316,7 +316,7 @@ const TelecallerRawLeads = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Phone size={16} className="text-gray-600" />
-                        <span className="font-mono text-gray-700">{lead.phone}</span>
+                        <a href={`tel:${lead.phone}`} className="font-mono text-blue-600 hover:underline">{lead.phone}</a>
                       </div>
                     </td>
                     <td className="px-6 py-4">

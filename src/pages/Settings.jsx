@@ -548,7 +548,7 @@ const Settings = () => {
                     return lead ? (
                       <div className="space-y-1 text-sm text-gray-600">
                         <p><strong>Name:</strong> {lead.name}</p>
-                        <p><strong>Phone:</strong> {lead.phone}</p>
+                        <p><strong>Phone:</strong> <a href={`tel:${lead.phone}`} className="text-blue-600 hover:underline">{lead.phone}</a></p>
                         <p><strong>City:</strong> {lead.city || 'N/A'}</p>
                         <p><strong>Destination:</strong> {lead.destination || 'N/A'}</p>
                         <p><strong>Status:</strong> {lead.status}</p>

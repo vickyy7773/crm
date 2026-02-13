@@ -730,7 +730,7 @@ const RawLeads = () => {
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                       <Phone size={11} className="text-blue-600" />
-                      <span className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px]">{lead.phone}</span>
+                      <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
