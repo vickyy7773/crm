@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart3, Users, TrendingUp,
   ArrowUpRight, ArrowDownRight,
-  Phone, Clock
+  Phone, Clock, X, Calendar, MapPin, User
 } from 'lucide-react';
 import TelecallerComparisonWidget from '../components/TelecallerComparisonWidget';
 import DailyStatsHistoryWidget from '../components/DailyStatsHistoryWidget';
@@ -16,6 +16,9 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [recentActivities, setRecentActivities] = useState([]);
   const [leadsProgress, setLeadsProgress] = useState([]);
+  const [showFollowupsModal, setShowFollowupsModal] = useState(false);
+  const [pendingFollowups, setPendingFollowups] = useState([]);
+  const [followupsLoading, setFollowupsLoading] = useState(false);
 
   // Fetch dashboard data on component mount
   useEffect(() => {
@@ -53,6 +56,44 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch pending follow-ups list
+  const fetchPendingFollowups = async () => {
+    try {
+      setFollowupsLoading(true);
+      const response = await fetch(`${API_URL}/dashboard/pending-followups`);
+      const data = await response.json();
+      if (data.success) {
+        setPendingFollowups(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch pending follow-ups:', error);
+    } finally {
+      setFollowupsLoading(false);
+    }
+  };
+
+  // Handle clicking on Pending Follow-ups card
+  const handleFollowupsClick = () => {
+    setShowFollowupsModal(true);
+    fetchPendingFollowups();
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    }
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   // Map dashboard stats to display format
@@ -126,7 +167,11 @@ const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div
+            key={index}
+            onClick={stat.title === 'Pending Follow-ups' ? handleFollowupsClick : undefined}
+            className={`bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.title === 'Pending Follow-ups' ? 'cursor-pointer ring-2 ring-purple-200 hover:ring-purple-400' : ''}`}
+          >
             <div className="flex items-start justify-between mb-2 md:mb-4">
               <div className={`${stat.bgColor} p-2 md:p-4 rounded-lg md:rounded-xl`}>
                 <stat.icon className={stat.iconColor} size={20} />
@@ -138,6 +183,9 @@ const Dashboard = () => {
             </div>
             <h3 className="text-gray-600 text-xs md:text-sm font-semibold mb-1 md:mb-2">{stat.title}</h3>
             <p className="text-2xl md:text-4xl font-bold text-gray-900">{stat.value}</p>
+            {stat.title === 'Pending Follow-ups' && (
+              <p className="text-xs text-purple-600 mt-2 font-medium">Click to view details</p>
+            )}
           </div>
         ))}
       </div>
@@ -247,6 +295,105 @@ const Dashboard = () => {
         </div>
 
       </div>
+
+      {/* Pending Follow-ups Modal */}
+      {showFollowupsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Clock className="text-white" size={24} />
+                <h2 className="text-xl font-bold text-white">Pending Follow-ups</h2>
+                <span className="bg-white/20 px-3 py-1 rounded-full text-sm text-white">
+                  {pendingFollowups.length} leads
+                </span>
+              </div>
+              <button
+                onClick={() => setShowFollowupsModal(false)}
+                className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto max-h-[calc(85vh-80px)]">
+              {followupsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+                </div>
+              ) : pendingFollowups.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {pendingFollowups.map((lead) => (
+                    <div
+                      key={lead.id}
+                      className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setShowFollowupsModal(false);
+                        navigate(`/leads`);
+                      }}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">{lead.name}</h3>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              lead.status === 'Interested' ? 'bg-purple-100 text-purple-700' :
+                              lead.status === 'Contacted' ? 'bg-yellow-100 text-yellow-700' :
+                              lead.status === 'New' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {lead.status}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Phone size={14} />
+                              {lead.phone}
+                            </span>
+                            {lead.city && (
+                              <span className="flex items-center gap-1">
+                                <MapPin size={14} />
+                                {lead.city}
+                              </span>
+                            )}
+                            {lead.assigned_to_name && (
+                              <span className="flex items-center gap-1">
+                                <User size={14} />
+                                {lead.assigned_to_name}
+                              </span>
+                            )}
+                          </div>
+                          {lead.remark && (
+                            <p className="text-sm text-gray-500 mt-1 line-clamp-1">{lead.remark}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                            formatDate(lead.next_followup_date) === 'Today' ? 'bg-red-100 text-red-700' :
+                            formatDate(lead.next_followup_date) === 'Tomorrow' ? 'bg-orange-100 text-orange-700' :
+                            'bg-purple-100 text-purple-700'
+                          }`}>
+                            <Calendar size={16} />
+                            <span className="font-medium text-sm">{formatDate(lead.next_followup_date)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <Clock size={48} className="mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">No pending follow-ups</p>
+                  <p className="text-sm">All follow-ups are up to date!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

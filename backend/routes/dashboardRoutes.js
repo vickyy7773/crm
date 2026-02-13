@@ -116,6 +116,43 @@ router.get('/activities', async (req, res) => {
   }
 });
 
+// GET pending follow-ups list
+router.get('/pending-followups', async (req, res) => {
+  try {
+    const query = `
+      SELECT
+        l.id,
+        l.name,
+        l.phone,
+        l.email,
+        l.city,
+        l.status,
+        l.next_followup_date,
+        l.assigned_to_name,
+        l.course,
+        l.remark
+      FROM leads l
+      WHERE l.next_followup_date IS NOT NULL
+      AND l.next_followup_date >= CURRENT_DATE
+      ORDER BY l.next_followup_date ASC
+      LIMIT 50
+    `;
+
+    const followups = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: followups.rows
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch pending follow-ups',
+      error: error.message
+    });
+  }
+});
+
 // GET leads progress (count by status)
 router.get('/leads-progress', async (req, res) => {
   try {
