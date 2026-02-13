@@ -554,13 +554,13 @@ const AssignedLeads = () => {
                   {isSuperAdmin(user) && (
                     <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
                   )}
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Course</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remark</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Source</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
                 </tr>
               </thead>
               <tbody className="bg-gray-50">
@@ -612,6 +612,14 @@ const AssignedLeads = () => {
                       </td>
                     )}
                     <td className="px-3 py-2.5">
+                      <div className="inline-flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                          <User size={12} />
+                        </div>
+                        <span className="text-[10px] font-bold text-green-700">{lead.assigned_to_name}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5">
                       <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
                         <Target size={11} />
                         {lead.neet || '-'}
@@ -654,14 +662,6 @@ const AssignedLeads = () => {
                     </td>
                     <td className="px-3 py-2.5">
                       {getStatusBadge(lead.status)}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <div className="inline-flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-md border border-green-200">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-                          <User size={12} />
-                        </div>
-                        <span className="text-[10px] font-bold text-green-700">{lead.assigned_to_name}</span>
-                      </div>
                     </td>
                   </tr>
                 ))}
