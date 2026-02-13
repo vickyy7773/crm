@@ -568,27 +568,6 @@ const Layout = () => {
                     </button>
                   </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-gray-200"></div>
-
-                  {/* Additional Options */}
-                  <div className="p-3 space-y-1">
-                    <button
-                      onClick={() => setProfileOpen(false)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors text-left"
-                    >
-                      <span className="text-2xl">💬</span>
-                      <span className="font-medium text-gray-900">Help & Support</span>
-                    </button>
-                    <button
-                      onClick={() => setProfileOpen(false)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors text-left"
-                    >
-                      <span className="text-2xl">ℹ️</span>
-                      <span className="font-medium text-gray-900">About Pulse Education</span>
-                    </button>
-                  </div>
-
                   {/* Logout Button */}
                   <div className="p-3 border-t border-gray-200 bg-gray-50">
                     <button
