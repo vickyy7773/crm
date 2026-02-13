@@ -911,7 +911,7 @@ const AssignedLeads = () => {
 
             {/* Modal Body */}
             <div className="p-3 md:p-6 space-y-3 md:space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Name *</label>
                   <input
@@ -931,20 +931,20 @@ const AssignedLeads = () => {
                   />
                 </div>
                 <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">City</label>
                   <input
                     type="text"
                     value={editFormData.city || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
-                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">NEET Score</label>
-                  <input
-                    type="text"
-                    value={editFormData.neet || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })}
                     className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
@@ -961,11 +961,61 @@ const AssignedLeads = () => {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">
+                    {editFormData.course === 'MBBS' ? 'NEET Score' : 'Score'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.neet || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder={editFormData.course === 'MBBS' ? 'Enter NEET marks/rank' : 'Enter score'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Destination Country</label>
+                  <input
+                    type="text"
+                    value={editFormData.destination || editFormData.destination_country || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, destination: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder="e.g. Russia, Kazakhstan"
+                  />
+                </div>
+                <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Source</label>
                   <input
                     type="text"
                     value={editFormData.source || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, source: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder="e.g. Google, Facebook"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Status</label>
+                  <select
+                    value={editFormData.status || 'Followup'}
+                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  >
+                    <option value="Followup">Followup</option>
+                    <option value="After Result">After Result</option>
+                    <option value="Call Back">Call Back</option>
+                    <option value="Office Meeting">Office Meeting</option>
+                    <option value="Interested">Interested</option>
+                    <option value="India First">India First</option>
+                    <option value="Other Course">Other Course</option>
+                    <option value="Not Interested">Not Interested</option>
+                    <option value="Drop">Drop</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Next Follow-up Date</label>
+                  <input
+                    type="datetime-local"
+                    value={editFormData.next_followup_date ? new Date(editFormData.next_followup_date).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, next_followup_date: e.target.value })}
                     className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
@@ -974,21 +1024,41 @@ const AssignedLeads = () => {
                   <select
                     value={editFormData.assigned_to || ''}
                     onChange={(e) => {
-                      const telecaller = telecallers.find(t => t.id === parseInt(e.target.value));
-                      setEditFormData({
-                        ...editFormData,
-                        assigned_to: e.target.value ? parseInt(e.target.value) : null,
-                        assigned_to_name: telecaller ? telecaller.name : null
-                      });
+                      if (e.target.value === 'self') {
+                        setEditFormData({
+                          ...editFormData,
+                          assigned_to: user.id,
+                          assigned_to_name: user.name
+                        });
+                      } else {
+                        const telecaller = telecallers.find(t => t.id === parseInt(e.target.value));
+                        setEditFormData({
+                          ...editFormData,
+                          assigned_to: e.target.value ? parseInt(e.target.value) : null,
+                          assigned_to_name: telecaller ? telecaller.name : null
+                        });
+                      }
                     }}
                     className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   >
                     <option value="">-- Unassigned --</option>
+                    <option value="self" className="font-semibold">🔷 Self (Assign to me)</option>
+                    <option disabled>──────────</option>
                     {telecallers.map((tc) => (
                       <option key={tc.id} value={tc.id}>{tc.name}</option>
                     ))}
                   </select>
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Remark</label>
+                <textarea
+                  value={editFormData.remark || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })}
+                  rows="3"
+                  className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  placeholder="Add any remarks..."
+                ></textarea>
               </div>
 
               {/* Call Log Section - Add entry to call history */}
