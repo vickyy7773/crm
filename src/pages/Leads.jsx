@@ -146,19 +146,33 @@ const Leads = () => {
     }
 
     try {
-      // Find the selected telecaller's name
-      const telecaller = telecallers.find(t => t.id === parseInt(selectedTelecaller));
-      if (!telecaller) {
-        alert('Telecaller not found');
-        return;
+      let assignedTo, assignedToName;
+
+      // Check if self-assign
+      if (selectedTelecaller === 'self') {
+        if (!user) {
+          alert('User not found');
+          return;
+        }
+        assignedTo = user.id;
+        assignedToName = user.name;
+      } else {
+        // Find the selected telecaller's name
+        const telecaller = telecallers.find(t => t.id === parseInt(selectedTelecaller));
+        if (!telecaller) {
+          alert('Telecaller not found');
+          return;
+        }
+        assignedTo = parseInt(selectedTelecaller);
+        assignedToName = telecaller.name;
       }
 
       const response = await fetch(`${API_URL}/leads/${assignLeadId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          assignedTo: parseInt(selectedTelecaller),
-          assignedToName: telecaller.name
+          assignedTo: assignedTo,
+          assignedToName: assignedToName
         })
       });
 
@@ -175,46 +189,6 @@ const Leads = () => {
       }
     } catch (err) {
       console.error('Error assigning lead:', err);
-      alert('Error assigning lead. Check console for details.');
-    }
-  };
-
-  // Self-assign lead to current admin
-  const handleSelfAssign = async () => {
-    if (!user) {
-      alert('User not found');
-      return;
-    }
-
-    const leadIds = bulkAssignMode ? selectedLeads : [assignLeadId];
-
-    try {
-      for (const leadId of leadIds) {
-        const response = await fetch(`${API_URL}/leads/${leadId}/assign`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            assignedTo: user.id,
-            assignedToName: user.name
-          })
-        });
-
-        const result = await response.json();
-        if (!result.success) {
-          alert('Failed to self-assign lead: ' + (result.message || 'Unknown error'));
-          return;
-        }
-      }
-
-      alert(bulkAssignMode ? `${selectedLeads.length} leads assigned to you!` : 'Lead assigned to you!');
-      setAssignModalOpen(false);
-      setSelectedTelecaller('');
-      setAssignLeadId(null);
-      setBulkAssignMode(false);
-      setSelectedLeads([]);
-      fetchLeads();
-    } catch (err) {
-      console.error('Error self-assigning lead:', err);
       alert('Error assigning lead. Check console for details.');
     }
   };
@@ -347,21 +321,35 @@ const Leads = () => {
       return;
     }
 
-    const telecaller = telecallers.find(t => t.id === parseInt(selectedTelecaller));
-    if (!telecaller) {
-      alert('Telecaller not found');
-      return;
+    let assignedTo, assignedToName;
+
+    // Check if self-assign
+    if (selectedTelecaller === 'self') {
+      if (!user) {
+        alert('User not found');
+        return;
+      }
+      assignedTo = user.id;
+      assignedToName = user.name;
+    } else {
+      const telecaller = telecallers.find(t => t.id === parseInt(selectedTelecaller));
+      if (!telecaller) {
+        alert('Telecaller not found');
+        return;
+      }
+      assignedTo = parseInt(selectedTelecaller);
+      assignedToName = telecaller.name;
     }
 
     try {
       // Assign all selected leads
       const assignPromises = selectedLeads.map(leadId =>
-        fetch(`${API_URL}/${leadId}/assign`, {
+        fetch(`${API_URL}/leads/${leadId}/assign`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            assignedTo: parseInt(selectedTelecaller),
-            assignedToName: telecaller.name
+            assignedTo: assignedTo,
+            assignedToName: assignedToName
           })
         }).then(res => res.json())
       );
@@ -1120,6 +1108,10 @@ const Leads = () => {
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all text-sm font-medium bg-white"
                 >
                   <option value="">-- Select Telecaller --</option>
+                  <option value="self" className="font-semibold text-blue-600">
+                    🔷 Self (Assign to me)
+                  </option>
+                  <option disabled>──────────</option>
                   {telecallers.map((telecaller) => (
                     <option key={telecaller.id} value={telecaller.id}>
                       {telecaller.name} ({telecaller.email})
@@ -1138,35 +1130,26 @@ const Leads = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-between gap-3">
+            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex items-center justify-end gap-3">
               <button
-                onClick={handleSelfAssign}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow flex items-center gap-2"
+                onClick={() => {
+                  setAssignModalOpen(false);
+                  setSelectedTelecaller('');
+                  setAssignLeadId(null);
+                  setBulkAssignMode(false);
+                  setSelectedLeads([]);
+                }}
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
               >
-                <UserCircle size={18} />
-                Self-assign to Me
+                Cancel
               </button>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setAssignModalOpen(false);
-                    setSelectedTelecaller('');
-                    setAssignLeadId(null);
-                    setBulkAssignMode(false);
-                    setSelectedLeads([]);
-                  }}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={bulkAssignMode ? handleBulkAssignSubmit : handleAssignLead}
-                  disabled={!selectedTelecaller}
-                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {bulkAssignMode ? `Assign ${selectedLeads.length} Leads` : 'Assign Lead'}
-                </button>
-              </div>
+              <button
+                onClick={bulkAssignMode ? handleBulkAssignSubmit : handleAssignLead}
+                disabled={!selectedTelecaller}
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bulkAssignMode ? `Assign ${selectedLeads.length} Leads` : 'Assign Lead'}
+              </button>
             </div>
           </div>
         </div>
