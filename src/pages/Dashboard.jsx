@@ -338,7 +338,7 @@ const Dashboard = () => {
                       className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => {
                         setShowFollowupsModal(false);
-                        navigate(`/leads?highlight=${lead.id}`);
+                        navigate(`/assigned-leads?highlight=${lead.id}`);
                       }}
                     >
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">

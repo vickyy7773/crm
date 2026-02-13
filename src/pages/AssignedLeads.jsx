@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { UserCheck, Phone, User, RefreshCw, CheckCircle, Target, MapPin, GraduationCap, Globe, Clock, MessageSquare, X, Calendar, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isSuperAdmin } from '../utils/permissions';
@@ -6,6 +7,11 @@ import API_URL from '../config/api';
 
 const AssignedLeads = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightedLeadId = searchParams.get('highlight');
+  const [highlightId, setHighlightId] = useState(null);
+  const leadRefs = useRef({});
+
   const [assignedLeads, setAssignedLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -34,6 +40,36 @@ const AssignedLeads = () => {
     fetchAssignedLeads();
     fetchTelecallers();
   }, []);
+
+  // Handle highlighted lead from URL parameter
+  useEffect(() => {
+    if (highlightedLeadId && assignedLeads.length > 0) {
+      const leadId = parseInt(highlightedLeadId);
+      setHighlightId(leadId);
+
+      // Find the lead and open edit modal
+      const lead = assignedLeads.find(l => l.id === leadId);
+      if (lead) {
+        setEditFormData(lead);
+        setEditModalOpen(true);
+
+        // Scroll to the lead row after a short delay
+        setTimeout(() => {
+          if (leadRefs.current[leadId]) {
+            leadRefs.current[leadId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+
+      // Clear the URL parameter
+      setSearchParams({});
+
+      // Remove highlight after 5 seconds
+      setTimeout(() => {
+        setHighlightId(null);
+      }, 5000);
+    }
+  }, [highlightedLeadId, assignedLeads]);
 
   const fetchTelecallers = async () => {
     try {
@@ -531,7 +567,12 @@ const AssignedLeads = () => {
                 {filteredLeads.map((lead) => (
                   <tr
                     key={lead.id}
-                    className="bg-white border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-blue-50 transition-all duration-200 hover:shadow-sm group"
+                    ref={(el) => leadRefs.current[lead.id] = el}
+                    className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-blue-50 transition-all duration-200 hover:shadow-sm group ${
+                      highlightId === lead.id
+                        ? 'bg-yellow-100 ring-2 ring-yellow-400 animate-pulse'
+                        : 'bg-white'
+                    }`}
                   >
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
