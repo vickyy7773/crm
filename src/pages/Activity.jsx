@@ -204,14 +204,6 @@ const Activity = () => {
               Calls
             </button>
             <button
-              onClick={() => setFilter('email')}
-              className={`px-4 py-3 rounded-xl font-semibold transition-all ${
-                filter === 'email' ? 'bg-purple-600 text-white' : 'bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Emails
-            </button>
-            <button
               onClick={() => setFilter('meeting')}
               className={`px-4 py-3 rounded-xl font-semibold transition-all ${
                 filter === 'meeting' ? 'bg-green-600 text-white' : 'bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50'
