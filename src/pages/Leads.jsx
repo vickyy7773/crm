@@ -834,14 +834,14 @@ const Leads = () => {
                       </th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Phone</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">{courseTypeFilter === 'Other' ? 'Score' : 'NEET'}</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Course</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remark</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Source</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-gray-50">
@@ -878,6 +878,40 @@ const Leads = () => {
                     <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                       <Phone size={11} className="text-blue-600" />
                       <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setSelectedLead(lead);
+                          setViewModalOpen(true);
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-md transition-all text-gray-700 text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
+                      >
+                        <Eye size={11} />
+                        View
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAssignLeadId(lead.id);
+                          setAssignModalOpen(true);
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-md transition-all text-white text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
+                      >
+                        <UserCheck size={11} />
+                        Assign
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md font-semibold text-[10px] ${
+                      !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
+                        ? 'bg-red-50 text-red-700 border border-red-200'
+                        : 'bg-teal-50 text-teal-700 border border-teal-200'
+                    }`}>
+                      <UserCircle size={11} />
+                      {lead.assigned_to_name || 'Unassigned'}
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
@@ -922,40 +956,6 @@ const Leads = () => {
                   </td>
                   <td className="px-3 py-2.5">
                     {getStatusBadge(lead.status)}
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md font-semibold text-[10px] ${
-                      !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
-                        ? 'bg-red-50 text-red-700 border border-red-200'
-                        : 'bg-teal-50 text-teal-700 border border-teal-200'
-                    }`}>
-                      <UserCircle size={11} />
-                      {lead.assigned_to_name || 'Unassigned'}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => {
-                          setSelectedLead(lead);
-                          setViewModalOpen(true);
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-md transition-all text-gray-700 text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
-                      >
-                        <Eye size={11} />
-                        View
-                      </button>
-                      <button
-                        onClick={() => {
-                          setAssignLeadId(lead.id);
-                          setAssignModalOpen(true);
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-md transition-all text-white text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
-                      >
-                        <UserCheck size={11} />
-                        Assign
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
