@@ -855,7 +855,7 @@ const Leads = () => {
                       : 'bg-white'
                   }`}
                 >
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <input
                       type="checkbox"
                       className="w-3.5 h-3.5 rounded border-gray-300 text-purple-600 cursor-pointer"
@@ -863,7 +863,7 @@ const Leads = () => {
                       onChange={() => handleSelectLead(lead.id)}
                     />
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                         {lead.name.charAt(0)}
@@ -874,13 +874,13 @@ const Leads = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                       <Phone size={11} className="text-blue-600" />
                       <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => {
@@ -904,7 +904,7 @@ const Leads = () => {
                       </button>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md font-semibold text-[10px] ${
                       !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
                         ? 'bg-red-50 text-red-700 border border-red-200'
@@ -914,19 +914,19 @@ const Leads = () => {
                       {lead.assigned_to_name || 'Unassigned'}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
                       <Target size={11} />
                       {lead.neet}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
                       <MapPin size={11} className="text-emerald-600" />
                       <span className="text-xs font-semibold text-emerald-700">{lead.city}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-1.5 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-200 w-fit">
                         <GraduationCap size={11} className="text-indigo-600" />
@@ -938,7 +938,7 @@ const Leads = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 max-w-[180px]">
+                  <td className="px-2 py-1.5 max-w-[180px]">
                     <div className="bg-gray-50 px-2 py-1.5 rounded-md border border-gray-200">
                       <div className="text-[10px] text-gray-700 truncate font-medium">
                         {lead.remark}
@@ -949,12 +949,12 @@ const Leads = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     <div className="inline-block bg-cyan-50 px-2 py-1 rounded-md border border-cyan-200">
                       <div className="text-[10px] font-bold text-cyan-700">{lead.source}</div>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-2 py-1.5">
                     {getStatusBadge(lead.status)}
                   </td>
                 </tr>
