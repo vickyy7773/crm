@@ -15,6 +15,8 @@ const AssignedLeads = () => {
   const [assignedLeads, setAssignedLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const LEADS_PER_PAGE = 10;
   const [leadTypeFilter, setLeadTypeFilter] = useState('all'); // 'all', 'raw', 'qualified'
   const [courseFilter, setCourseFilter] = useState('all'); // 'all', 'MBBS', 'Other'
   const [statusFilter, setStatusFilter] = useState('all');
@@ -253,6 +255,16 @@ const AssignedLeads = () => {
   };
 
   const filteredLeads = getFilteredLeads();
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredLeads.length / LEADS_PER_PAGE);
+  const startIndex = (currentPage - 1) * LEADS_PER_PAGE;
+  const paginatedLeads = filteredLeads.slice(startIndex, startIndex + LEADS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, leadTypeFilter, courseFilter, statusFilter, cityFilter, assignedFilter]);
 
   // Calculate raw and qualified counts
   const rawCount = assignedLeads.filter(lead => isRawLead(lead)).length;
@@ -564,7 +576,7 @@ const AssignedLeads = () => {
                 </tr>
               </thead>
               <tbody className="bg-gray-50">
-                {filteredLeads.map((lead) => (
+                {paginatedLeads.map((lead) => (
                   <tr
                     key={lead.id}
                     ref={(el) => leadRefs.current[lead.id] = el}
@@ -668,6 +680,44 @@ const AssignedLeads = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+              <div className="text-sm text-gray-600">
+                Showing <span className="font-semibold">{startIndex + 1}-{Math.min(startIndex + LEADS_PER_PAGE, filteredLeads.length)}</span> of <span className="font-semibold">{filteredLeads.length}</span> leads
+              </div>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
+                      currentPage === page
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                        : 'border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
