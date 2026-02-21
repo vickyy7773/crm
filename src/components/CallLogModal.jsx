@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Phone, MessageSquare, Calendar, Clock, ChevronRight } from 'lucide-react';
+import { X, Phone, MessageSquare, Calendar, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import API_URL from '../config/api';
 
@@ -71,7 +71,6 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
   const [callOutcome, setCallOutcome] = useState('');
   const [callReason, setCallReason] = useState('');
   const [nextFollowUpDate, setNextFollowUpDate] = useState('');
-  const [duration, setDuration] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen || !lead) return null;
@@ -94,25 +93,6 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
       return;
     }
 
-    // Validate remark length (min 20 characters)
-    if (callRemark.trim().length < 20) {
-      alert('Call remark must be at least 20 characters long. Please provide detailed information.');
-      return;
-    }
-
-    // Check for blocked generic words
-    const blockedWords = ['ok', 'done', 'talked', 'call done', 'called'];
-    const remarkLower = callRemark.toLowerCase().trim();
-    const hasBlockedWord = blockedWords.some(word => {
-      const regex = new RegExp(`\\b${word}\\b`, 'i');
-      return regex.test(remarkLower);
-    });
-
-    if (hasBlockedWord) {
-      alert('Please avoid generic words like "ok", "done", "talked". Provide specific details about the conversation.');
-      return;
-    }
-
     // Validate sub-option selection
     if (hasSubOptions && !callReason) {
       alert('Please select a sub-option for the selected outcome.');
@@ -131,8 +111,7 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
           callRemark: callRemark.trim(),
           callOutcome,
           callReason: callReason || null,
-          nextFollowUpDate: nextFollowUpDate || null,
-          duration: duration || null
+          nextFollowUpDate: nextFollowUpDate || null
         })
       });
 
@@ -144,7 +123,6 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
         setCallOutcome('');
         setCallReason('');
         setNextFollowUpDate('');
-        setDuration('');
         onClose();
         if (onSuccess) onSuccess();
       } else {
@@ -196,19 +174,11 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
             <textarea
               value={callRemark}
               onChange={(e) => setCallRemark(e.target.value)}
-              rows={4}
-              placeholder="Enter details about the call (what was discussed, student's concerns, etc.)"
+              rows={3}
+              placeholder="Enter details about the call..."
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm resize-none"
               required
             />
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-xs text-gray-500">
-                Be detailed: mention course preference, budget, timeline, etc.
-              </p>
-              <p className={`text-xs font-semibold ${callRemark.trim().length >= 20 ? 'text-green-600' : 'text-red-500'}`}>
-                {callRemark.trim().length}/20 chars
-              </p>
-            </div>
           </div>
 
           {/* Call Outcome */}
@@ -236,6 +206,29 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
             </select>
           </div>
 
+          {/* Next Follow-up Date */}
+          {showFollowUp && (
+            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+              <label className="flex items-center gap-2 text-sm font-semibold text-purple-900 mb-2">
+                <Calendar size={16} />
+                Next Follow-up Date
+                {isFollowUpRequired && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="datetime-local"
+                value={nextFollowUpDate}
+                onChange={(e) => setNextFollowUpDate(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm bg-white"
+                required={isFollowUpRequired}
+              />
+              <p className="text-xs text-purple-600 mt-1">
+                {isFollowUpRequired
+                  ? 'Required: Schedule next call date and time'
+                  : 'Optional: Set reminder for follow-up'}
+              </p>
+            </div>
+          )}
+
           {/* Sub-Dropdown based on Call Outcome */}
           {hasSubOptions && (
             <div className={`border-2 rounded-xl p-4 ${isNegativeOutcome ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
@@ -258,45 +251,6 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-          )}
-
-          {/* Duration */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-              <Clock size={16} />
-              Call Duration (minutes)
-            </label>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              min="0"
-              placeholder="e.g., 5"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm"
-            />
-          </div>
-
-          {/* Next Follow-up Date */}
-          {showFollowUp && (
-            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
-              <label className="flex items-center gap-2 text-sm font-semibold text-purple-900 mb-2">
-                <Calendar size={16} />
-                Next Follow-up Date
-                {isFollowUpRequired && <span className="text-red-500">*</span>}
-              </label>
-              <input
-                type="datetime-local"
-                value={nextFollowUpDate}
-                onChange={(e) => setNextFollowUpDate(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm bg-white"
-                required={isFollowUpRequired}
-              />
-              <p className="text-xs text-purple-600 mt-1">
-                {isFollowUpRequired
-                  ? 'Required: Schedule next call date and time'
-                  : 'Optional: Set reminder for follow-up'}
-              </p>
             </div>
           )}
 
