@@ -337,6 +337,22 @@ app.get('/api/debug/call-history', async (req, res) => {
   }
 });
 
+// Reset admin password endpoint (one-time use)
+app.get('/api/reset-admin', async (req, res) => {
+  const { pool } = require('./config/database');
+  const bcrypt = require('bcrypt');
+  try {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await pool.query(
+      `UPDATE users SET password = $1 WHERE email = 'admin@pulseeducation.com'`,
+      [hashedPassword]
+    );
+    res.json({ success: true, message: 'Admin password reset to admin123' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Database health check endpoint
 app.get('/api/health/db', async (req, res) => {
   const isConnected = await testConnection();
