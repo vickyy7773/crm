@@ -536,33 +536,10 @@ router.post('/:id/call-log', async (req, res) => {
       });
     }
 
-    // Remark quality validation (min 20 characters) - Skip for Super Admin
-    if (!isSuperAdmin && callRemark.trim().length < 20) {
-      return res.status(400).json({
-        success: false,
-        message: 'Call remark must be at least 20 characters long'
-      });
-    }
-
-    // Block generic/low-quality remarks - Skip for Super Admin
-    if (!isSuperAdmin) {
-      const blockedWords = ['ok', 'done', 'talked', 'call done', 'called'];
-      const remarkLower = callRemark.toLowerCase().trim();
-      const hasBlockedWord = blockedWords.some(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'i');
-        return regex.test(remarkLower);
-      });
-
-      if (hasBlockedWord) {
-        return res.status(400).json({
-          success: false,
-          message: 'Please provide detailed and meaningful remarks about the call'
-        });
-      }
-    }
+    // Remark quality validation removed - no minimum character limit now
 
     // Validate call reason for negative outcomes - Skip for Super Admin
-    const negativeOutcomes = ['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off'];
+    const negativeOutcomes = ['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Drop', 'Invalid Lead'];
     if (!isSuperAdmin && negativeOutcomes.includes(callOutcome) && !callReason) {
       return res.status(400).json({
         success: false,
