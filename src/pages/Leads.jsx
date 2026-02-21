@@ -48,14 +48,16 @@ const Leads = () => {
   const [newLeadType, setNewLeadType] = useState('raw'); // 'raw' or 'qualified'
   const [newStudent, setNewStudent] = useState({
     name: '',
+    fatherName: '',
     phone: '',
-    neet: '',
     city: '',
-    country: '',
-    course: '',
-    remark: '',
     source: '',
-    status: 'Followup'
+    neetPrevious: '',
+    neet2026: '',
+    course: '',
+    destination: '',
+    nextFollowUpDate: '',
+    remark: '',
   });
 
   // Fetch leads from API
@@ -255,26 +257,52 @@ const Leads = () => {
     e.preventDefault();
 
     try {
+      // Map form fields to backend expected fields
+      const leadData = {
+        name: newStudent.name,
+        phone: newStudent.phone,
+        city: newStudent.city,
+        source: newStudent.source,
+        neet: [newStudent.neetPrevious, newStudent.neet2026].filter(Boolean).join(' | 2026: ') || null,
+        course: newStudent.course || null,
+        destination: newStudent.destination || null,
+        remark: [
+          newStudent.fatherName ? `Father: ${newStudent.fatherName}` : '',
+          newStudent.remark
+        ].filter(Boolean).join(' | ') || null,
+      };
+
       const response = await fetch(`${API_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStudent)
+        body: JSON.stringify(leadData)
       });
 
+      // If follow-up date is set, update lead with it after creation
       const result = await response.json();
+      if (result.success && newStudent.nextFollowUpDate) {
+        await fetch(`${API_URL}/leads/${result.data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ next_followup_date: newStudent.nextFollowUpDate })
+        });
+      }
+
       if (result.success) {
-        alert('✓ Student added successfully!');
+        alert('✓ Lead added successfully!');
         setAddModalOpen(false);
         setNewStudent({
           name: '',
+          fatherName: '',
           phone: '',
-          neet: '',
           city: '',
-          country: '',
-          course: '',
-          remark: '',
           source: '',
-          status: 'Followup'
+          neetPrevious: '',
+          neet2026: '',
+          course: '',
+          destination: '',
+          nextFollowUpDate: '',
+          remark: '',
         });
         fetchLeads(); // Refresh the leads list
       } else {
@@ -1650,8 +1678,8 @@ const Leads = () => {
                     <Plus size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Add Lead</h2>
-                    <p className="text-purple-100 text-sm">Add raw or qualified lead - only Name & Phone required</p>
+                    <h2 className="text-2xl font-bold">Add Qualified Lead</h2>
+                    <p className="text-purple-100 text-sm">Name & Phone required, rest optional</p>
                   </div>
                 </div>
                 <button
@@ -1679,31 +1707,28 @@ const Leads = () => {
             {/* Modal Body */}
             <form onSubmit={handleAddStudent} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
 
-              {/* Lead Type Selection */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Lead Type *</label>
-                <select
-                  value={newLeadType}
-                  onChange={(e) => setNewLeadType(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                >
-                  <option value="raw">Raw Lead (Basic info)</option>
-                  <option value="qualified">Qualified Lead (Complete details)</option>
-                </select>
-              </div>
-
-              {/* Lead Details */}
+              {/* Qualified Lead Fields */}
               <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
                     <input
                       type="text"
                       required
                       value={newStudent.name}
                       onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
                       className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                      placeholder="Enter student's full name"
+                      placeholder="Student name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
+                    <input
+                      type="text"
+                      value={newStudent.fatherName}
+                      onChange={(e) => setNewStudent({...newStudent, fatherName: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Father's name"
                     />
                   </div>
                   <div>
@@ -1717,7 +1742,7 @@ const Leads = () => {
                       minLength="10"
                       pattern="[0-9]{10}"
                       className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                      placeholder="10-digit mobile number"
+                      placeholder="10-digit mobile"
                     />
                   </div>
                   <div>
@@ -1730,86 +1755,80 @@ const Leads = () => {
                       placeholder="City name"
                     />
                   </div>
-
-                  {/* Qualified Lead Only Fields */}
-                  {newLeadType === 'qualified' && (
-                    <>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Country</label>
-                        <input
-                          type="text"
-                          value={newStudent.country}
-                          onChange={(e) => setNewStudent({...newStudent, country: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="e.g. Russia, Kazakhstan, etc."
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Source</label>
-                        <input
-                          type="text"
-                          value={newStudent.source}
-                          onChange={(e) => setNewStudent({...newStudent, source: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="e.g. Google, Facebook, Referral"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
-                        <select
-                          value={newStudent.course}
-                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                        >
-                          <option value="">-- Select Course --</option>
-                          <option value="MBBS">MBBS</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      {newStudent.course && (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            {newStudent.course === 'MBBS' ? 'NEET Score' : 'Score'}
-                          </label>
-                          <input
-                            type="text"
-                            value={newStudent.neet}
-                            onChange={(e) => setNewStudent({...newStudent, neet: e.target.value})}
-                            className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                            placeholder={newStudent.course === 'MBBS' ? 'Enter NEET marks/rank' : 'Enter score'}
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
-                        <select
-                          value={newStudent.status}
-                          onChange={(e) => setNewStudent({...newStudent, status: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                        >
-                          <option value="Followup">Followup</option>
-                          <option value="After Result">After Result</option>
-                          <option value="Call Back">Call Back</option>
-                          <option value="Office Meeting">Office Meeting</option>
-                          <option value="Interested">Interested</option>
-                          <option value="India First">India First</option>
-                          <option value="Other Course">Other Course</option>
-                          <option value="Not Interested">Not Interested</option>
-                          <option value="Drop">Drop</option>
-                        </select>
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
-                        <textarea
-                          value={newStudent.remark}
-                          onChange={(e) => setNewStudent({...newStudent, remark: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="Any additional notes or remarks..."
-                          rows="3"
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Source</label>
+                    <input
+                      type="text"
+                      value={newStudent.source}
+                      onChange={(e) => setNewStudent({...newStudent, source: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="e.g. Google, Facebook, Referral"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
+                    <input
+                      type="text"
+                      value={newStudent.neetPrevious}
+                      onChange={(e) => setNewStudent({...newStudent, neetPrevious: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Previous NEET score"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
+                    <input
+                      type="text"
+                      value={newStudent.neet2026}
+                      onChange={(e) => setNewStudent({...newStudent, neet2026: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="NEET 2026 score"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
+                    <select
+                      value={newStudent.course}
+                      onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    >
+                      <option value="">-- Select Course --</option>
+                      <option value="MBBS">MBBS</option>
+                      <option value="BAMS/BDS">BAMS / BDS</option>
+                      <option value="Other Course">Other Course</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Interested Location</label>
+                    <select
+                      value={newStudent.destination}
+                      onChange={(e) => setNewStudent({...newStudent, destination: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    >
+                      <option value="">-- Select --</option>
+                      <option value="India">India</option>
+                      <option value="Abroad">Abroad</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Follow Up</label>
+                    <input
+                      type="datetime-local"
+                      value={newStudent.nextFollowUpDate}
+                      onChange={(e) => setNewStudent({...newStudent, nextFollowUpDate: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
+                    <textarea
+                      value={newStudent.remark}
+                      onChange={(e) => setNewStudent({...newStudent, remark: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Any additional notes..."
+                      rows="2"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1821,13 +1840,16 @@ const Leads = () => {
                     setAddModalOpen(false);
                     setNewStudent({
                       name: '',
+                      fatherName: '',
                       phone: '',
-                      neet: '',
                       city: '',
-                      course: '',
-                      remark: '',
                       source: '',
-                      status: 'Followup'
+                      neetPrevious: '',
+                      neet2026: '',
+                      course: '',
+                      destination: '',
+                      nextFollowUpDate: '',
+                      remark: '',
                     });
                   }}
                   className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
