@@ -9,12 +9,13 @@ const AssignedLeads = () => {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightedLeadId = searchParams.get('highlight');
+  const statusFromUrl = searchParams.get('status');
   const [highlightId, setHighlightId] = useState(null);
   const leadRefs = useRef({});
 
   const [assignedLeads, setAssignedLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(statusFromUrl || 'all');
   const [currentPage, setCurrentPage] = useState(1);
   const LEADS_PER_PAGE = 10;
   const [leadTypeFilter, setLeadTypeFilter] = useState('all'); // 'all', 'raw', 'qualified'
@@ -277,28 +278,28 @@ const AssignedLeads = () => {
   // Calculate counts for tabs (Converted leads removed - see Converted Leads page)
   const counts = {
     all: assignedLeads.length,
-    'Followup': assignedLeads.filter(l => l.status === 'Followup').length,
-    'After Result': assignedLeads.filter(l => l.status === 'After Result').length,
-    'Call Back': assignedLeads.filter(l => l.status === 'Call Back').length,
-    'Office Meeting': assignedLeads.filter(l => l.status === 'Office Meeting').length,
     'Interested': assignedLeads.filter(l => l.status === 'Interested').length,
-    'India First': assignedLeads.filter(l => l.status === 'India First').length,
+    'Follow Up': assignedLeads.filter(l => l.status === 'Follow Up').length,
+    'Call Back': assignedLeads.filter(l => l.status === 'Call Back').length,
+    'Office Visit': assignedLeads.filter(l => l.status === 'Office Visit').length,
+    'After Result / Counseling': assignedLeads.filter(l => l.status === 'After Result / Counseling').length,
     'Other Course': assignedLeads.filter(l => l.status === 'Other Course').length,
     'Not Interested': assignedLeads.filter(l => l.status === 'Not Interested').length,
     'Drop': assignedLeads.filter(l => l.status === 'Drop').length,
+    'Invalid Lead': assignedLeads.filter(l => l.status === 'Invalid Lead').length,
   };
 
   const tabs = [
     { id: 'all', label: 'All Assigned', count: counts.all },
-    { id: 'Followup', label: 'Followup', count: counts['Followup'] },
-    { id: 'After Result', label: 'After Result', count: counts['After Result'] },
-    { id: 'Call Back', label: 'Call Back', count: counts['Call Back'] },
-    { id: 'Office Meeting', label: 'Office Meeting', count: counts['Office Meeting'] },
     { id: 'Interested', label: 'Interested', count: counts['Interested'] },
-    { id: 'India First', label: 'India First', count: counts['India First'] },
+    { id: 'Follow Up', label: 'Follow Up', count: counts['Follow Up'] },
+    { id: 'Call Back', label: 'Call Back', count: counts['Call Back'] },
+    { id: 'Office Visit', label: 'Office Visit', count: counts['Office Visit'] },
+    { id: 'After Result / Counseling', label: 'After Result', count: counts['After Result / Counseling'] },
     { id: 'Other Course', label: 'Other Course', count: counts['Other Course'] },
     { id: 'Not Interested', label: 'Not Interested', count: counts['Not Interested'] },
     { id: 'Drop', label: 'Drop', count: counts['Drop'] },
+    { id: 'Invalid Lead', label: 'Invalid Lead', count: counts['Invalid Lead'] },
   ];
 
   const openRemarkModal = async (lead) => {
@@ -334,15 +335,15 @@ const AssignedLeads = () => {
 
   const getStatusBadge = (status) => {
     const statusColors = {
-      'Followup': 'bg-blue-100 text-blue-800 border-blue-300',
-      'After Result': 'bg-amber-100 text-amber-800 border-amber-300',
-      'Call Back': 'bg-orange-100 text-orange-800 border-orange-300',
-      'Office Meeting': 'bg-teal-100 text-teal-800 border-teal-300',
       'Interested': 'bg-purple-100 text-purple-800 border-purple-300',
-      'India First': 'bg-indigo-100 text-indigo-800 border-indigo-300',
+      'Follow Up': 'bg-blue-100 text-blue-800 border-blue-300',
+      'Call Back': 'bg-orange-100 text-orange-800 border-orange-300',
+      'Office Visit': 'bg-teal-100 text-teal-800 border-teal-300',
+      'After Result / Counseling': 'bg-amber-100 text-amber-800 border-amber-300',
       'Other Course': 'bg-cyan-100 text-cyan-800 border-cyan-300',
       'Not Interested': 'bg-gray-100 text-gray-800 border-gray-300',
       'Drop': 'bg-rose-100 text-rose-800 border-rose-300',
+      'Invalid Lead': 'bg-red-100 text-red-800 border-red-300',
       'Converted': 'bg-green-100 text-green-800 border-green-300',
     };
 
@@ -995,19 +996,19 @@ const AssignedLeads = () => {
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Status</label>
                   <select
-                    value={editFormData.status || 'Followup'}
+                    value={editFormData.status || 'Follow Up'}
                     onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
                     className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                   >
-                    <option value="Followup">Followup</option>
-                    <option value="After Result">After Result</option>
-                    <option value="Call Back">Call Back</option>
-                    <option value="Office Meeting">Office Meeting</option>
                     <option value="Interested">Interested</option>
-                    <option value="India First">India First</option>
+                    <option value="Follow Up">Follow Up</option>
+                    <option value="Call Back">Call Back</option>
+                    <option value="Office Visit">Office Visit</option>
+                    <option value="After Result / Counseling">After Result / Counseling</option>
                     <option value="Other Course">Other Course</option>
                     <option value="Not Interested">Not Interested</option>
                     <option value="Drop">Drop</option>
+                    <option value="Invalid Lead">Invalid Lead</option>
                   </select>
                 </div>
                 <div>
