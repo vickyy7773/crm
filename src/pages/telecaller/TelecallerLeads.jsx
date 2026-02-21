@@ -122,6 +122,17 @@ const TelecallerLeads = () => {
     });
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const isOverdue = (date) => {
     if (!date) return false;
     return new Date(date) < new Date();
@@ -357,7 +368,7 @@ const TelecallerLeads = () => {
                         <span className={`text-[10px] font-bold ${
                           isOverdue(lead.next_followup_date) && lead.next_followup_date ? 'text-red-700' : 'text-gray-700'
                         }`}>
-                          {formatDate(lead.next_followup_date)}
+                          {formatDateTime(lead.next_followup_date)}
                         </span>
                         {isOverdue(lead.next_followup_date) && lead.next_followup_date && (
                           <span className="text-[8px] font-bold text-red-600 ml-1">⚠️</span>
