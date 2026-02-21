@@ -1069,52 +1069,172 @@ const AssignedLeads = () => {
                   <span className="text-[10px] md:text-xs text-gray-500 hidden md:inline">(Optional)</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 md:gap-4 bg-purple-50 p-2 md:p-4 rounded-lg md:rounded-xl border border-purple-200">
+                <div className="space-y-3 bg-purple-50 p-2 md:p-4 rounded-lg md:rounded-xl border border-purple-200">
+                  {/* 1. Outcome */}
                   <div>
                     <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Outcome *</label>
                     <select
                       value={callLogData.callOutcome}
-                      onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value })}
+                      onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value, callReason: '' })}
                       className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                     >
                       <option value="">-- Select --</option>
-                      <option value="Followup">Followup</option>
-                      <option value="After Result">After Result</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="Office Meeting">Office Meeting</option>
-                      <option value="Interested">Interested</option>
-                      <option value="India First">India First</option>
-                      <option value="Other Course">Other Course</option>
-                      <option value="Not Interested">Not Interested</option>
-                      <option value="Drop">Drop</option>
-                      <option value="Converted">Converted</option>
+                      <option value="Interested">⭐ Interested</option>
+                      <option value="Follow Up">📋 Follow Up</option>
+                      <option value="Call Back">🔄 Call Back</option>
+                      <option value="Office Visit">🏢 Office Visit</option>
+                      <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+                      <option value="Other Course">📚 Other Course</option>
+                      <option value="Not Interested">✖ Not Interested</option>
+                      <option value="Drop">❌ Drop</option>
+                      <option value="Invalid Lead">🚫 Invalid Lead</option>
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Follow-up</label>
-                    <input
-                      type="datetime-local"
-                      value={callLogData.nextFollowUpDate}
-                      onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
-                      className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
-                    />
-                  </div>
-
-                  {['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off'].includes(callLogData.callOutcome) && (
-                    <div className="col-span-2">
-                      <label className="block text-xs md:text-sm font-semibold text-red-700 mb-1 md:mb-2">Reason *</label>
-                      <input
-                        type="text"
+                  {/* 2. Sub Category */}
+                  {callLogData.callOutcome && {
+                    'Interested': [
+                      { value: 'India', label: '🇮🇳 India' },
+                      { value: 'Abroad', label: '🌍 Abroad' },
+                      { value: 'Counselling Only', label: '💬 Counselling Only' },
+                      { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
+                    ],
+                    'Follow Up': [
+                      { value: 'Details Shared', label: '📋 Details Shared' },
+                      { value: 'Discussed on Phone', label: '📞 Discussed on Phone' },
+                      { value: 'Documents Pending', label: '📄 Documents Pending' },
+                      { value: 'Meeting Planned', label: '📅 Meeting Planned' },
+                    ],
+                    'Call Back': [
+                      { value: 'Not Reachable', label: '📴 Not Reachable' },
+                      { value: 'Busy', label: '📵 Busy' },
+                      { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
+                      { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
+                    ],
+                    'Office Visit': [
+                      { value: 'Address Shared', label: '📍 Address Shared' },
+                      { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
+                      { value: 'Visit Done', label: '✅ Visit Done' },
+                    ],
+                    'After Result / Counseling': [
+                      { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
+                      { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
+                    ],
+                    'Other Course': [
+                      { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
+                      { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' },
+                      { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' },
+                      { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' },
+                    ],
+                    'Not Interested': [
+                      { value: 'Budget Issue', label: '💰 Budget Issue' },
+                      { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' },
+                      { value: 'Already Admission Taken', label: '📄 Already Admission Taken' },
+                      { value: 'Just Inquiry', label: '❓ Just Inquiry' },
+                    ],
+                    'Drop': [
+                      { value: 'Not Qualified', label: '❌ Not Qualified' },
+                      { value: 'Improvement Year', label: '📖 Improvement Year' },
+                      { value: 'Financial Problem', label: '💸 Financial Problem' },
+                    ],
+                    'Invalid Lead': [
+                      { value: 'Wrong Number', label: '📞 Wrong Number' },
+                      { value: 'Not Reachable', label: '📴 Not Reachable' },
+                      { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
+                    ],
+                  }[callLogData.callOutcome] && (
+                    <div className={`border-2 rounded-lg md:rounded-xl p-2 md:p-3 ${
+                      ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
+                        ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
+                    }`}>
+                      <label className={`block text-xs md:text-sm font-semibold mb-1 md:mb-2 ${
+                        ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
+                          ? 'text-red-700' : 'text-blue-700'
+                      }`}>{callLogData.callOutcome} - Sub Category *</label>
+                      <select
                         value={callLogData.callReason}
                         onChange={(e) => setCallLogData({ ...callLogData, callReason: e.target.value })}
-                        placeholder="Enter reason..."
-                        className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-red-200 rounded-lg md:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none bg-white"
+                        className={`w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 rounded-lg md:rounded-xl focus:ring-2 outline-none bg-white ${
+                          ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                            : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                        }`}
+                      >
+                        <option value="">-- Select Reason --</option>
+                        {{
+                          'Interested': [
+                            { value: 'India', label: '🇮🇳 India' },
+                            { value: 'Abroad', label: '🌍 Abroad' },
+                            { value: 'Counselling Only', label: '💬 Counselling Only' },
+                            { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
+                          ],
+                          'Follow Up': [
+                            { value: 'Details Shared', label: '📋 Details Shared' },
+                            { value: 'Discussed on Phone', label: '📞 Discussed on Phone' },
+                            { value: 'Documents Pending', label: '📄 Documents Pending' },
+                            { value: 'Meeting Planned', label: '📅 Meeting Planned' },
+                          ],
+                          'Call Back': [
+                            { value: 'Not Reachable', label: '📴 Not Reachable' },
+                            { value: 'Busy', label: '📵 Busy' },
+                            { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
+                            { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
+                          ],
+                          'Office Visit': [
+                            { value: 'Address Shared', label: '📍 Address Shared' },
+                            { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
+                            { value: 'Visit Done', label: '✅ Visit Done' },
+                          ],
+                          'After Result / Counseling': [
+                            { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
+                            { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
+                          ],
+                          'Other Course': [
+                            { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
+                            { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' },
+                            { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' },
+                            { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' },
+                          ],
+                          'Not Interested': [
+                            { value: 'Budget Issue', label: '💰 Budget Issue' },
+                            { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' },
+                            { value: 'Already Admission Taken', label: '📄 Already Admission Taken' },
+                            { value: 'Just Inquiry', label: '❓ Just Inquiry' },
+                          ],
+                          'Drop': [
+                            { value: 'Not Qualified', label: '❌ Not Qualified' },
+                            { value: 'Improvement Year', label: '📖 Improvement Year' },
+                            { value: 'Financial Problem', label: '💸 Financial Problem' },
+                          ],
+                          'Invalid Lead': [
+                            { value: 'Wrong Number', label: '📞 Wrong Number' },
+                            { value: 'Not Reachable', label: '📴 Not Reachable' },
+                            { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
+                          ],
+                        }[callLogData.callOutcome]?.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* 3. Follow-up Date */}
+                  {['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling'].includes(callLogData.callOutcome) && (
+                    <div>
+                      <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">
+                        Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={callLogData.nextFollowUpDate}
+                        onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
+                        className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                       />
                     </div>
                   )}
 
-                  <div className="col-span-2">
+                  {/* 4. Remark */}
+                  <div>
                     <label className="block text-xs md:text-sm font-semibold text-purple-700 mb-1 md:mb-2">Remark *</label>
                     <textarea
                       value={callLogData.callRemark}
@@ -1123,10 +1243,6 @@ const AssignedLeads = () => {
                       className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
                       rows="2"
                     />
-                    <p className="text-[10px] md:text-xs text-purple-600 mt-1">
-                      {callLogData.callRemark.length}/20 chars
-                      {callLogData.callRemark.length >= 20 ? ' ✓' : ''}
-                    </p>
                   </div>
                 </div>
               </div>
