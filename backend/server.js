@@ -59,6 +59,23 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'CRM Backend API is running' });
 });
 
+// Auto-setup endpoint - creates all tables if they don't exist
+app.get('/api/setup', async (req, res) => {
+  const { pool } = require('./config/database');
+  const fs = require('fs');
+  const path = require('path');
+
+  try {
+    const migrationPath = path.join(__dirname, 'migrations', 'full_migration.sql');
+    const sql = fs.readFileSync(migrationPath, 'utf8');
+    await pool.query(sql);
+    res.json({ success: true, message: 'Database setup completed! All tables created.' });
+  } catch (error) {
+    console.error('Setup error:', error);
+    res.status(500).json({ success: false, message: 'Setup failed', error: error.message });
+  }
+});
+
 // Database migration endpoint - adds missing columns
 app.get('/api/migrate', async (req, res) => {
   const { pool } = require('./config/database');
