@@ -1,7 +1,69 @@
 import { useState } from 'react';
-import { X, Phone, MessageSquare, Calendar, Clock } from 'lucide-react';
+import { X, Phone, MessageSquare, Calendar, Clock, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import API_URL from '../config/api';
+
+// Sub-options for each Call Outcome
+const outcomeSubOptions = {
+  'Interested': [
+    { value: 'India', label: '🇮🇳 India' },
+    { value: 'Abroad', label: '🌍 Abroad' },
+    { value: 'Counselling Only', label: '💬 Counselling Only' },
+    { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
+  ],
+  'Follow Up': [
+    { value: 'Details Shared', label: '📋 Details Shared' },
+    { value: 'Discussed on Phone', label: '📞 Discussed on Phone' },
+    { value: 'Documents Pending', label: '📄 Documents Pending' },
+    { value: 'Meeting Planned', label: '📅 Meeting Planned' },
+  ],
+  'Call Back': [
+    { value: 'Not Reachable', label: '📴 Not Reachable' },
+    { value: 'Busy', label: '📵 Busy' },
+    { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
+    { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
+  ],
+  'Office Visit': [
+    { value: 'Address Shared', label: '📍 Address Shared' },
+    { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
+    { value: 'Visit Done', label: '✅ Visit Done' },
+  ],
+  'After Result / Counseling': [
+    { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
+    { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
+  ],
+  'Other Course': [
+    { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
+    { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' },
+    { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' },
+    { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' },
+  ],
+  'Not Interested': [
+    { value: 'Budget Issue', label: '💰 Budget Issue' },
+    { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' },
+    { value: 'Already Admission Taken', label: '📄 Already Admission Taken' },
+    { value: 'Just Inquiry', label: '❓ Just Inquiry' },
+  ],
+  'Drop': [
+    { value: 'Not Qualified', label: '❌ Not Qualified' },
+    { value: 'Improvement Year', label: '📖 Improvement Year' },
+    { value: 'Financial Problem', label: '💸 Financial Problem' },
+  ],
+  'Invalid Lead': [
+    { value: 'Wrong Number', label: '📞 Wrong Number' },
+    { value: 'Not Reachable', label: '📴 Not Reachable' },
+    { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
+  ],
+};
+
+// Outcomes that need follow-up date
+const followUpOutcomes = ['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling'];
+
+// Outcomes where follow-up is required
+const requiredFollowUpOutcomes = ['Call Back', 'Follow Up'];
+
+// Negative outcomes (for styling)
+const negativeOutcomes = ['Not Interested', 'Drop', 'Invalid Lead'];
 
 const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
   const { user } = useAuth();
@@ -14,9 +76,15 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
 
   if (!isOpen || !lead) return null;
 
-  // Check if outcome is negative (requires reason)
-  const negativeOutcomes = ['Not Interested', 'Not Reachable', 'Drop'];
+  const hasSubOptions = callOutcome && outcomeSubOptions[callOutcome];
   const isNegativeOutcome = negativeOutcomes.includes(callOutcome);
+  const showFollowUp = followUpOutcomes.includes(callOutcome);
+  const isFollowUpRequired = requiredFollowUpOutcomes.includes(callOutcome);
+
+  const handleOutcomeChange = (value) => {
+    setCallOutcome(value);
+    setCallReason(''); // Reset sub-option when outcome changes
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,9 +113,9 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
       return;
     }
 
-    // Validate call reason for negative outcomes
-    if (isNegativeOutcome && !callReason) {
-      alert('Please select a reason for this negative outcome.');
+    // Validate sub-option selection
+    if (hasSubOptions && !callReason) {
+      alert('Please select a sub-option for the selected outcome.');
       return;
     }
 
@@ -151,48 +219,45 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
             </label>
             <select
               value={callOutcome}
-              onChange={(e) => setCallOutcome(e.target.value)}
+              onChange={(e) => handleOutcomeChange(e.target.value)}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium bg-white"
               required
             >
               <option value="">-- Select Outcome --</option>
-              <option value="Contacted">📞 Contacted</option>
               <option value="Interested">⭐ Interested</option>
+              <option value="Follow Up">📋 Follow Up</option>
               <option value="Call Back">🔄 Call Back</option>
-              <option value="Not Interested">✖ Not Interested</option>
-              <option value="Converted">✅ Converted</option>
-              <option value="Not Reachable">📴 Not Reachable</option>
               <option value="Office Visit">🏢 Office Visit</option>
+              <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+              <option value="Other Course">📚 Other Course</option>
+              <option value="Not Interested">✖ Not Interested</option>
               <option value="Drop">❌ Drop</option>
+              <option value="Invalid Lead">🚫 Invalid Lead</option>
             </select>
           </div>
 
-          {/* Call Reason - Only for negative outcomes */}
-          {isNegativeOutcome && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-              <label className="flex items-center gap-2 text-sm font-semibold text-red-900 mb-2">
-                <MessageSquare size={16} />
-                Call Reason <span className="text-red-500">*</span>
+          {/* Sub-Dropdown based on Call Outcome */}
+          {hasSubOptions && (
+            <div className={`border-2 rounded-xl p-4 ${isNegativeOutcome ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+              <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isNegativeOutcome ? 'text-red-900' : 'text-blue-900'}`}>
+                <ChevronRight size={16} />
+                {callOutcome} - Sub Category <span className="text-red-500">*</span>
               </label>
               <select
                 value={callReason}
                 onChange={(e) => setCallReason(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm font-medium bg-white"
-                required={isNegativeOutcome}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 outline-none transition-all text-sm font-medium bg-white ${
+                  isNegativeOutcome
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                    : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                }`}
+                required
               >
-                <option value="">-- Select Reason --</option>
-                <option value="Budget Issue">💰 Budget Issue</option>
-                <option value="Parents Not Agree">👨‍👩‍👧 Parents Not Agree</option>
-                <option value="Already Applied Elsewhere">📄 Already Applied Elsewhere</option>
-                <option value="Not Eligible">❌ Not Eligible</option>
-                <option value="Language Issue">🗣️ Language Issue</option>
-                <option value="Wrong Contact">📞 Wrong Contact</option>
-                <option value="Not Interested (General)">🚫 Not Interested (General)</option>
-                <option value="Other">❓ Other</option>
+                <option value="">-- Select {callOutcome} Reason --</option>
+                {outcomeSubOptions[callOutcome].map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
-              <p className="text-xs text-red-600 mt-2 font-medium">
-                Required: Please specify why this outcome is negative
-              </p>
             </div>
           )}
 
@@ -213,22 +278,22 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
           </div>
 
           {/* Next Follow-up Date */}
-          {(callOutcome === 'Call Back' || callOutcome === 'Interested' || callOutcome === 'Contacted') && (
+          {showFollowUp && (
             <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
               <label className="flex items-center gap-2 text-sm font-semibold text-purple-900 mb-2">
                 <Calendar size={16} />
                 Next Follow-up Date
-                {callOutcome === 'Call Back' && <span className="text-red-500">*</span>}
+                {isFollowUpRequired && <span className="text-red-500">*</span>}
               </label>
               <input
                 type="datetime-local"
                 value={nextFollowUpDate}
                 onChange={(e) => setNextFollowUpDate(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm bg-white"
-                required={callOutcome === 'Call Back'}
+                required={isFollowUpRequired}
               />
               <p className="text-xs text-purple-600 mt-1">
-                {callOutcome === 'Call Back'
+                {isFollowUpRequired
                   ? 'Required: Schedule next call date and time'
                   : 'Optional: Set reminder for follow-up'}
               </p>
