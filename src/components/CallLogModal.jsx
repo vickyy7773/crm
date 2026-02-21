@@ -165,23 +165,7 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
 
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Call Remark */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-              <MessageSquare size={16} />
-              Call Remark <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              value={callRemark}
-              onChange={(e) => setCallRemark(e.target.value)}
-              rows={3}
-              placeholder="Enter details about the call..."
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm resize-none"
-              required
-            />
-          </div>
-
-          {/* Call Outcome */}
+          {/* 1. Call Outcome */}
           <div>
             <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
               <Phone size={16} />
@@ -206,30 +190,7 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
             </select>
           </div>
 
-          {/* Next Follow-up Date */}
-          {showFollowUp && (
-            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
-              <label className="flex items-center gap-2 text-sm font-semibold text-purple-900 mb-2">
-                <Calendar size={16} />
-                Next Follow-up Date
-                {isFollowUpRequired && <span className="text-red-500">*</span>}
-              </label>
-              <input
-                type="datetime-local"
-                value={nextFollowUpDate}
-                onChange={(e) => setNextFollowUpDate(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm bg-white"
-                required={isFollowUpRequired}
-              />
-              <p className="text-xs text-purple-600 mt-1">
-                {isFollowUpRequired
-                  ? 'Required: Schedule next call date and time'
-                  : 'Optional: Set reminder for follow-up'}
-              </p>
-            </div>
-          )}
-
-          {/* Sub-Dropdown based on Call Outcome */}
+          {/* 2. Sub-Dropdown based on Call Outcome */}
           {hasSubOptions && (
             <div className={`border-2 rounded-xl p-4 ${isNegativeOutcome ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
               <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isNegativeOutcome ? 'text-red-900' : 'text-blue-900'}`}>
@@ -253,6 +214,45 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
               </select>
             </div>
           )}
+
+          {/* 3. Next Follow-up Date */}
+          {showFollowUp && (
+            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+              <label className="flex items-center gap-2 text-sm font-semibold text-purple-900 mb-2">
+                <Calendar size={16} />
+                Next Follow-up Date
+                {isFollowUpRequired && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="datetime-local"
+                value={nextFollowUpDate}
+                onChange={(e) => setNextFollowUpDate(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm bg-white"
+                required={isFollowUpRequired}
+              />
+              <p className="text-xs text-purple-600 mt-1">
+                {isFollowUpRequired
+                  ? 'Required: Schedule next call date and time'
+                  : 'Optional: Set reminder for follow-up'}
+              </p>
+            </div>
+          )}
+
+          {/* 4. Call Remark */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <MessageSquare size={16} />
+              Call Remark <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={callRemark}
+              onChange={(e) => setCallRemark(e.target.value)}
+              rows={3}
+              placeholder="Enter details about the call..."
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm resize-none"
+              required
+            />
+          </div>
 
           {/* Auto-filled Info */}
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
