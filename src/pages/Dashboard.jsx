@@ -103,43 +103,47 @@ const Dashboard = () => {
     return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
-  // Map dashboard stats to display format
+  // Map dashboard stats to display format - Status-wise boxes
   const stats = dashboardStats ? [
     {
-      title: 'Total Leads',
-      value: dashboardStats.totalLeads.toLocaleString(),
-      change: `${dashboardStats.changes.leads > 0 ? '+' : ''}${dashboardStats.changes.leads}%`,
-      isPositive: dashboardStats.changes.leads >= 0,
-      icon: Users,
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    },
-    {
-      title: 'Conversions',
-      value: dashboardStats.conversions.toLocaleString(),
-      change: `${dashboardStats.changes.conversions > 0 ? '+' : ''}${dashboardStats.changes.conversions}%`,
-      isPositive: dashboardStats.changes.conversions >= 0,
+      title: 'Interested',
+      value: (dashboardStats.interestedCount || 0).toLocaleString(),
       icon: TrendingUp,
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
-    },
-    {
-      title: 'Pending Follow-ups',
-      value: dashboardStats.pendingFollowups.toLocaleString(),
-      change: 'Upcoming',
-      isPositive: true,
-      icon: Clock,
       bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600'
+      iconColor: 'text-purple-600',
+      borderColor: 'border-purple-200',
+      hoverRing: 'hover:ring-purple-400',
+      navigateTo: '/assigned-leads?status=Interested'
     },
     {
-      title: 'Active Users',
-      value: dashboardStats.activeUsers.toLocaleString(),
-      change: 'Team members',
-      isPositive: true,
+      title: 'Follow Up',
+      value: (dashboardStats.followUpCount || 0).toLocaleString(),
+      icon: Clock,
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      borderColor: 'border-blue-200',
+      hoverRing: 'hover:ring-blue-400',
+      navigateTo: '/assigned-leads?status=Follow Up'
+    },
+    {
+      title: 'Office Visit',
+      value: (dashboardStats.officeVisitCount || 0).toLocaleString(),
+      icon: Users,
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
+      borderColor: 'border-green-200',
+      hoverRing: 'hover:ring-green-400',
+      navigateTo: '/assigned-leads?status=Office Visit'
+    },
+    {
+      title: 'Other Course',
+      value: (dashboardStats.otherCourseCount || 0).toLocaleString(),
       icon: BarChart3,
       bgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600'
+      iconColor: 'text-orange-600',
+      borderColor: 'border-orange-200',
+      hoverRing: 'hover:ring-orange-400',
+      navigateTo: '/assigned-leads?status=Other Course'
     },
   ] : [];
 
@@ -167,8 +171,8 @@ const Dashboard = () => {
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600 text-sm md:text-lg">Welcome back! Here's what's happening today.</p>
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Super Admin Dashboard</h1>
+        <p className="text-gray-600 text-sm md:text-lg">Welcome back! Here's your lead overview.</p>
       </div>
 
       {/* Stats Grid */}
@@ -176,23 +180,18 @@ const Dashboard = () => {
         {stats.map((stat, index) => (
           <div
             key={index}
-            onClick={stat.title === 'Pending Follow-ups' ? handleFollowupsClick : undefined}
-            className={`bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.title === 'Pending Follow-ups' ? 'cursor-pointer ring-2 ring-purple-200 hover:ring-purple-400' : ''}`}
+            onClick={() => navigate(stat.navigateTo)}
+            className={`bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 border ${stat.borderColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ring-2 ring-transparent ${stat.hoverRing}`}
           >
             <div className="flex items-start justify-between mb-2 md:mb-4">
               <div className={`${stat.bgColor} p-2 md:p-4 rounded-lg md:rounded-xl`}>
                 <stat.icon className={stat.iconColor} size={20} />
               </div>
-              <div className={`flex items-center gap-1 text-xs md:text-sm font-semibold ${stat.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {stat.isPositive ? <ArrowUpRight size={12} className="md:w-4 md:h-4" /> : <ArrowDownRight size={12} className="md:w-4 md:h-4" />}
-                <span className="hidden md:inline">{stat.change}</span>
-              </div>
+              <ArrowUpRight size={16} className="text-gray-400" />
             </div>
             <h3 className="text-gray-600 text-xs md:text-sm font-semibold mb-1 md:mb-2">{stat.title}</h3>
             <p className="text-2xl md:text-4xl font-bold text-gray-900">{stat.value}</p>
-            {stat.title === 'Pending Follow-ups' && (
-              <p className="text-xs text-purple-600 mt-2 font-medium">Click to view details</p>
-            )}
+            <p className="text-xs text-gray-500 mt-2 font-medium">Click to view leads</p>
           </div>
         ))}
       </div>

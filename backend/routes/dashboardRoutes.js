@@ -27,29 +27,19 @@ router.get('/stats', async (req, res) => {
       ['active']
     );
 
-    // Get previous month's data for comparison
-    const prevMonthLeads = await pool.query(
-      `SELECT COUNT(*) as count FROM leads
-       WHERE created_at >= (CURRENT_DATE - INTERVAL '2 months')
-       AND created_at < (CURRENT_DATE - INTERVAL '1 month')`
+    // Get status-wise counts for dashboard boxes
+    const interestedCount = await pool.query(
+      "SELECT COUNT(*) as count FROM leads WHERE status = 'Interested'"
     );
-
-    const prevMonthConversions = await pool.query(
-      `SELECT COUNT(*) as count FROM leads
-       WHERE status = $1
-       AND updated_at >= (CURRENT_DATE - INTERVAL '2 months')
-       AND updated_at < (CURRENT_DATE - INTERVAL '1 month')`,
-      ['Converted']
+    const followUpCount = await pool.query(
+      "SELECT COUNT(*) as count FROM leads WHERE status = 'Follow Up'"
     );
-
-    // Calculate percentage changes
-    const leadsChange = prevMonthLeads.rows[0].count > 0
-      ? ((totalLeads.rows[0].count - prevMonthLeads.rows[0].count) / prevMonthLeads.rows[0].count * 100).toFixed(1)
-      : 0;
-
-    const conversionsChange = prevMonthConversions.rows[0].count > 0
-      ? ((conversions.rows[0].count - prevMonthConversions.rows[0].count) / prevMonthConversions.rows[0].count * 100).toFixed(1)
-      : 0;
+    const officeVisitCount = await pool.query(
+      "SELECT COUNT(*) as count FROM leads WHERE status = 'Office Visit'"
+    );
+    const otherCourseCount = await pool.query(
+      "SELECT COUNT(*) as count FROM leads WHERE status = 'Other Course'"
+    );
 
     res.json({
       success: true,
@@ -58,10 +48,10 @@ router.get('/stats', async (req, res) => {
         conversions: conversions.rows[0].count,
         pendingFollowups: pendingFollowups.rows[0].count,
         activeUsers: activeUsers.rows[0].count,
-        changes: {
-          leads: leadsChange,
-          conversions: conversionsChange
-        }
+        interestedCount: parseInt(interestedCount.rows[0].count),
+        followUpCount: parseInt(followUpCount.rows[0].count),
+        officeVisitCount: parseInt(officeVisitCount.rows[0].count),
+        otherCourseCount: parseInt(otherCourseCount.rows[0].count),
       }
     });
   } catch (error) {
