@@ -3,6 +3,45 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { pool } = require('../config/database');
 
+// GET /debug-permissions - Debug endpoint to check permissions
+router.get('/debug-permissions', async (req, res) => {
+  try {
+    const users = await pool.query(
+      'SELECT id, name, email, role, permissions FROM users ORDER BY created_at DESC'
+    );
+
+    // Parse permissions for each user
+    const usersWithParsedPermissions = users.rows.map(user => {
+      let permissions = user.permissions;
+      if (typeof permissions === 'string') {
+        try {
+          permissions = JSON.parse(permissions);
+        } catch (e) {
+          permissions = [];
+        }
+      }
+      return {
+        ...user,
+        permissions: permissions,
+        hasCreateLead: Array.isArray(permissions) && permissions.includes('create_lead')
+      };
+    });
+
+    res.json({
+      success: true,
+      count: usersWithParsedPermissions.length,
+      data: usersWithParsedPermissions
+    });
+  } catch (error) {
+    console.error('Debug permissions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching permissions',
+      error: error.message
+    });
+  }
+});
+
 // GET all users
 router.get('/', async (req, res) => {
   try {
