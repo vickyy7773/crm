@@ -9,10 +9,13 @@ const AllUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resetPasswordModal, setResetPasswordModal] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [editFormData, setEditFormData] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -115,6 +118,95 @@ const AllUsers = () => {
       alert('Error resetting password');
     } finally {
       setResetting(false);
+    }
+  };
+
+  const openEditModal = async (user) => {
+    try {
+      // Fetch full user details including permissions
+      const response = await fetch(`${API_URL}/users/${user.id}`);
+      const result = await response.json();
+
+      if (result.success) {
+        const userData = result.data;
+        // Parse permissions if string
+        let permissions = userData.permissions || [];
+        if (typeof permissions === 'string') {
+          try {
+            permissions = JSON.parse(permissions);
+          } catch (e) {
+            permissions = [];
+          }
+        }
+
+        setEditFormData({
+          ...userData,
+          permissions: permissions,
+          canAddLeads: permissions.includes('create_lead')
+        });
+        setEditModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      alert('Error loading user details');
+    }
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditFormData(null);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editFormData) return;
+
+    try {
+      setSaving(true);
+
+      // Build permissions array based on role and custom permissions
+      let permissions = [];
+      if (editFormData.role === 'Super Admin') {
+        permissions = ['all'];
+      } else if (editFormData.role === 'Telecaller') {
+        permissions = ['view_assigned_leads', 'add_call_logs', 'update_lead_status'];
+        // Add create_lead if checkbox is checked
+        if (editFormData.canAddLeads) {
+          permissions.push('create_lead');
+        }
+      } else if (editFormData.role === 'Counsellor') {
+        permissions = ['view_transferred_leads', 'update_lead_status'];
+      }
+
+      const response = await fetch(`${API_URL}/users/${editFormData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editFormData.name,
+          email: editFormData.email,
+          role: editFormData.role,
+          phone: editFormData.phone,
+          department: editFormData.department,
+          status: editFormData.status,
+          permissions: permissions
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✓ User updated successfully!');
+        closeEditModal();
+        fetchUsers(); // Refresh the user list
+      } else {
+        alert('Failed to update user: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Error updating user. Check console for details.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -297,7 +389,10 @@ const AllUsers = () => {
                     </td>
                     <td className="px-3 md:px-6 py-2 md:py-4">
                       <div className="flex items-center gap-1 md:gap-2">
-                        <button className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow">
+                        <button
+                          onClick={() => openEditModal(user)}
+                          className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow"
+                        >
                           <Edit2 size={14} className="md:hidden" />
                           <span className="hidden md:inline-flex items-center gap-1"><Edit2 size={14} />Edit</span>
                         </button>
@@ -424,6 +519,154 @@ const AllUsers = () => {
                   <>
                     <Key size={16} />
                     Reset
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {editModalOpen && editFormData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 md:p-6 rounded-t-xl md:rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <Edit2 size={20} className="md:w-6 md:h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg md:text-2xl font-bold">Edit User</h2>
+                    <p className="text-blue-100 text-xs md:text-sm">{editFormData.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeEditModal}
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                >
+                  <X size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 md:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Role</label>
+                  <select
+                    value={editFormData.role}
+                    onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  >
+                    <option value="Telecaller">Telecaller</option>
+                    <option value="Counsellor">Counsellor</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Super Admin">Super Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Phone</label>
+                  <input
+                    type="text"
+                    value={editFormData.phone || ''}
+                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Department</label>
+                  <input
+                    type="text"
+                    value={editFormData.department || ''}
+                    onChange={(e) => setEditFormData({...editFormData, department: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={editFormData.status}
+                    onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Permissions Section - Only for Telecaller */}
+              {editFormData.role === 'Telecaller' && (
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border-2 border-purple-300">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">Special Permissions</h3>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="canAddLeads"
+                      checked={editFormData.canAddLeads || false}
+                      onChange={(e) => setEditFormData({...editFormData, canAddLeads: e.target.checked})}
+                      className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    />
+                    <label htmlFor="canAddLeads" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                      ✨ Can Add New Leads (Telecaller will see "Add Lead" button)
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2 ml-8">
+                    By default, telecallers can only view assigned leads. Enable this to allow them to add new leads.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-xl md:rounded-b-2xl flex items-center justify-end gap-3">
+              <button
+                onClick={closeEditModal}
+                disabled={saving}
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveUser}
+                disabled={saving}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <>
+                    <Loader className="animate-spin" size={16} />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Edit2 size={16} />
+                    Save Changes
                   </>
                 )}
               </button>

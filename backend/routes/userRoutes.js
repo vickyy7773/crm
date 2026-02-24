@@ -472,7 +472,7 @@ router.put('/:id/reset-password', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    const { name, email, role, phone, department, status, password } = req.body;
+    const { name, email, role, phone, department, status, password, permissions } = req.body;
 
     // Check if user exists
     const existingUsers = await pool.query(
@@ -518,18 +518,23 @@ router.put('/:id', async (req, res) => {
     if (role) {
       updateFields.push(`role = $${paramCounter++}`);
       updateValues.push(role);
-
-      // Update permissions based on role
-      let permissions = [];
-      if (role === 'Super Admin') {
-        permissions = ['all'];
-      } else if (role === 'Telecaller') {
-        permissions = ['view_assigned_leads', 'add_call_logs', 'update_lead_status'];
-      } else if (role === 'Counsellor') {
-        permissions = ['view_transferred_leads', 'update_lead_status'];
-      }
+    }
+    // Handle permissions - use provided permissions or set default based on role
+    if (permissions !== undefined) {
       updateFields.push(`permissions = $${paramCounter++}`);
       updateValues.push(JSON.stringify(permissions));
+    } else if (role) {
+      // If role is updated but permissions not provided, set default
+      let defaultPermissions = [];
+      if (role === 'Super Admin') {
+        defaultPermissions = ['all'];
+      } else if (role === 'Telecaller') {
+        defaultPermissions = ['view_assigned_leads', 'add_call_logs', 'update_lead_status'];
+      } else if (role === 'Counsellor') {
+        defaultPermissions = ['view_transferred_leads', 'update_lead_status'];
+      }
+      updateFields.push(`permissions = $${paramCounter++}`);
+      updateValues.push(JSON.stringify(defaultPermissions));
     }
     if (phone !== undefined) {
       updateFields.push(`phone = $${paramCounter++}`);
