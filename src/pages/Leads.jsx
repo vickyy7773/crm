@@ -52,6 +52,7 @@ const Leads = () => {
     phone: '',
     city: '',
     source: '',
+    status: 'Followup',
     neetPrevious: '',
     neet2026: '',
     course: '',
@@ -263,6 +264,7 @@ const Leads = () => {
         phone: newStudent.phone,
         city: newStudent.city,
         source: newStudent.source,
+        status: newStudent.status || 'Followup',
         neet: [newStudent.neetPrevious, newStudent.neet2026].filter(Boolean).join(' | 2026: ') || null,
         course: newStudent.course || null,
         destination: newStudent.destination || null,
@@ -297,6 +299,7 @@ const Leads = () => {
           phone: '',
           city: '',
           source: '',
+          status: 'Followup',
           neetPrevious: '',
           neet2026: '',
           course: '',
@@ -1688,13 +1691,17 @@ const Leads = () => {
                     setNewLeadType('raw');
                     setNewStudent({
                       name: '',
+                      fatherName: '',
                       phone: '',
-                      neet: '',
                       city: '',
-                      course: '',
-                      remark: '',
                       source: '',
-                      status: 'Followup'
+                      status: 'Followup',
+                      neetPrevious: '',
+                      neet2026: '',
+                      course: '',
+                      destination: '',
+                      nextFollowUpDate: '',
+                      remark: '',
                     });
                   }}
                   className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
@@ -1783,6 +1790,24 @@ const Leads = () => {
                       className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="e.g. Google, Facebook, Referral"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+                    <select
+                      value={newStudent.status || 'Followup'}
+                      onChange={(e) => setNewStudent({...newStudent, status: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    >
+                      <option value="Followup">Followup</option>
+                      <option value="After Result">After Result</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="Office Meeting">Office Meeting</option>
+                      <option value="Interested">Interested</option>
+                      <option value="India First">India First</option>
+                      <option value="Other Course">Other Course</option>
+                      <option value="Not Interested">Not Interested</option>
+                      <option value="Drop">Drop</option>
+                    </select>
                   </div>
 
                   {/* Qualified Lead Additional Fields */}
@@ -1881,6 +1906,7 @@ const Leads = () => {
                       phone: '',
                       city: '',
                       source: '',
+                      status: 'Followup',
                       neetPrevious: '',
                       neet2026: '',
                       course: '',
