@@ -690,18 +690,29 @@ const Leads = () => {
 
   // Check if user has permission to add leads
   const canAddLeads = () => {
-    if (!user) return false;
+    if (!user) {
+      console.log('❌ No user found');
+      return false;
+    }
+
+    console.log('👤 Current user:', user);
+    console.log('🔑 User permissions:', user.permissions);
+    console.log('👔 User role:', user.role);
 
     // Super Admin and Manager can always add leads
     if (user.role === 'Super Admin' || user.role === 'Manager') {
+      console.log('✅ User is Super Admin or Manager - can add leads');
       return true;
     }
 
     // Check if user has create_lead permission
     if (user.permissions && Array.isArray(user.permissions)) {
-      return user.permissions.includes('create_lead');
+      const hasPermission = user.permissions.includes('create_lead');
+      console.log('🔍 Has create_lead permission:', hasPermission);
+      return hasPermission;
     }
 
+    console.log('❌ No permissions found or not an array');
     return false;
   };
 
