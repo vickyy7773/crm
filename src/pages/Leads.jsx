@@ -688,6 +688,23 @@ const Leads = () => {
     );
   }
 
+  // Check if user has permission to add leads
+  const canAddLeads = () => {
+    if (!user) return false;
+
+    // Super Admin and Manager can always add leads
+    if (user.role === 'Super Admin' || user.role === 'Manager') {
+      return true;
+    }
+
+    // Check if user has create_lead permission
+    if (user.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes('create_lead');
+    }
+
+    return false;
+  };
+
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -697,16 +714,18 @@ const Leads = () => {
             <h1 className="text-lg md:text-2xl font-bold text-gray-900 mb-1">Leads</h1>
             <p className="text-gray-500 text-xs md:text-sm">Manage all leads - raw and qualified students</p>
           </div>
-          <button
-            onClick={() => {
-              console.log('Button clicked! Opening modal...');
-              setAddModalOpen(true);
-            }}
-            className="flex items-center justify-center gap-1 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md text-xs md:text-sm"
-          >
-            <UserPlus size={18} />
-            Add Lead
-          </button>
+          {canAddLeads() && (
+            <button
+              onClick={() => {
+                console.log('Button clicked! Opening modal...');
+                setAddModalOpen(true);
+              }}
+              className="flex items-center justify-center gap-1 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md text-xs md:text-sm"
+            >
+              <UserPlus size={18} />
+              Add Lead
+            </button>
+          )}
         </div>
       </div>
 
