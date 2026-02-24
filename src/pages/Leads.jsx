@@ -1678,7 +1678,7 @@ const Leads = () => {
                     <Plus size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Add Qualified Lead</h2>
+                    <h2 className="text-2xl font-bold">Add {newLeadType === 'raw' ? 'Raw' : 'Qualified'} Lead</h2>
                     <p className="text-purple-100 text-sm">Name & Phone required, rest optional</p>
                   </div>
                 </div>
@@ -1706,10 +1706,39 @@ const Leads = () => {
 
             {/* Modal Body */}
             <form onSubmit={handleAddStudent} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Lead Type Selection */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-purple-300">
+                <label className="block text-sm font-bold text-gray-800 mb-2">Select Lead Type</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNewLeadType('raw')}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
+                      newLeadType === 'raw'
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    🆕 Raw Lead
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewLeadType('qualified')}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
+                      newLeadType === 'qualified'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    ⭐ Qualified Lead
+                  </button>
+                </div>
+              </div>
 
-              {/* Qualified Lead Fields */}
+              {/* Lead Fields */}
               <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
                 <div className="grid grid-cols-2 gap-3">
+                  {/* Common Fields for Both Raw and Qualified */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
                     <input
@@ -1719,16 +1748,6 @@ const Leads = () => {
                       onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
                       className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="Student name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
-                    <input
-                      type="text"
-                      value={newStudent.fatherName}
-                      onChange={(e) => setNewStudent({...newStudent, fatherName: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                      placeholder="Father's name"
                     />
                   </div>
                   <div>
@@ -1765,60 +1784,78 @@ const Leads = () => {
                       placeholder="e.g. Google, Facebook, Referral"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
-                    <input
-                      type="text"
-                      value={newStudent.neetPrevious}
-                      onChange={(e) => setNewStudent({...newStudent, neetPrevious: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                      placeholder="Previous NEET score"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
-                    <input
-                      type="text"
-                      value={newStudent.neet2026}
-                      onChange={(e) => setNewStudent({...newStudent, neet2026: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                      placeholder="NEET 2026 score"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
-                    <select
-                      value={newStudent.course}
-                      onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    >
-                      <option value="">-- Select Course --</option>
-                      <option value="MBBS">MBBS</option>
-                      <option value="BAMS/BDS">BAMS / BDS</option>
-                      <option value="Other Course">Other Course</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Interested Location</label>
-                    <select
-                      value={newStudent.destination}
-                      onChange={(e) => setNewStudent({...newStudent, destination: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    >
-                      <option value="">-- Select --</option>
-                      <option value="India">India</option>
-                      <option value="Abroad">Abroad</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Follow Up</label>
-                    <input
-                      type="datetime-local"
-                      value={newStudent.nextFollowUpDate}
-                      onChange={(e) => setNewStudent({...newStudent, nextFollowUpDate: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    />
-                  </div>
+
+                  {/* Qualified Lead Additional Fields */}
+                  {newLeadType === 'qualified' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
+                        <input
+                          type="text"
+                          value={newStudent.fatherName}
+                          onChange={(e) => setNewStudent({...newStudent, fatherName: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                          placeholder="Father's name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
+                        <input
+                          type="text"
+                          value={newStudent.neetPrevious}
+                          onChange={(e) => setNewStudent({...newStudent, neetPrevious: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                          placeholder="Previous NEET score"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
+                        <input
+                          type="text"
+                          value={newStudent.neet2026}
+                          onChange={(e) => setNewStudent({...newStudent, neet2026: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                          placeholder="NEET 2026 score"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
+                        <select
+                          value={newStudent.course}
+                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="">-- Select Course --</option>
+                          <option value="MBBS">MBBS</option>
+                          <option value="BAMS/BDS">BAMS / BDS</option>
+                          <option value="Other Course">Other Course</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Interested Location</label>
+                        <select
+                          value={newStudent.destination}
+                          onChange={(e) => setNewStudent({...newStudent, destination: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="">-- Select --</option>
+                          <option value="India">India</option>
+                          <option value="Abroad">Abroad</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Follow Up</label>
+                        <input
+                          type="datetime-local"
+                          value={newStudent.nextFollowUpDate}
+                          onChange={(e) => setNewStudent({...newStudent, nextFollowUpDate: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Remark - Common for both */}
                   <div className="col-span-2">
                     <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
                     <textarea
