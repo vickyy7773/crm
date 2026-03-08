@@ -23,10 +23,22 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 // CORS Configuration for Production and Development
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      process.env.FRONTEND_URL,
+      'https://crm-frontend.onrender.com',
+      /\.onrender\.com$/,
+    ].filter(Boolean)
+  : ['http://localhost:5173'];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL || 'https://yourdomain.com'
-    : 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser requests
+    const allowed = allowedOrigins.some(o =>
+      o instanceof RegExp ? o.test(origin) : o === origin
+    );
+    callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
