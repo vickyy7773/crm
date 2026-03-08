@@ -261,6 +261,7 @@ const Leads = () => {
       // Map form fields to backend expected fields
       const leadData = {
         name: newStudent.name,
+        father_name: newStudent.fatherName || null,
         phone: newStudent.phone,
         city: newStudent.city,
         source: newStudent.source,
@@ -268,10 +269,7 @@ const Leads = () => {
         neet: [newStudent.neetPrevious, newStudent.neet2026].filter(Boolean).join(' | 2026: ') || null,
         course: newStudent.course || null,
         destination: newStudent.destination || null,
-        remark: [
-          newStudent.fatherName ? `Father: ${newStudent.fatherName}` : '',
-          newStudent.remark
-        ].filter(Boolean).join(' | ') || null,
+        remark: newStudent.remark || null,
       };
 
       const response = await fetch(`${API_URL}/leads`, {
@@ -935,16 +933,15 @@ const Leads = () => {
                           onChange={(e) => handleSelectAll(e, filteredLeads)}
                         />
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Phone</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">{courseTypeFilter === 'Other' ? 'Score' : 'NEET'}</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Course</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remark</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Source</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody className="bg-gray-50">
@@ -966,99 +963,92 @@ const Leads = () => {
                       onChange={() => handleSelectLead(lead.id)}
                     />
                   </td>
+                  {/* Student Name */}
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0">
                         {lead.name.charAt(0)}
                       </div>
                       <div>
                         <div className="font-bold text-gray-900 text-xs">{lead.name}</div>
-                        <div className="text-[10px] text-gray-500">ID: #{1000 + lead.id}</div>
+                        <div className="text-[10px] text-gray-400">#{1000 + lead.id}</div>
                       </div>
                     </div>
                   </td>
+                  {/* Father's Name */}
+                  <td className="px-2 py-1.5">
+                    <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
+                  </td>
+                  {/* Mobile Number */}
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                       <Phone size={11} className="text-blue-600" />
-                      <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
+                      <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 hover:underline">{lead.phone}</a>
                     </div>
                   </td>
+                  {/* NEET Score */}
                   <td className="px-2 py-1.5">
-                    <div className="flex items-center gap-1.5">
+                    {lead.neet ? (
+                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
+                        <Target size={11} />
+                        {lead.neet}
+                      </div>
+                    ) : <span className="text-[10px] text-gray-400">-</span>}
+                  </td>
+                  {/* City */}
+                  <td className="px-2 py-1.5">
+                    <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
+                      <MapPin size={11} className="text-emerald-600" />
+                      <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
+                    </div>
+                  </td>
+                  {/* Status */}
+                  <td className="px-2 py-1.5">
+                    {getStatusBadge(lead.status)}
+                  </td>
+                  {/* Sub Status */}
+                  <td className="px-2 py-1.5">
+                    {lead.latest_call_reason ? (
+                      <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-1 rounded-md text-[10px] font-medium">
+                        {lead.latest_call_reason}
+                      </span>
+                    ) : <span className="text-[10px] text-gray-400">-</span>}
+                  </td>
+                  {/* Remarks */}
+                  <td className="px-2 py-1.5 max-w-[160px]">
+                    <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                      <div className="text-[10px] text-gray-700 truncate font-medium">
+                        {lead.latest_call_remark || lead.remark || '-'}
+                      </div>
+                    </div>
+                  </td>
+                  {/* Action */}
+                  <td className="px-2 py-1.5">
+                    <div className="flex items-center gap-1">
                       <button
-                        onClick={() => {
-                          setSelectedLead(lead);
-                          setViewModalOpen(true);
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-md transition-all text-gray-700 text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
+                        onClick={() => { setSelectedLead(lead); setViewModalOpen(true); }}
+                        className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 text-[10px] font-bold transition-all"
                       >
                         <Eye size={11} />
                         View
                       </button>
                       <button
-                        onClick={() => {
-                          setAssignLeadId(lead.id);
-                          setAssignModalOpen(true);
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-md transition-all text-white text-[10px] font-bold shadow-sm hover:shadow transform hover:scale-105"
+                        onClick={() => { setAssignLeadId(lead.id); setAssignModalOpen(true); }}
+                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-md text-white text-[10px] font-bold transition-all"
                       >
                         <UserCheck size={11} />
                         Assign
                       </button>
+                      {(user?.role === 'Super Admin' || user?.role === 'Manager') && (
+                        <button
+                          onClick={() => handleEditLead(lead)}
+                          className="flex items-center gap-1 px-2 py-1 bg-indigo-100 hover:bg-indigo-200 rounded-md text-indigo-700 text-[10px] font-bold transition-all"
+                        >
+                          <Edit2 size={11} />
+                          Edit
+                        </button>
+                      )}
                     </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md font-semibold text-[10px] ${
-                      !lead.assigned_to_name || lead.assigned_to_name === 'Unassigned'
-                        ? 'bg-red-50 text-red-700 border border-red-200'
-                        : 'bg-teal-50 text-teal-700 border border-teal-200'
-                    }`}>
-                      <UserCircle size={11} />
-                      {lead.assigned_to_name || 'Unassigned'}
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
-                      <Target size={11} />
-                      {lead.neet}
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
-                      <MapPin size={11} className="text-emerald-600" />
-                      <span className="text-xs font-semibold text-emerald-700">{lead.city}</span>
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-200 w-fit">
-                        <GraduationCap size={11} className="text-indigo-600" />
-                        <span className="font-bold text-indigo-700 text-xs">{lead.course}</span>
-                      </div>
-                      <div className="flex items-center gap-1 bg-orange-50 px-1.5 py-0.5 rounded w-fit">
-                        <Globe size={9} className="text-orange-600" />
-                        <span className="text-[10px] font-medium text-orange-700">{lead.destination}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5 max-w-[180px]">
-                    <div className="bg-gray-50 px-2 py-1.5 rounded-md border border-gray-200">
-                      <div className="text-[10px] text-gray-700 truncate font-medium">
-                        {lead.remark}
-                      </div>
-                      <div className="flex items-center gap-1 text-[9px] text-gray-500 mt-0.5">
-                        <Clock size={9} />
-                        {lead.importedDate}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <div className="inline-block bg-cyan-50 px-2 py-1 rounded-md border border-cyan-200">
-                      <div className="text-[10px] font-bold text-cyan-700">{lead.source}</div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    {getStatusBadge(lead.status)}
                   </td>
                 </tr>
               ))}
@@ -1548,7 +1538,7 @@ const Leads = () => {
             <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Name *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Student Name *</label>
                   <input
                     type="text"
                     value={editFormData.name || ''}
@@ -1557,7 +1547,17 @@ const Leads = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Father's Name</label>
+                  <input
+                    type="text"
+                    value={editFormData.father_name || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, father_name: e.target.value })}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+                    placeholder="Father's full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile Number *</label>
                   <input
                     type="text"
                     value={editFormData.phone || ''}
@@ -1643,6 +1643,9 @@ const Leads = () => {
                     <option value="Other Course">Other Course</option>
                     <option value="Not Interested">Not Interested</option>
                     <option value="Drop">Drop</option>
+                    {user?.role === 'Super Admin' && (
+                      <option value="Converted">Converted</option>
+                    )}
                   </select>
                 </div>
                 <div>
@@ -1777,7 +1780,7 @@ const Leads = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {/* Common Fields for Both Raw and Qualified */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Student Name *</label>
                     <input
                       type="text"
                       required
@@ -1788,7 +1791,17 @@ const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Phone *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
+                    <input
+                      type="text"
+                      value={newStudent.fatherName}
+                      onChange={(e) => setNewStudent({...newStudent, fatherName: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Father's name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number *</label>
                     <input
                       type="tel"
                       required

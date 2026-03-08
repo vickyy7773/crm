@@ -375,11 +375,25 @@ app.get('/api/health/db', async (req, res) => {
   }
 });
 
+// Auto-migrate: add missing columns on startup
+const runStartupMigrations = async () => {
+  const { pool } = require('./config/database');
+  try {
+    await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS father_name VARCHAR(100)`);
+    console.log('✅ Startup migration: father_name column ensured');
+  } catch (err) {
+    console.error('⚠️ Startup migration warning:', err.message);
+  }
+};
+
 // Start server and test database connection
 const startServer = async () => {
   try {
     // Test database connection
     await testConnection();
+
+    // Run startup migrations
+    await runStartupMigrations();
 
     // Initialize daily stats cron job
     initDailyStatsJob();

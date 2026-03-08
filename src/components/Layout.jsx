@@ -73,7 +73,8 @@ const Layout = () => {
           title: notif.title,
           message: notif.message,
           time: notif.time_ago,
-          unread: notif.unread
+          unread: notif.unread,
+          leadId: notif.lead_id
         }));
         allNotifications = [...mappedNotifications];
       }
@@ -448,6 +449,18 @@ const Layout = () => {
                           className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
                             notification.unread ? 'bg-blue-50' : ''
                           }`}
+                          onClick={() => {
+                            setNotificationOpen(false);
+                            if (notification.leadId) {
+                              // Navigate to leads page and highlight the lead
+                              const role = user?.role;
+                              if (role === 'Telecaller') {
+                                navigate(`/telecaller/leads?highlight=${notification.leadId}`);
+                              } else {
+                                navigate(`/leads?highlight=${notification.leadId}`);
+                              }
+                            }
+                          }}
                         >
                           <div className="flex items-start gap-3">
                             <div className={`p-2 rounded-lg ${

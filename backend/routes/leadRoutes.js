@@ -21,13 +21,17 @@ router.get('/', async (req, res) => {
       SELECT
         leads.*,
         ch.call_remark as latest_call_remark,
-        ch.call_date as latest_call_date
+        ch.call_date as latest_call_date,
+        ch.call_reason as latest_call_reason,
+        ch.call_outcome as latest_call_outcome
       FROM leads
       LEFT JOIN (
         SELECT
           lead_id,
           call_remark,
           call_date,
+          call_reason,
+          call_outcome,
           ROW_NUMBER() OVER (PARTITION BY lead_id ORDER BY call_date DESC) as rn
         FROM call_history
       ) ch ON ch.lead_id = leads.id AND ch.rn = 1
@@ -288,7 +292,8 @@ router.post('/', async (req, res) => {
       course,
       destination,
       remark,
-      source
+      source,
+      father_name
     } = req.body;
 
     // Validation
@@ -304,10 +309,11 @@ router.post('/', async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO leads (
-        name, phone, city, neet, course, destination, remark, source, status, assigned_to_name, imported_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'New', 'Unassigned', $9) RETURNING id`,
+        name, father_name, phone, city, neet, course, destination, remark, source, status, assigned_to_name, imported_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'New', 'Unassigned', $10) RETURNING id`,
       [
         name,
+        father_name || null,
         phone,
         city || null,
         neet || null,
@@ -422,10 +428,11 @@ async function importLeadsToDatabase(leadsData, res) {
       try {
         await pool.query(
           `INSERT INTO leads (
-            name, phone, city, neet, course, destination, remark, source, status
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'New')`,
+            name, father_name, phone, city, neet, course, destination, remark, source, status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'New')`,
           [
             row.name || '',
+            row.father_name || null,
             row.phone || '',
             row.city || null,
             row.neet || null,
@@ -909,7 +916,7 @@ router.put('/:id', async (req, res) => {
     }
 
     // Build dynamic update query
-    const allowedFields = ['name', 'phone', 'city', 'neet', 'course', 'destination', 'remark', 'source', 'status'];
+    const allowedFields = ['name', 'father_name', 'phone', 'city', 'neet', 'course', 'destination', 'remark', 'source', 'status'];
     const updateFields = [];
     const updateValues = [];
     let paramCount = 1;
@@ -940,17 +947,18 @@ router.put('/:id', async (req, res) => {
 
     // Create notification if status was changed
     if (req.body.status !== undefined) {
+      const leadName = updatedLeadResult.rows[0].name;
       const statusMessage = req.body.status === 'Converted'
-        ? `Lead #${leadId} marked as "Converted"`
-        : `Lead #${leadId} moved to "${req.body.status}"`;
+        ? `${leadName} has been marked as "Converted"`
+        : `${leadName}'s enquiry status changed to "${req.body.status}"`;
 
       await createNotification({
-        userId: updatedLeadResult.rows[0].assigned_to || null,
+        userId: null, // visible to all
         type: req.body.status === 'Converted' ? 'lead_converted' : 'status_change',
-        title: 'Status Updated',
+        title: req.body.status === 'Converted' ? 'Lead Converted' : 'Status Updated',
         message: statusMessage,
         leadId: leadId,
-        leadName: updatedLeadResult.rows[0].name
+        leadName: leadName
       });
     }
 

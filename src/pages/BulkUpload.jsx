@@ -14,15 +14,15 @@ const BulkUpload = () => {
     let filename;
 
     if (activeTab === 'raw') {
-      csv = `name,phone,city
-Rajesh Kumar,9876543210,Udaipur
-Priya Sharma,8765432109,Jaipur
-Amit Singh,7654321098,Delhi`;
+      csv = `name,father_name,phone,city
+Rajesh Kumar,Suresh Kumar,9876543210,Udaipur
+Priya Sharma,Ramesh Sharma,8765432109,Jaipur
+Amit Singh,Vijay Singh,7654321098,Delhi`;
       filename = 'raw_leads_sample.csv';
     } else {
-      csv = `name,phone,city,neet,course,destination,remark,source
-John Doe,9876543210,New York,520,MBBS,Russia,Interested in premium package,Facebook Ad
-Jane Smith,8765432109,Los Angeles,485,MBBS,Philippines,Looking for basic plan,Google Ad`;
+      csv = `name,father_name,phone,neet,city
+John Doe,Robert Doe,9876543210,520,Mumbai
+Jane Smith,David Smith,8765432109,485,Delhi`;
       filename = 'qualified_leads_sample.csv';
     }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { UserCheck, Phone, User, RefreshCw, CheckCircle, Target, MapPin, GraduationCap, Globe, Clock, MessageSquare, X, Calendar, Edit2, Trash2 } from 'lucide-react';
+import { UserCheck, Phone, User, RefreshCw, CheckCircle, Target, MapPin, GraduationCap, MessageSquare, X, Calendar, Edit2, Trash2, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isSuperAdmin } from '../utils/permissions';
 import API_URL from '../config/api';
@@ -23,6 +23,7 @@ const AssignedLeads = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [remarkModal, setRemarkModal] = useState(false);
   const [selectedRemark, setSelectedRemark] = useState(null);
   const [callHistory, setCallHistory] = useState([]);
@@ -247,6 +248,18 @@ const AssignedLeads = () => {
       filtered = filtered.filter(lead => lead.assigned_to_name === assignedFilter);
     }
 
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(lead =>
+        lead.name?.toLowerCase().includes(q) ||
+        lead.phone?.includes(q) ||
+        lead.city?.toLowerCase().includes(q) ||
+        lead.father_name?.toLowerCase().includes(q) ||
+        lead.assigned_to_name?.toLowerCase().includes(q)
+      );
+    }
+
     // Then filter by status tab
     if (activeTab !== 'all') {
       filtered = filtered.filter(lead => lead.status === activeTab);
@@ -392,6 +405,17 @@ const AssignedLeads = () => {
 
       {/* Filter Section */}
       <div className="bg-white rounded-lg md:rounded-xl shadow-md p-2 md:p-4 mb-3 md:mb-4 border border-gray-100">
+        {/* Search Bar */}
+        <div className="relative mb-3">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name, phone, city, father's name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none text-xs md:text-sm"
+          />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
           {/* Lead Type Filter */}
           <div>
@@ -486,6 +510,7 @@ const AssignedLeads = () => {
                 setStatusFilter('all');
                 setCityFilter('all');
                 setAssignedFilter('all');
+                setSearchQuery('');
               }}
               className="px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
             >
