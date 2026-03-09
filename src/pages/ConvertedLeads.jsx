@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   CheckCircle, Search, RefreshCw, User, Phone, MapPin, Calendar,
-  TrendingUp, Award, MessageSquare, Edit, AlertTriangle
+  TrendingUp, Award, MessageSquare, Edit, AlertTriangle, Target
 } from 'lucide-react';
 import CallLogModal from '../components/CallLogModal';
 
@@ -226,83 +226,61 @@ const ConvertedLeads = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-green-50 to-emerald-50">
-                <tr>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Student Details
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Destination
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Assigned To
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Remark
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Converted Date
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold text-green-900 uppercase tracking-wider">
-                    Actions
-                  </th>
+              <thead>
+                <tr className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600">
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-green-50 transition-colors">
-                    <td className="px-4 py-3">
+                  <tr key={lead.id} className="border-b border-gray-100 hover:bg-green-50 transition-colors bg-white">
+                    {/* Student Name */}
+                    <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
-                        <User size={16} className="text-green-600" />
-                        <span className="font-semibold text-gray-900">{lead.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <a href={`tel:${lead.phone}`} className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline">
-                        <Phone size={14} />
-                        {lead.phone}
-                      </a>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <MapPin size={14} className="text-gray-400" />
-                        {lead.city || '-'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {lead.destination || '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                          {lead.assigned_to_name?.charAt(0) || 'U'}
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {lead.name?.charAt(0)}
                         </div>
-                        <span className="text-sm font-medium text-gray-700">
-                          {lead.assigned_to_name || 'Unassigned'}
-                        </span>
+                        <div>
+                          <div className="font-bold text-gray-900 text-xs">{lead.name}</div>
+                          <div className="text-[10px] text-gray-400">#{1000 + lead.id}</div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 max-w-xs">
-                      <div className="text-sm text-gray-600">
-                        {truncateText(lead.remark)}
+                    {/* Father's Name */}
+                    <td className="px-3 py-2.5">
+                      <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
+                    </td>
+                    {/* Mobile Number */}
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
+                        <Phone size={11} className="text-blue-600" />
+                        <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 hover:underline">{lead.phone}</a>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar size={14} className="text-gray-400" />
-                        {formatDate(lead.updated_at)}
+                    {/* NEET Score */}
+                    <td className="px-3 py-2.5">
+                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
+                        <Target size={11} />
+                        {lead.neet || '-'}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    {/* City */}
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
+                        <MapPin size={11} className="text-emerald-600" />
+                        <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
+                      </div>
+                    </td>
+                    {/* Status */}
+                    <td className="px-3 py-2.5">
                       {editingStatusId === lead.id && user.role === 'Super Admin' ? (
                         <select
                           value={newStatus}
@@ -321,8 +299,25 @@ const ConvertedLeads = () => {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                    {/* Sub Status */}
+                    <td className="px-3 py-2.5">
+                      {lead.latest_call_reason ? (
+                        <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                          {lead.latest_call_reason}
+                        </span>
+                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    </td>
+                    {/* Remarks */}
+                    <td className="px-3 py-2.5 max-w-[150px]">
+                      <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                        <div className="text-[10px] text-gray-700 truncate font-medium">
+                          {lead.latest_call_remark || lead.remark || '-'}
+                        </div>
+                      </div>
+                    </td>
+                    {/* Action */}
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5">
                         {editingStatusId === lead.id && user.role === 'Super Admin' ? (
                           <>
                             <button

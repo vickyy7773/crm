@@ -587,18 +587,15 @@ const AssignedLeads = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Phone</th>
-                  {isSuperAdmin(user) && (
-                    <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
-                  )}
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Course</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remark</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Source</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-gray-50">
@@ -612,6 +609,7 @@ const AssignedLeads = () => {
                         : 'bg-white'
                     }`}
                   >
+                    {/* Student Name */}
                     <td className="px-2 py-1.5">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
@@ -623,58 +621,44 @@ const AssignedLeads = () => {
                         </div>
                       </div>
                     </td>
+                    {/* Father's Name */}
+                    <td className="px-2 py-1.5">
+                      <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
+                    </td>
+                    {/* Mobile Number */}
                     <td className="px-2 py-1.5">
                       <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                         <Phone size={11} className="text-blue-600" />
                         <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
                       </div>
                     </td>
-                    {isSuperAdmin(user) && (
-                      <td className="px-2 py-1.5">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleEditLead(lead)}
-                            className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all"
-                            title="Edit Lead"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteLead(lead.id)}
-                            className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all"
-                            title="Delete Lead"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                    <td className="px-2 py-1.5">
-                      <div className="inline-flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-md border border-green-200">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-                          <User size={12} />
-                        </div>
-                        <span className="text-[10px] font-bold text-green-700">{lead.assigned_to_name}</span>
-                      </div>
-                    </td>
+                    {/* NEET Score */}
                     <td className="px-2 py-1.5">
                       <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
                         <Target size={11} />
                         {lead.neet || '-'}
                       </div>
                     </td>
+                    {/* City */}
                     <td className="px-2 py-1.5">
                       <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
                         <MapPin size={11} className="text-emerald-600" />
                         <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
                       </div>
                     </td>
+                    {/* Status */}
                     <td className="px-2 py-1.5">
-                      <div className="flex items-center gap-1.5 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-200 w-fit">
-                        <GraduationCap size={11} className="text-indigo-600" />
-                        <span className="font-bold text-indigo-700 text-xs">{lead.course || '-'}</span>
-                      </div>
+                      {getStatusBadge(lead.status)}
                     </td>
+                    {/* Sub Status */}
+                    <td className="px-2 py-1.5">
+                      {lead.latest_call_reason ? (
+                        <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                          {lead.latest_call_reason}
+                        </span>
+                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    </td>
+                    {/* Remarks */}
                     <td className="px-2 py-1.5 max-w-[180px]">
                       <div
                         onClick={() => openRemarkModal(lead)}
@@ -686,20 +670,30 @@ const AssignedLeads = () => {
                             {truncateText(lead.latest_call_remark || lead.remark)}
                           </div>
                         </div>
-                        {lead.latest_call_remark && (
-                          <div className="text-[8px] text-purple-500 mt-0.5">
-                            Click to view full remark
-                          </div>
+                      </div>
+                    </td>
+                    {/* Action */}
+                    <td className="px-2 py-1.5">
+                      <div className="flex items-center gap-1">
+                        {isSuperAdmin(user) && (
+                          <>
+                            <button
+                              onClick={() => handleEditLead(lead)}
+                              className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all"
+                              title="Edit Lead"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLead(lead.id)}
+                              className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all"
+                              title="Delete Lead"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
                         )}
                       </div>
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <div className="inline-block bg-cyan-50 px-2 py-1 rounded-md border border-cyan-200">
-                        <div className="text-[10px] font-bold text-cyan-700">{lead.source || '-'}</div>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1.5">
-                      {getStatusBadge(lead.status)}
                     </td>
                   </tr>
                 ))}

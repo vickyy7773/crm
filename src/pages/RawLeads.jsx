@@ -697,11 +697,14 @@ const RawLeads = () => {
                           onChange={handleSelectAll}
                         />
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Name</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Phone</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -716,6 +719,7 @@ const RawLeads = () => {
                       onChange={() => handleSelectLead(lead.id)}
                     />
                   </td>
+                  {/* Student Name */}
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
@@ -727,29 +731,49 @@ const RawLeads = () => {
                       </div>
                     </div>
                   </td>
+                  {/* Father's Name */}
+                  <td className="px-3 py-2.5">
+                    <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
+                  </td>
+                  {/* Mobile Number */}
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                       <Phone size={11} className="text-blue-600" />
                       <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 truncate max-w-[100px] hover:underline">{lead.phone}</a>
                     </div>
                   </td>
+                  {/* NEET Score */}
+                  <td className="px-3 py-2.5">
+                    <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
+                      <Target size={11} />
+                      {lead.neet || '-'}
+                    </div>
+                  </td>
+                  {/* City */}
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
                       <MapPin size={11} className="text-emerald-600" />
-                      <span className="text-xs font-semibold text-emerald-700">{lead.city || 'N/A'}</span>
+                      <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
                     </div>
                   </td>
+                  {/* Status */}
                   <td className="px-3 py-2.5">
                     {getStatusBadge(lead.status)}
                   </td>
+                  {/* Sub Status */}
                   <td className="px-3 py-2.5">
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md font-semibold text-[10px] ${
-                      lead.assigned === 'Unassigned' || !lead.assigned
-                        ? 'bg-red-50 text-red-700 border border-red-200'
-                        : 'bg-teal-50 text-teal-700 border border-teal-200'
-                    }`}>
-                      <UserCircle size={11} />
-                      {lead.assigned || 'Unassigned'}
+                    {lead.latest_call_reason ? (
+                      <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                        {lead.latest_call_reason}
+                      </span>
+                    ) : <span className="text-[10px] text-gray-400">-</span>}
+                  </td>
+                  {/* Remarks */}
+                  <td className="px-3 py-2.5 max-w-[150px]">
+                    <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                      <div className="text-[10px] text-gray-700 truncate font-medium">
+                        {lead.latest_call_remark || lead.remark || '-'}
+                      </div>
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
