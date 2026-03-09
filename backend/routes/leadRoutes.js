@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
     let paramCount = 1;
 
     if (status) {
-      query += ` AND status = $${paramCount}`;
+      query += ` AND leads.status = ${paramCount}`;
       params.push(status);
       paramCount++;
     }
@@ -96,7 +96,21 @@ router.get('/assigned/:userId', async (req, res) => {
     const { userId } = req.params;
     const { status, search } = req.query;
 
-    let query = 'SELECT * FROM leads WHERE assigned_to = $1';
+    let query = `
+      SELECT
+        leads.*,
+        ch.call_remark as latest_call_remark,
+        ch.call_date as latest_call_date,
+        ch.call_reason as latest_call_reason,
+        ch.call_outcome as latest_call_outcome
+      FROM leads
+      LEFT JOIN (
+        SELECT lead_id, call_remark, call_date, call_reason, call_outcome,
+          ROW_NUMBER() OVER (PARTITION BY lead_id ORDER BY call_date DESC) as rn
+        FROM call_history
+      ) ch ON ch.lead_id = leads.id AND ch.rn = 1
+      WHERE leads.assigned_to = $1
+    `;
     const params = [userId];
     let paramCount = 2;
 
@@ -107,13 +121,13 @@ router.get('/assigned/:userId', async (req, res) => {
     }
 
     if (search) {
-      query += ` AND (name LIKE $${paramCount} OR phone LIKE $${paramCount+1} OR city LIKE $${paramCount+2})`;
+      query += ` AND (leads.name LIKE ${paramCount} OR leads.phone LIKE ${paramCount+1} OR leads.city LIKE ${paramCount+2})`;
       const searchPattern = `%${search}%`;
       params.push(searchPattern, searchPattern, searchPattern);
       paramCount += 3;
     }
 
-    query += ' ORDER BY next_followup_date ASC, created_at DESC';
+    query += ' ORDER BY leads.next_followup_date ASC, leads.created_at DESC';
 
     const result = await pool.query(query, params);
 
@@ -660,18 +674,17 @@ router.post('/:id/call-log', async (req, res) => {
       [leadId]
     );
 
-    // Create notification for important call outcomes
-    const importantOutcomes = ['Interested', 'Converted'];
-    if (importantOutcomes.includes(callOutcome)) {
-      await createNotification({
-        userId: null, // Visible to all users
-        type: 'call_log',
-        title: `Lead ${callOutcome}`,
-        message: `${updatedLeadResult.rows[0].name} marked as "${callOutcome}" by ${callerName}`,
-        leadId: leadId,
-        leadName: updatedLeadResult.rows[0].name
-      });
-    }
+    // Create notification for all call log outcomes
+    const _leadName = updatedLeadResult.rows[0].name;
+    const _subStatusText = callReason ? ` (${callReason})` : "";
+    await createNotification({
+      userId: null,
+      type: callOutcome === "Converted" ? "lead_converted" : "status_change",
+      title: callOutcome === "Converted" ? "Lead Converted!" : "Enquiry: " + callOutcome,
+      message: _leadName + " → " + JSON.stringify(callOutcome) + _subStatusText + " by " + callerName,
+      leadId: leadId,
+      leadName: _leadName
+    });
 
     res.json({
       success: true,
