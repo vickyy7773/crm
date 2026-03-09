@@ -30,6 +30,11 @@ const TelecallerLeads = () => {
   const [editFormData, setEditFormData] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
 
+  // Add Lead modal state
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' });
+  const [addSaving, setAddSaving] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchLeads();
@@ -152,6 +157,56 @@ const TelecallerLeads = () => {
       alert('Error updating lead.');
     } finally {
       setEditSaving(false);
+    }
+  };
+
+
+  // Add new lead (auto-assigned to this telecaller)
+  const handleAddLead = async (e) => {
+    e.preventDefault();
+    if (!addFormData.name || !addFormData.phone) {
+      alert('Student Name and Mobile Number are required');
+      return;
+    }
+    setAddSaving(true);
+    try {
+      // Create lead
+      const response = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: addFormData.name,
+          father_name: addFormData.father_name || null,
+          phone: addFormData.phone,
+          neet: addFormData.neet || null,
+          city: addFormData.city || null,
+          remark: addFormData.remark || null,
+          status: 'Followup',
+        })
+      });
+      const result = await response.json();
+      if (!result.success) {
+        alert('Failed to add lead: ' + result.message);
+        setAddSaving(false);
+        return;
+      }
+
+      // Auto-assign to this telecaller
+      await fetch(`${API_URL}/leads/${result.data.id}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignedTo: user.id, assignedToName: user.name })
+      });
+
+      alert('Lead added and assigned to you successfully!');
+      setAddModalOpen(false);
+      setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' });
+      fetchLeads();
+    } catch (err) {
+      console.error('Error adding lead:', err);
+      alert('Error adding lead.');
+    } finally {
+      setAddSaving(false);
     }
   };
 
