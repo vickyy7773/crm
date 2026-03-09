@@ -291,15 +291,12 @@ const TelecallerRawLeads = () => {
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
+                  <th className="px-6 py-4 text-left font-bold">Name</th>
+                  <th className="px-6 py-4 text-left font-bold">Phone</th>
+                  <th className="px-6 py-4 text-left font-bold">City</th>
+                  <th className="px-6 py-4 text-left font-bold">Status</th>
+                  <th className="px-6 py-4 text-left font-bold">Remark</th>
+                  <th className="px-6 py-4 text-center font-bold">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -310,75 +307,57 @@ const TelecallerRawLeads = () => {
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                     }`}
                   >
-                    {/* Student Name */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {lead.name?.charAt(0)}
-                        </div>
-                        <span className="font-bold text-gray-900 text-xs">{lead.name}</span>
+                        <User size={18} className="text-blue-600" />
+                        <span className="font-semibold text-gray-900">{lead.name}</span>
                       </div>
                     </td>
-                    {/* Father's Name */}
-                    <td className="px-3 py-2.5">
-                      <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
-                    </td>
-                    {/* Mobile Number */}
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
-                        <Phone size={11} className="text-blue-600" />
-                        <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 hover:underline">{lead.phone}</a>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <Phone size={16} className="text-gray-600" />
+                        <a href={`tel:${lead.phone}`} className="font-mono text-blue-600 hover:underline">{lead.phone}</a>
                       </div>
                     </td>
-                    {/* NEET Score */}
-                    <td className="px-3 py-2.5">
-                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
-                        <Target size={11} />
-                        {lead.neet || '-'}
-                      </div>
-                    </td>
-                    {/* City */}
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
-                        <MapPin size={11} className="text-emerald-600" />
-                        <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
-                        <button onClick={() => handleCityEditClick(lead)} className="ml-0.5 p-0.5 text-blue-600 hover:bg-blue-100 rounded" title="Edit City">
-                          <Edit2 size={11} />
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {lead.city ? (
+                          <>
+                            <MapPin size={16} className="text-gray-600" />
+                            <span className="text-gray-700">{lead.city}</span>
+                          </>
+                        ) : (
+                          <span className="text-gray-400 italic">No City</span>
+                        )}
+                        <button onClick={() => handleCityEditClick(lead)} className="ml-1 p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Edit City">
+                          <Edit2 size={14} />
                         </button>
                       </div>
                     </td>
-                    {/* Status */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-6 py-4">
                       {lead.status === 'New' ? (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">New (Raw)</span>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">New (Raw)</span>
                       ) : lead.status === 'Not Connected' ? (
-                        <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">Not Connected</span>
+                        <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Not Connected</span>
                       ) : lead.status === 'Call Back' ? (
-                        <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">Call Back</span>
+                        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Call Back</span>
                       ) : lead.status === 'Wrong Number' ? (
-                        <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">Wrong Number</span>
+                        <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">Wrong Number</span>
                       ) : lead.status === 'Not Interested' ? (
-                        <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">Not Interested</span>
+                        <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">Not Interested</span>
                       ) : (
-                        <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">{lead.status}</span>
+                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{lead.status}</span>
                       )}
                     </td>
-                    {/* Sub Status */}
-                    <td className="px-3 py-2.5">
-                      {lead.latest_call_reason ? (
-                        <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
-                          {lead.latest_call_reason}
-                        </span>
-                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    <td className="px-6 py-4">
+                      {lead.remark ? (
+                        <span className="text-gray-600 text-sm max-w-[200px] truncate block" title={lead.remark}>{lead.remark}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
-                    {/* Remarks */}
-                    <td className="px-3 py-2.5 max-w-[130px]">
-                      <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
-                        <span className="text-[10px] text-gray-700 truncate block font-medium">{lead.remark || '-'}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-1.5">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleQualifyClick(lead)}
                           className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md flex items-center gap-1"
