@@ -1643,7 +1643,7 @@ const Leads = () => {
                     <option value="Other Course">Other Course</option>
                     <option value="Not Interested">Not Interested</option>
                     <option value="Drop">Drop</option>
-                    {user?.role === 'Super Admin' && (
+                    {(user?.role === 'Super Admin' || user?.role === 'Manager' || user?.role === 'Admin') && (
                       <option value="Converted">Converted</option>
                     )}
                   </select>
