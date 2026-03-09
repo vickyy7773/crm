@@ -1114,6 +1114,9 @@ const AssignedLeads = () => {
                       <option value="Not Interested">✖ Not Interested</option>
                       <option value="Drop">❌ Drop</option>
                       <option value="Invalid Lead">🚫 Invalid Lead</option>
+                      {(user?.role === 'Super Admin' || user?.role === 'Manager' || user?.role === 'Admin') && (
+                        <option value="Converted">✅ Converted</option>
+                      )}
                     </select>
                   </div>
 
