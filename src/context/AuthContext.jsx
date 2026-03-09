@@ -9,11 +9,22 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
+    // Check if user is logged in from localStorage, then refresh from server
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed); // set immediately so UI doesn't flash
+        // Refresh from server to get latest permissions
+        fetch(`${API_URL}/auth/me/${parsed.id}`)
+          .then(r => r.json())
+          .then(data => {
+            if (data.success && data.data) {
+              setUser(data.data);
+              localStorage.setItem('user', JSON.stringify(data.data));
+            }
+          })
+          .catch(() => {}); // silently ignore if server is down
       } catch (err) {
         console.error('Error parsing saved user:', err);
         localStorage.removeItem('user');

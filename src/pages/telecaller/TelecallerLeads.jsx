@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Phone, Search, Filter, AlertCircle, Target, MapPin,
   Clock, Calendar, TrendingUp, CheckCircle,
-  RefreshCw, X, Edit2, UserCircle
+  RefreshCw, X, Edit2, UserCircle, UserPlus
 } from 'lucide-react';
 import CallLogModal from '../../components/CallLogModal';
 import API_URL from '../../config/api';
@@ -289,9 +289,20 @@ const TelecallerLeads = () => {
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">My Assigned Leads</h1>
-        <p className="text-gray-500 text-sm">Manage and follow up with your assigned enquiries</p>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">My Assigned Leads</h1>
+          <p className="text-gray-500 text-sm">Manage and follow up with your assigned enquiries</p>
+        </div>
+        {user?.permissions?.includes('create_lead') && (
+          <button
+            onClick={() => setAddModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-md transition-all whitespace-nowrap"
+          >
+            <UserPlus size={16} />
+            Add Lead
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -693,6 +704,114 @@ const TelecallerLeads = () => {
                 {editSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Add Lead Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <UserPlus size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold">Add New Lead</h2>
+                  <p className="text-purple-100 text-xs">Will be auto-assigned to you</p>
+                </div>
+              </div>
+              <button onClick={() => { setAddModalOpen(false); setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' }); }} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <form onSubmit={handleAddLead} className="p-5 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Student Name *</label>
+                  <input
+                    type="text"
+                    value={addFormData.name}
+                    onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    placeholder="Full name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
+                  <input
+                    type="text"
+                    value={addFormData.father_name}
+                    onChange={(e) => setAddFormData({ ...addFormData, father_name: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    placeholder="Father's full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number *</label>
+                  <input
+                    type="text"
+                    value={addFormData.phone}
+                    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    placeholder="10-digit number"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Score</label>
+                  <input
+                    type="text"
+                    value={addFormData.neet}
+                    onChange={(e) => setAddFormData({ ...addFormData, neet: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    placeholder="e.g. 520"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    value={addFormData.city}
+                    onChange={(e) => setAddFormData({ ...addFormData, city: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                    placeholder="City name"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
+                <textarea
+                  value={addFormData.remark}
+                  onChange={(e) => setAddFormData({ ...addFormData, remark: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none resize-none"
+                  placeholder="Add remarks..."
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setAddModalOpen(false); setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' }); }}
+                  className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold text-sm transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSaving}
+                  className="px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold text-sm transition-all shadow-sm disabled:opacity-50"
+                >
+                  {addSaving ? 'Adding...' : 'Add Lead'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
