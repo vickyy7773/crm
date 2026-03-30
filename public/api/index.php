@@ -1,4 +1,27 @@
 <?php
+// Auto-restart backend if not running
+function ensureBackendRunning() {
+    $health = @file_get_contents('http://127.0.0.1:5000/api/health');
+    if (!$health) {
+        $node_path = '/opt/alt/alt-nodejs20/root/usr/bin';
+        $pm2 = '/home/u591726268/node_modules/.bin/pm2';
+        $dir = '/home/u591726268/domains/crmpulseeducation.in/backend';
+        $cmd = "export PATH={$node_path}:\$PATH && cd {$dir} && {$pm2} start server.js --name crm-backend >> /home/u591726268/backend.log 2>&1";
+        $desc = [['pipe','r'],['pipe','w'],['pipe','w']];
+        $proc = proc_open('/bin/bash', $desc, $pipes);
+        if (is_resource($proc)) {
+            fwrite($pipes[0], $cmd . "\n");
+            fclose($pipes[0]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($proc);
+        }
+        sleep(4);
+    }
+}
+
+ensureBackendRunning();
+
 $path = isset($_GET['_path']) ? $_GET['_path'] : '/';
 unset($_GET['_path']);
 $query = http_build_query($_GET);
@@ -20,23 +43,18 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 curl_setopt($ch, CURLOPT_HEADER, true);
 
 if (in_array($method, ['POST', 'PUT', 'PATCH'])) {
-    // File upload (multipart/form-data)
     if (stripos($contentType, 'multipart/form-data') !== false && !empty($_FILES)) {
         $postFields = [];
-        // Add regular POST fields
         foreach ($_POST as $key => $value) {
             $postFields[$key] = $value;
         }
-        // Add files
         foreach ($_FILES as $key => $file) {
             if ($file['error'] === UPLOAD_ERR_OK) {
                 $postFields[$key] = new CURLFile($file['tmp_name'], $file['type'], $file['name']);
             }
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        // Let curl set the Content-Type with boundary automatically
     } else {
-        // JSON or other body
         $body = file_get_contents('php://input');
         $headers[] = 'Content-Type: ' . ($contentType ?: 'application/json');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
