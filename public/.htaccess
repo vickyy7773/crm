@@ -1,5 +1,11 @@
 Options -MultiViews
 RewriteEngine On
+
+# Route /api/* to PHP proxy
+RewriteRule ^api/(.*)$ /api/index.php?_path=/$1 [L,QSA]
+RewriteRule ^api$ /api/index.php?_path=/ [L,QSA]
+
+# React Router
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
