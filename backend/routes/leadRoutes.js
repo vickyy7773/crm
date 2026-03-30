@@ -391,6 +391,26 @@ router.post('/import', async (req, res) => {
   }
 });
 
+// POST bulk-upload (alias for /import/file used by frontend)
+router.post('/bulk-upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const results = [];
+    const bufferStream = new Readable();
+    bufferStream.push(req.file.buffer);
+    bufferStream.push(null);
+    bufferStream
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => { await importLeadsToDatabase(results, res); });
+  } catch (error) {
+    console.error('Bulk upload error:', error);
+    res.status(500).json({ success: false, message: 'Error uploading file', error: error.message });
+  }
+});
+
 // POST CSV file upload (alternative method)
 router.post('/import/file', upload.single('file'), async (req, res) => {
   try {
