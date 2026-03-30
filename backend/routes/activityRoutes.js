@@ -7,7 +7,6 @@ router.get('/', async (req, res) => {
   try {
     const { search = '', type = 'all', limit = 100 } = req.query;
 
-    // Build the query based on filters
     let query = `
       SELECT
         ch.id,
@@ -18,13 +17,13 @@ router.get('/', async (req, res) => {
         ch.call_date as activity_date,
         ch.duration,
         CASE
-          WHEN ch.call_date >= NOW() - INTERVAL '5 minutes' THEN EXTRACT(EPOCH FROM (NOW() - ch.call_date))/60 || ' mins ago'
-          WHEN ch.call_date >= NOW() - INTERVAL '1 hour' THEN EXTRACT(EPOCH FROM (NOW() - ch.call_date))/60 || ' mins ago'
-          WHEN ch.call_date >= NOW() - INTERVAL '24 hours' THEN EXTRACT(EPOCH FROM (NOW() - ch.call_date))/3600 || ' hours ago'
-          WHEN ch.call_date >= NOW() - INTERVAL '7 days' THEN EXTRACT(EPOCH FROM (NOW() - ch.call_date))/86400 || ' days ago'
-          ELSE TO_CHAR(ch.call_date, 'Mon DD')
+          WHEN ch.call_date >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, ch.call_date, NOW()), ' hours ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, ch.call_date, NOW()), ' days ago')
+          ELSE DATE_FORMAT(ch.call_date, '%b %d')
         END as time,
-        TO_CHAR(ch.call_date, 'HH12:MI AM') as timestamp,
+        DATE_FORMAT(ch.call_date, '%h:%i %p') as timestamp,
         'call' as type,
         'completed' as status
       FROM call_history ch
@@ -33,25 +32,20 @@ router.get('/', async (req, res) => {
     `;
 
     const params = [];
-    let paramCount = 1;
 
     // Add search filter
     if (search && search.trim() !== '') {
-      query += ` AND (ch.caller_name LIKE $${paramCount} OR l.name LIKE $${paramCount+1})`;
+      query += ` AND (ch.caller_name LIKE ? OR l.name LIKE ?)`;
       params.push(`%${search}%`, `%${search}%`);
-      paramCount += 2;
     }
 
-    // Type filter is handled in frontend for now since we only have call data
-    // In future, we can add UNION with other activity types
-
-    query += ` ORDER BY ch.call_date DESC LIMIT $${paramCount}`;
+    query += ` ORDER BY ch.call_date DESC LIMIT ?`;
     params.push(parseInt(limit));
 
-    const result = await pool.query(query, params);
+    const [rows] = await pool.query(query, params);
 
     // Format the activities
-    const formattedActivities = result.rows.map(activity => ({
+    const formattedActivities = rows.map(activity => ({
       id: activity.id,
       person: activity.person,
       avatar: getInitials(activity.person),
@@ -96,19 +90,18 @@ router.get('/person/:name', async (req, res) => {
         ch.call_remark,
         l.name as lead_name,
         l.id as lead_id,
-        TO_CHAR(ch.call_date, 'HH12:MI AM') as time,
-        TO_CHAR(ch.call_date, 'YYYY-MM-DD') as call_day
+        DATE_FORMAT(ch.call_date, '%h:%i %p') as time,
+        DATE_FORMAT(ch.call_date, '%Y-%m-%d') as call_day
       FROM call_history ch
       JOIN leads l ON ch.lead_id = l.id
-      WHERE ch.caller_name = $1
+      WHERE ch.caller_name = ?
       AND DATE(ch.call_date) = CURRENT_DATE
       ORDER BY ch.call_date DESC
     `;
 
-    const result = await pool.query(query, [name]);
+    const [rows] = await pool.query(query, [name]);
 
-    // Format the activities for the timeline
-    const formattedActivities = result.rows.map(activity => ({
+    const formattedActivities = rows.map(activity => ({
       time: activity.time,
       action: `Called lead ${activity.lead_name}`,
       duration: activity.duration || '-',
@@ -133,29 +126,26 @@ router.get('/person/:name', async (req, res) => {
 // GET activity statistics
 router.get('/stats', async (req, res) => {
   try {
-    // Get total activities count
-    const totalActivities = await pool.query(
+    const [totalRows] = await pool.query(
       'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE'
     );
 
-    // Get unique team members who made calls today
-    const teamMembers = await pool.query(
+    const [teamRows] = await pool.query(
       'SELECT COUNT(DISTINCT caller_name) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE'
     );
 
-    // Get activities by type (for now just calls)
-    const callsCount = await pool.query(
+    const [callsRows] = await pool.query(
       'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE'
     );
 
     res.json({
       success: true,
       data: {
-        totalActivities: totalActivities.rows[0].count,
-        teamMembers: teamMembers.rows[0].count,
-        calls: callsCount.rows[0].count,
-        emails: 0, // Placeholder for future implementation
-        meetings: 0 // Placeholder for future implementation
+        totalActivities: totalRows[0].count,
+        teamMembers: teamRows[0].count,
+        calls: callsRows[0].count,
+        emails: 0,
+        meetings: 0
       }
     });
   } catch (error) {

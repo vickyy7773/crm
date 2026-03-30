@@ -38,47 +38,41 @@ router.get('/', async (req, res) => {
       WHERE 1=1
     `;
     const params = [];
-    let paramCount = 1;
 
     if (status) {
-      query += ` AND leads.status = ${paramCount}`;
+      query += ` AND leads.status = ?`;
       params.push(status);
-      paramCount++;
     }
 
     if (assigned_to) {
-      query += ` AND assigned_to = $${paramCount}`;
+      query += ` AND assigned_to = ?`;
       params.push(assigned_to);
-      paramCount++;
     }
 
     if (city) {
-      query += ` AND city = $${paramCount}`;
+      query += ` AND city = ?`;
       params.push(city);
-      paramCount++;
     }
 
     if (destination) {
-      query += ` AND destination = $${paramCount}`;
+      query += ` AND destination = ?`;
       params.push(destination);
-      paramCount++;
     }
 
     if (search) {
-      query += ` AND (name LIKE $${paramCount} OR phone LIKE $${paramCount+1} OR city LIKE $${paramCount+2} OR source LIKE $${paramCount+3})`;
+      query += ` AND (name LIKE ? OR phone LIKE ? OR city LIKE ? OR source LIKE ?)`;
       const searchPattern = `%${search}%`;
       params.push(searchPattern, searchPattern, searchPattern, searchPattern);
-      paramCount += 4;
     }
 
     query += ' ORDER BY created_at DESC';
 
-    const result = await pool.query(query, params);
+    const [rows] = await pool.query(query, params);
 
     res.json({
       success: true,
-      count: result.rows.length,
-      data: result.rows
+      count: rows.length,
+      data: rows
     });
   } catch (error) {
     console.error('Get leads error:', error);
@@ -109,32 +103,29 @@ router.get('/assigned/:userId', async (req, res) => {
           ROW_NUMBER() OVER (PARTITION BY lead_id ORDER BY call_date DESC) as rn
         FROM call_history
       ) ch ON ch.lead_id = leads.id AND ch.rn = 1
-      WHERE leads.assigned_to = $1
+      WHERE leads.assigned_to = ?
     `;
     const params = [userId];
-    let paramCount = 2;
 
     if (status && status !== 'all') {
-      query += ` AND status = $${paramCount}`;
+      query += ` AND status = ?`;
       params.push(status);
-      paramCount++;
     }
 
     if (search) {
-      query += ` AND (leads.name LIKE ${paramCount} OR leads.phone LIKE ${paramCount+1} OR leads.city LIKE ${paramCount+2})`;
+      query += ` AND (leads.name LIKE ? OR leads.phone LIKE ? OR leads.city LIKE ?)`;
       const searchPattern = `%${search}%`;
       params.push(searchPattern, searchPattern, searchPattern);
-      paramCount += 3;
     }
 
     query += ' ORDER BY leads.next_followup_date ASC, leads.created_at DESC';
 
-    const result = await pool.query(query, params);
+    const [rows] = await pool.query(query, params);
 
     res.json({
       success: true,
-      count: result.rows.length,
-      data: result.rows
+      count: rows.length,
+      data: rows
     });
   } catch (error) {
     console.error('Get assigned leads error:', error);
@@ -151,11 +142,11 @@ router.get('/follow-ups/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const result = await pool.query(
+    const [rows] = await pool.query(
       `SELECT * FROM leads
-       WHERE assigned_to = $1
+       WHERE assigned_to = ?
          AND next_followup_date IS NOT NULL
-         AND next_followup_date <= NOW() + INTERVAL '1 day'
+         AND next_followup_date <= NOW() + INTERVAL 1 DAY
          AND is_transferred = FALSE
        ORDER BY next_followup_date ASC`,
       [userId]
@@ -164,13 +155,11 @@ router.get('/follow-ups/:userId', async (req, res) => {
     // Separate into today and overdue
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const todayLeads = [];
     const overdueLeads = [];
 
-    result.rows.forEach(lead => {
+    rows.forEach(lead => {
       const followUpDate = new Date(lead.next_followup_date);
       if (followUpDate < today) {
         overdueLeads.push(lead);
@@ -184,7 +173,7 @@ router.get('/follow-ups/:userId', async (req, res) => {
       data: {
         today: todayLeads,
         overdue: overdueLeads,
-        total: result.rows.length
+        total: rows.length
       }
     });
   } catch (error) {
@@ -207,12 +196,12 @@ router.get('/converted', async (req, res) => {
       ORDER BY updated_at DESC
     `;
 
-    const result = await pool.query(query);
+    const [rows] = await pool.query(query);
 
     res.json({
       success: true,
-      data: result.rows,
-      count: result.rows.length
+      data: rows,
+      count: rows.length
     });
   } catch (error) {
     console.error('Error fetching converted leads:', error);
@@ -237,16 +226,16 @@ router.get('/:id/call-history', async (req, res) => {
         l.next_followup_date
       FROM call_history ch
       JOIN leads l ON ch.lead_id = l.id
-      WHERE ch.lead_id = $1
+      WHERE ch.lead_id = ?
       ORDER BY ch.call_date DESC
     `;
 
-    const result = await pool.query(query, [id]);
+    const [rows] = await pool.query(query, [id]);
 
     res.json({
       success: true,
-      data: result.rows,
-      count: result.rows.length
+      data: rows,
+      count: rows.length
     });
   } catch (error) {
     console.error('Error fetching call history:', error);
@@ -261,9 +250,9 @@ router.get('/:id/call-history', async (req, res) => {
 // GET single lead by ID
 router.get('/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM leads WHERE id = $1', [req.params.id]);
+    const [rows] = await pool.query('SELECT * FROM leads WHERE id = ?', [req.params.id]);
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
@@ -271,14 +260,14 @@ router.get('/:id', async (req, res) => {
     }
 
     // Get call history for this lead
-    const callHistoryResult = await pool.query(
-      'SELECT * FROM call_history WHERE lead_id = $1 ORDER BY call_date DESC',
+    const [callHistoryRows] = await pool.query(
+      'SELECT * FROM call_history WHERE lead_id = ? ORDER BY call_date DESC',
       [req.params.id]
     );
 
     const leadData = {
-      ...result.rows[0],
-      callHistory: callHistoryResult.rows
+      ...rows[0],
+      callHistory: callHistoryRows
     };
 
     res.json({
@@ -321,10 +310,10 @@ router.post('/', async (req, res) => {
     // Ensure course is null for raw leads
     const courseValue = course ? course : null;
 
-    const result = await pool.query(
+    const [insertResult] = await pool.query(
       `INSERT INTO leads (
         name, father_name, phone, city, neet, course, destination, remark, source, status, assigned_to_name, imported_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'New', 'Unassigned', $10) RETURNING id`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'New', 'Unassigned', ?)`,
       [
         name,
         father_name || null,
@@ -339,7 +328,8 @@ router.post('/', async (req, res) => {
       ]
     );
 
-    const newLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [result.rows[0].id]);
+    const newLeadId = insertResult.insertId;
+    const [newLeadRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [newLeadId]);
 
     // Create notification for new lead (visible to all users)
     await createNotification({
@@ -347,7 +337,7 @@ router.post('/', async (req, res) => {
       type: 'new_lead',
       title: 'New Lead Added',
       message: `${name} submitted inquiry for ${course || 'MBBS'} in ${destination || 'abroad'}`,
-      leadId: result.rows[0].id,
+      leadId: newLeadId,
       leadName: name
     });
 
@@ -357,7 +347,7 @@ router.post('/', async (req, res) => {
       userName: req.body.createdByName || 'System',
       action: 'CREATE',
       entityType: 'Lead',
-      entityId: result.rows[0].id,
+      entityId: newLeadId,
       details: { name, phone, city, course, destination, source },
       ipAddress: getIpAddress(req),
       userAgent: req.get('user-agent')
@@ -366,7 +356,7 @@ router.post('/', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Lead created successfully',
-      data: newLeadResult.rows[0]
+      data: newLeadRows[0]
     });
   } catch (error) {
     console.error('Create lead error:', error);
@@ -443,7 +433,7 @@ async function importLeadsToDatabase(leadsData, res) {
         await pool.query(
           `INSERT INTO leads (
             name, father_name, phone, city, neet, course, destination, remark, source, status
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'New')`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'New')`,
           [
             row.name || '',
             row.father_name || null,
@@ -491,8 +481,8 @@ router.post('/:id/assign', async (req, res) => {
     }
 
     // Check if lead exists
-    const result = await pool.query('SELECT id FROM leads WHERE id = $1', [leadId]);
-    if (result.rows.length === 0) {
+    const [rows] = await pool.query('SELECT id FROM leads WHERE id = ?', [leadId]);
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
@@ -502,27 +492,27 @@ router.post('/:id/assign', async (req, res) => {
     // Update lead assignment
     await pool.query(
       `UPDATE leads
-       SET assigned_to = $1, assigned_to_name = $2, assigned_date = NOW(), updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3`,
+       SET assigned_to = ?, assigned_to_name = ?, assigned_date = NOW(), updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
       [assignedTo, assignedToName, leadId]
     );
 
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [updatedRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
     // Create notification for assigned user
     await createNotification({
       userId: assignedTo,
       type: 'assignment',
       title: 'Lead Assigned',
-      message: `You have been assigned to ${updatedLeadResult.rows[0].name}'s application`,
+      message: `You have been assigned to ${updatedRows[0].name}'s application`,
       leadId: leadId,
-      leadName: updatedLeadResult.rows[0].name
+      leadName: updatedRows[0].name
     });
 
     res.json({
       success: true,
       message: 'Lead assigned successfully',
-      data: updatedLeadResult.rows[0]
+      data: updatedRows[0]
     });
   } catch (error) {
     console.error('Assign lead error:', error);
@@ -557,8 +547,6 @@ router.post('/:id/call-log', async (req, res) => {
       });
     }
 
-    // Remark quality validation removed - no minimum character limit now
-
     // Validate call reason for negative outcomes - Skip for Super Admin
     const negativeOutcomes = ['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Drop', 'Invalid Lead'];
     if (!isSuperAdmin && negativeOutcomes.includes(callOutcome) && !callReason) {
@@ -569,15 +557,15 @@ router.post('/:id/call-log', async (req, res) => {
     }
 
     // Check if lead exists and get current status
-    const result = await pool.query('SELECT id, status, is_transferred FROM leads WHERE id = $1', [leadId]);
-    if (result.rows.length === 0) {
+    const [leadRows] = await pool.query('SELECT id, status, is_transferred FROM leads WHERE id = ?', [leadId]);
+    if (leadRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
       });
     }
 
-    if (result.rows[0].is_transferred) {
+    if (leadRows[0].is_transferred) {
       return res.status(403).json({
         success: false,
         message: 'Cannot add call log to transferred lead'
@@ -585,13 +573,9 @@ router.post('/:id/call-log', async (req, res) => {
     }
 
     // STATUS CHANGE GUARD - Validate status transitions (Skip for Super Admin)
-    // Treat empty or null status as "New" (data integrity fix)
-    const currentStatus = result.rows[0].status || 'New';
-    const newStatus = callOutcome;
+    const currentStatus = leadRows[0].status || 'New';
 
     if (!isSuperAdmin) {
-      // Status transition validation temporarily disabled for flexibility
-      // Only block Converted and Drop leads from being changed
       const finalStatuses = ['converted', 'drop'];
       if (finalStatuses.includes(currentStatus.toLowerCase())) {
         return res.status(400).json({
@@ -601,15 +585,15 @@ router.post('/:id/call-log', async (req, res) => {
       }
 
       // Same-day call limit check (max 5 attempts per day per telecaller)
-      const todayCallsResult = await pool.query(
+      const [todayCallsRows] = await pool.query(
         `SELECT COUNT(*) as count FROM call_history
-         WHERE lead_id = $1
-         AND caller_id = $2
+         WHERE lead_id = ?
+         AND caller_id = ?
          AND DATE(call_date) = CURRENT_DATE`,
         [leadId, callerId]
       );
 
-      if (todayCallsResult.rows[0].count >= 5) {
+      if (todayCallsRows[0].count >= 5) {
         return res.status(400).json({
           success: false,
           message: 'You have already contacted this lead 5 times today. Please try again tomorrow.'
@@ -640,13 +624,12 @@ router.post('/:id/call-log', async (req, res) => {
         `INSERT INTO call_history (
           lead_id, caller_id, caller_name, call_date, call_remark, call_outcome, call_reason,
           next_followup_date, duration, created_ip, user_agent
-        ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)`,
+        ) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?)`,
         [leadId, callerId, callerName, callRemark, callOutcome, callReason || null, nextFollowUpDate || null, duration || null, clientIp, userAgent]
       );
       console.log('INSERT successful!');
     } catch (insertError) {
       console.error('INSERT FAILED:', insertError.message);
-      console.error('INSERT error detail:', insertError.detail);
       console.error('INSERT error code:', insertError.code);
       throw insertError;
     }
@@ -656,8 +639,8 @@ router.post('/:id/call-log', async (req, res) => {
       console.log('Attempting UPDATE leads...');
       await pool.query(
         `UPDATE leads
-         SET status = $1, last_call_date = NOW(), next_followup_date = $2, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $3`,
+         SET status = ?, last_call_date = NOW(), next_followup_date = ?, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
         [callOutcome, nextFollowUpDate || null, leadId]
       );
       console.log('UPDATE successful!');
@@ -668,14 +651,14 @@ router.post('/:id/call-log', async (req, res) => {
     console.log('=== CALL LOG DEBUG END ===');
 
     // Get updated lead with call history
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
-    const callHistoryResult = await pool.query(
-      'SELECT * FROM call_history WHERE lead_id = $1 ORDER BY call_date DESC',
+    const [updatedLeadRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
+    const [callHistoryRows] = await pool.query(
+      'SELECT * FROM call_history WHERE lead_id = ? ORDER BY call_date DESC',
       [leadId]
     );
 
     // Create notification for all call log outcomes
-    const _leadName = updatedLeadResult.rows[0].name;
+    const _leadName = updatedLeadRows[0].name;
     const _subStatusText = callReason ? ` (${callReason})` : "";
     await createNotification({
       userId: null,
@@ -690,8 +673,8 @@ router.post('/:id/call-log', async (req, res) => {
       success: true,
       message: 'Call log added successfully',
       data: {
-        ...updatedLeadResult.rows[0],
-        callHistory: callHistoryResult.rows
+        ...updatedLeadRows[0],
+        callHistory: callHistoryRows
       }
     });
   } catch (error) {
@@ -725,23 +708,23 @@ router.put('/:id/transfer', async (req, res) => {
     }
 
     // Check if lead exists and is in "Interested" status
-    const result = await pool.query('SELECT id, status, is_transferred FROM leads WHERE id = $1', [leadId]);
+    const [leadRows] = await pool.query('SELECT id, status, is_transferred FROM leads WHERE id = ?', [leadId]);
 
-    if (result.rows.length === 0) {
+    if (leadRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
       });
     }
 
-    if (result.rows[0].is_transferred) {
+    if (leadRows[0].is_transferred) {
       return res.status(400).json({
         success: false,
         message: 'Lead has already been transferred'
       });
     }
 
-    if (result.rows[0].status !== 'Interested') {
+    if (leadRows[0].status !== 'Interested') {
       return res.status(400).json({
         success: false,
         message: 'Only interested leads can be transferred'
@@ -749,40 +732,40 @@ router.put('/:id/transfer', async (req, res) => {
     }
 
     // Get counsellor name
-    const counsellorResult = await pool.query(
-      'SELECT id, name FROM users WHERE id = $1',
+    const [counsellorRows] = await pool.query(
+      'SELECT id, name FROM users WHERE id = ?',
       [transferredTo]
     );
 
-    if (counsellorResult.rows.length === 0) {
+    if (counsellorRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Counsellor not found'
       });
     }
 
-    const counsellorName = counsellorResult.rows[0].name;
+    const counsellorName = counsellorRows[0].name;
 
     // Transfer lead
     await pool.query(
       `UPDATE leads
        SET is_transferred = TRUE,
-           transferred_to = $1,
-           transferred_to_name = $2,
+           transferred_to = ?,
+           transferred_to_name = ?,
            transferred_date = NOW(),
            status = 'Converted',
-           remark = CONCAT(COALESCE(remark, ''), ' | Transfer Reason: ', $3),
+           remark = CONCAT(COALESCE(remark, ''), ' | Transfer Reason: ', ?),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $4`,
+       WHERE id = ?`,
       [transferredTo, counsellorName, transferReason || 'No reason provided', leadId]
     );
 
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [updatedRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
     res.json({
       success: true,
       message: 'Lead transferred successfully',
-      data: updatedLeadResult.rows[0]
+      data: updatedRows[0]
     });
   } catch (error) {
     console.error('Transfer lead error:', error);
@@ -808,26 +791,26 @@ router.post('/:id/request-reopen', async (req, res) => {
     }
 
     // Check if lead exists and is "Not Interested"
-    const result = await pool.query(
-      'SELECT id, status, reopen_requested FROM leads WHERE id = $1',
+    const [leadRows] = await pool.query(
+      'SELECT id, status, reopen_requested FROM leads WHERE id = ?',
       [leadId]
     );
 
-    if (result.rows.length === 0) {
+    if (leadRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
       });
     }
 
-    if (result.rows[0].status !== 'Not Interested') {
+    if (leadRows[0].status !== 'Not Interested') {
       return res.status(400).json({
         success: false,
         message: 'Only "Not Interested" leads can be requested for re-open'
       });
     }
 
-    if (result.rows[0].reopen_requested) {
+    if (leadRows[0].reopen_requested) {
       return res.status(400).json({
         success: false,
         message: 'Re-open request already pending for this lead'
@@ -838,18 +821,18 @@ router.post('/:id/request-reopen', async (req, res) => {
     await pool.query(
       `UPDATE leads
        SET reopen_requested = TRUE,
-           remark = CONCAT(COALESCE(remark, ''), ' | Re-open requested by ', $1, ': ', $2),
+           remark = CONCAT(COALESCE(remark, ''), ' | Re-open requested by ', ?, ': ', ?),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3`,
+       WHERE id = ?`,
       [requesterName, reason || 'No reason provided', leadId]
     );
 
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [updatedRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
     res.json({
       success: true,
       message: 'Re-open request submitted successfully. Admin will review.',
-      data: updatedLeadResult.rows[0]
+      data: updatedRows[0]
     });
   } catch (error) {
     console.error('Request re-open error:', error);
@@ -867,19 +850,19 @@ router.post('/:id/approve-reopen', async (req, res) => {
     const leadId = req.params.id;
 
     // Check if lead exists and has reopen request
-    const result = await pool.query(
-      'SELECT id, reopen_requested FROM leads WHERE id = $1',
+    const [leadRows] = await pool.query(
+      'SELECT id, reopen_requested FROM leads WHERE id = ?',
       [leadId]
     );
 
-    if (result.rows.length === 0) {
+    if (leadRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
       });
     }
 
-    if (!result.rows[0].reopen_requested) {
+    if (!leadRows[0].reopen_requested) {
       return res.status(400).json({
         success: false,
         message: 'No re-open request found for this lead'
@@ -893,16 +876,16 @@ router.post('/:id/approve-reopen', async (req, res) => {
            reopen_requested = FALSE,
            remark = CONCAT(COALESCE(remark, ''), ' | Re-open approved by admin'),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1`,
+       WHERE id = ?`,
       [leadId]
     );
 
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [updatedRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
     res.json({
       success: true,
       message: 'Lead re-opened successfully',
-      data: updatedLeadResult.rows[0]
+      data: updatedRows[0]
     });
   } catch (error) {
     console.error('Approve re-open error:', error);
@@ -920,8 +903,8 @@ router.put('/:id', async (req, res) => {
     const leadId = req.params.id;
 
     // Check if lead exists
-    const result = await pool.query('SELECT id FROM leads WHERE id = $1', [leadId]);
-    if (result.rows.length === 0) {
+    const [rows] = await pool.query('SELECT id FROM leads WHERE id = ?', [leadId]);
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
@@ -932,13 +915,11 @@ router.put('/:id', async (req, res) => {
     const allowedFields = ['name', 'father_name', 'phone', 'city', 'neet', 'course', 'destination', 'remark', 'source', 'status'];
     const updateFields = [];
     const updateValues = [];
-    let paramCount = 1;
 
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
-        updateFields.push(`${field} = $${paramCount}`);
+        updateFields.push(`${field} = ?`);
         updateValues.push(req.body[field]);
-        paramCount++;
       }
     }
 
@@ -952,15 +933,15 @@ router.put('/:id', async (req, res) => {
     updateValues.push(leadId);
 
     await pool.query(
-      `UPDATE leads SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramCount}`,
+      `UPDATE leads SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
       updateValues
     );
 
-    const updatedLeadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [updatedRows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
     // Create notification if status was changed
     if (req.body.status !== undefined) {
-      const leadName = updatedLeadResult.rows[0].name;
+      const leadName = updatedRows[0].name;
       const statusMessage = req.body.status === 'Converted'
         ? `${leadName} has been marked as "Converted"`
         : `${leadName}'s enquiry status changed to "${req.body.status}"`;
@@ -990,7 +971,7 @@ router.put('/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Lead updated successfully',
-      data: updatedLeadResult.rows[0]
+      data: updatedRows[0]
     });
   } catch (error) {
     console.error('Update lead error:', error);
@@ -1007,16 +988,16 @@ router.delete('/:id', async (req, res) => {
   try {
     const leadId = req.params.id;
 
-    const result = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+    const [rows] = await pool.query('SELECT * FROM leads WHERE id = ?', [leadId]);
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found'
       });
     }
 
-    await pool.query('DELETE FROM leads WHERE id = $1', [leadId]);
+    await pool.query('DELETE FROM leads WHERE id = ?', [leadId]);
 
     // Log audit trail
     await logAudit({
@@ -1025,7 +1006,7 @@ router.delete('/:id', async (req, res) => {
       action: 'DELETE',
       entityType: 'Lead',
       entityId: leadId,
-      details: { deletedLead: result.rows[0] },
+      details: { deletedLead: rows[0] },
       ipAddress: getIpAddress(req),
       userAgent: req.get('user-agent')
     });
@@ -1033,7 +1014,7 @@ router.delete('/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Lead deleted successfully',
-      data: result.rows[0]
+      data: rows[0]
     });
   } catch (error) {
     console.error('Delete lead error:', error);
@@ -1048,12 +1029,12 @@ router.delete('/:id', async (req, res) => {
 // DELETE all leads
 router.delete('/', async (req, res) => {
   try {
-    const result = await pool.query('DELETE FROM leads');
+    const [result] = await pool.query('DELETE FROM leads');
 
     res.json({
       success: true,
-      message: `${result.rowCount} leads deleted successfully`,
-      data: { deletedCount: result.rowCount }
+      message: `${result.affectedRows} leads deleted successfully`,
+      data: { deletedCount: result.affectedRows }
     });
   } catch (error) {
     console.error('Delete all leads error:', error);
@@ -1122,19 +1103,19 @@ router.post('/webhook', async (req, res) => {
     }
 
     // Check for duplicate lead (by phone or email)
-    const duplicateCheckQuery = `
-      SELECT id FROM leads
-      WHERE (phone = $1 OR email = $2)
-      AND phone IS NOT NULL AND email IS NOT NULL
-      LIMIT 1
-    `;
-    const existingLeadsResult = await pool.query(duplicateCheckQuery, [mobile, email]);
+    const [existingRows] = await pool.query(
+      `SELECT id FROM leads
+       WHERE (phone = ? OR email = ?)
+       AND phone IS NOT NULL AND email IS NOT NULL
+       LIMIT 1`,
+      [mobile, email]
+    );
 
-    if (existingLeadsResult.rows.length > 0) {
+    if (existingRows.length > 0) {
       return res.status(200).json({
         success: true,
         message: 'Lead already exists',
-        leadId: existingLeadsResult.rows[0].id,
+        leadId: existingRows[0].id,
         duplicate: true
       });
     }
@@ -1175,8 +1156,8 @@ router.post('/webhook', async (req, res) => {
     ].filter(Boolean).join('\n');
 
     // Insert lead into database
-    const insertQuery = `
-      INSERT INTO leads (
+    const [insertResult] = await pool.query(
+      `INSERT INTO leads (
         name,
         phone,
         email,
@@ -1188,27 +1169,28 @@ router.post('/webhook', async (req, res) => {
         notes,
         created_at,
         updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()) RETURNING id
-    `;
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [
+        fullName || 'Unknown',
+        mobile || null,
+        email || null,
+        city || null,
+        destination || 'Not Specified',
+        course || 'MBBS',
+        'New',
+        source || 'EducatePulse Website',
+        notes
+      ]
+    );
 
-    const result = await pool.query(insertQuery, [
-      fullName || 'Unknown',
-      mobile || null,
-      email || null,
-      city || null,
-      destination || 'Not Specified',
-      course || 'MBBS',
-      'New',
-      source || 'EducatePulse Website',
-      notes
-    ]);
+    const newLeadId = insertResult.insertId;
 
     res.status(201).json({
       success: true,
       message: 'Lead created successfully',
-      leadId: result.rows[0].id,
+      leadId: newLeadId,
       data: {
-        id: result.rows[0].id,
+        id: newLeadId,
         name: fullName,
         phone: mobile,
         email: email,
@@ -1267,20 +1249,19 @@ router.post('/bulk-upload', upload.single('file'), async (req, res) => {
         }
 
         // Check for duplicate phone number
-        const existing = await pool.query(
-          'SELECT id FROM leads WHERE phone = $1',
+        const [existing] = await pool.query(
+          'SELECT id FROM leads WHERE phone = ?',
           [phone]
         );
 
-        if (existing.rows.length > 0) {
+        if (existing.length > 0) {
           duplicates++;
           continue;
         }
 
         // Insert lead with NULL values for course, neet, destination, remark, source
-        // to ensure they don't get default values from database
         await pool.query(
-          'INSERT INTO leads (name, phone, city, neet, course, destination, remark, source, status, created_at) VALUES ($1, $2, $3, NULL, NULL, NULL, NULL, NULL, $4, NOW())',
+          'INSERT INTO leads (name, phone, city, neet, course, destination, remark, source, status, created_at) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, NULL, ?, NOW())',
           [name.trim(), phone.trim(), city?.trim() || null, 'New']
         );
 

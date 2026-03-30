@@ -5,50 +5,46 @@ const { pool } = require('../config/database');
 // Helper function to create a notification (can be called from other routes)
 async function createNotification({ userId = null, type, title, message, leadId = null, leadName = null }) {
   try {
-    const query = `
-      INSERT INTO notifications (user_id, type, title, message, lead_id, lead_name, unread, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
-      RETURNING id
-    `;
-
-    const result = await pool.query(query, [userId, type, title, message, leadId, leadName]);
-    return { success: true, notificationId: result.rows[0].id };
+    const [result] = await pool.query(
+      `INSERT INTO notifications (user_id, type, title, message, lead_id, lead_name, unread, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, TRUE, NOW())`,
+      [userId, type, title, message, leadId, leadName]
+    );
+    return { success: true, notificationId: result.insertId };
   } catch (error) {
     console.error('Error creating notification:', error);
     return { success: false, error: error.message };
   }
 }
 
-// Note: Function will be exported at the end of file
-
 // GET all notifications for a user (or all if no userId specified)
 router.get('/', async (req, res) => {
   try {
     const { userId, limit = 50, offset = 0 } = req.query;
 
-    let query = `
+    const query = `
       SELECT
         n.*,
         CASE
-          WHEN n.created_at >= NOW() - INTERVAL '5 minutes' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 60, ' minutes ago')
-          WHEN n.created_at >= NOW() - INTERVAL '1 hour' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 60, ' minutes ago')
-          WHEN n.created_at >= NOW() - INTERVAL '24 hours' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 3600, ' hours ago')
-          WHEN n.created_at >= NOW() - INTERVAL '7 days' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - n.created_at))::integer / 86400, ' days ago')
-          ELSE TO_CHAR(n.created_at, 'Mon DD at HH12:MI PM')
+          WHEN n.created_at >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, n.created_at, NOW()), ' minutes ago')
+          WHEN n.created_at >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, n.created_at, NOW()), ' minutes ago')
+          WHEN n.created_at >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, n.created_at, NOW()), ' hours ago')
+          WHEN n.created_at >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, n.created_at, NOW()), ' days ago')
+          ELSE DATE_FORMAT(n.created_at, '%b %d at %h:%i %p')
         END as time_ago,
-        TO_CHAR(n.created_at, 'Month DD, YYYY at HH12:MI PM') as formatted_date
+        DATE_FORMAT(n.created_at, '%M %d, %Y at %h:%i %p') as formatted_date
       FROM notifications n
-      WHERE (n.user_id = $1 OR n.user_id IS NULL)
+      WHERE (n.user_id = ? OR n.user_id IS NULL)
       ORDER BY n.created_at DESC
-      LIMIT $2 OFFSET $3
+      LIMIT ? OFFSET ?
     `;
 
-    const notifications = await pool.query(query, [userId || null, parseInt(limit), parseInt(offset)]);
+    const [rows] = await pool.query(query, [userId || null, parseInt(limit), parseInt(offset)]);
 
     res.json({
       success: true,
-      data: notifications.rows,
-      count: notifications.rows.length
+      data: rows,
+      count: rows.length
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -65,17 +61,16 @@ router.get('/unread-count', async (req, res) => {
   try {
     const { userId } = req.query;
 
-    const query = `
-      SELECT COUNT(*) as count
-      FROM notifications
-      WHERE (user_id = $1 OR user_id IS NULL) AND unread = TRUE
-    `;
-
-    const result = await pool.query(query, [userId || null]);
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) as count
+       FROM notifications
+       WHERE (user_id = ? OR user_id IS NULL) AND unread = TRUE`,
+      [userId || null]
+    );
 
     res.json({
       success: true,
-      count: result.rows[0].count
+      count: rows[0].count
     });
   } catch (error) {
     console.error('Error fetching unread count:', error);
@@ -92,13 +87,10 @@ router.put('/:id/read', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = `
-      UPDATE notifications
-      SET unread = FALSE, read_at = NOW()
-      WHERE id = $1
-    `;
-
-    await pool.query(query, [id]);
+    await pool.query(
+      `UPDATE notifications SET unread = FALSE, read_at = NOW() WHERE id = ?`,
+      [id]
+    );
 
     res.json({
       success: true,
@@ -119,13 +111,12 @@ router.put('/mark-all-read', async (req, res) => {
   try {
     const { userId } = req.body;
 
-    const query = `
-      UPDATE notifications
-      SET unread = FALSE, read_at = NOW()
-      WHERE (user_id = $1 OR user_id IS NULL) AND unread = TRUE
-    `;
-
-    await pool.query(query, [userId || null]);
+    await pool.query(
+      `UPDATE notifications
+       SET unread = FALSE, read_at = NOW()
+       WHERE (user_id = ? OR user_id IS NULL) AND unread = TRUE`,
+      [userId || null]
+    );
 
     res.json({
       success: true,
@@ -146,9 +137,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = `DELETE FROM notifications WHERE id = $1`;
-
-    await pool.query(query, [id]);
+    await pool.query(`DELETE FROM notifications WHERE id = ?`, [id]);
 
     res.json({
       success: true,
@@ -169,12 +158,10 @@ router.delete('/clear-all', async (req, res) => {
   try {
     const { userId } = req.query;
 
-    const query = `
-      DELETE FROM notifications
-      WHERE (user_id = $1 OR user_id IS NULL)
-    `;
-
-    await pool.query(query, [userId || null]);
+    await pool.query(
+      `DELETE FROM notifications WHERE (user_id = ? OR user_id IS NULL)`,
+      [userId || null]
+    );
 
     res.json({
       success: true,
@@ -195,9 +182,6 @@ router.get('/followups-today', async (req, res) => {
   try {
     const { userId, userRole } = req.query;
 
-    // Query for today's follow-ups
-    // If telecaller, show only their assigned leads
-    // If admin, show all leads
     let query;
     let queryParams;
 
@@ -213,15 +197,15 @@ router.get('/followups-today', async (req, res) => {
           'Follow-up Reminder' as title,
           CONCAT('Follow-up with ', l.name, ' (', l.phone, ')') as message,
           CASE
-            WHEN l.next_followup_date::date = CURRENT_DATE THEN 'Today'
-            WHEN l.next_followup_date::date < CURRENT_DATE THEN 'Overdue'
-            ELSE TO_CHAR(l.next_followup_date, 'Mon DD')
+            WHEN DATE(l.next_followup_date) = CURRENT_DATE THEN 'Today'
+            WHEN DATE(l.next_followup_date) < CURRENT_DATE THEN 'Overdue'
+            ELSE DATE_FORMAT(l.next_followup_date, '%b %d')
           END as time_ago,
           TRUE as unread,
           l.next_followup_date as created_at
         FROM leads l
-        WHERE l.assigned_to = $1
-          AND l.next_followup_date::date <= CURRENT_DATE
+        WHERE l.assigned_to = ?
+          AND DATE(l.next_followup_date) <= CURRENT_DATE
           AND l.status NOT IN ('Converted', 'Drop', 'Not Interested')
         ORDER BY l.next_followup_date ASC
         LIMIT 10
@@ -243,14 +227,14 @@ router.get('/followups-today', async (req, res) => {
             THEN CONCAT(' - Assigned to ', l.assigned_to_name)
             ELSE '' END) as message,
           CASE
-            WHEN l.next_followup_date::date = CURRENT_DATE THEN 'Today'
-            WHEN l.next_followup_date::date < CURRENT_DATE THEN 'Overdue'
-            ELSE TO_CHAR(l.next_followup_date, 'Mon DD')
+            WHEN DATE(l.next_followup_date) = CURRENT_DATE THEN 'Today'
+            WHEN DATE(l.next_followup_date) < CURRENT_DATE THEN 'Overdue'
+            ELSE DATE_FORMAT(l.next_followup_date, '%b %d')
           END as time_ago,
           TRUE as unread,
           l.next_followup_date as created_at
         FROM leads l
-        WHERE l.next_followup_date::date <= CURRENT_DATE
+        WHERE DATE(l.next_followup_date) <= CURRENT_DATE
           AND l.status NOT IN ('Converted', 'Drop', 'Not Interested')
         ORDER BY l.next_followup_date ASC
         LIMIT 20
@@ -258,12 +242,12 @@ router.get('/followups-today', async (req, res) => {
       queryParams = [];
     }
 
-    const result = await pool.query(query, queryParams);
+    const [rows] = await pool.query(query, queryParams);
 
     res.json({
       success: true,
-      data: result.rows,
-      count: result.rows.length
+      data: rows,
+      count: rows.length
     });
   } catch (error) {
     console.error('Error fetching followup notifications:', error);

@@ -14,7 +14,7 @@ router.get('/telecaller-performance', async (req, res) => {
         COUNT(ch.id) as total_calls,
         SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) as conversions,
         ROUND(
-          (SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(ch.id), 0)) * 100,
+          (SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) / NULLIF(COUNT(ch.id), 0)) * 100,
           2
         ) as success_rate,
         SUM(CASE WHEN ch.call_outcome = 'Contacted' THEN 1 ELSE 0 END) as contacted,
@@ -32,28 +32,22 @@ router.get('/telecaller-performance', async (req, res) => {
     `;
 
     const params = [];
-    let paramCounter = 1;
 
-    // Add date filters if provided
     if (startDate) {
-      query += ` AND DATE(ch.call_date) >= $${paramCounter}`;
+      query += ` AND DATE(ch.call_date) >= ?`;
       params.push(startDate);
-      paramCounter++;
     }
 
     if (endDate) {
-      query += ` AND DATE(ch.call_date) <= $${paramCounter}`;
+      query += ` AND DATE(ch.call_date) <= ?`;
       params.push(endDate);
-      paramCounter++;
     }
 
     query += ' GROUP BY u.id, u.name ORDER BY total_calls DESC';
 
-    const result = await pool.query(query, params);
-    const performance = result.rows;
+    const [rows] = await pool.query(query, params);
 
-    // Calculate outcomes for each telecaller
-    const formattedData = performance.map(tel => ({
+    const formattedData = rows.map(tel => ({
       telecaller_id: tel.telecaller_id,
       telecaller_name: tel.telecaller_name,
       total_calls: parseInt(tel.total_calls) || 0,
@@ -100,25 +94,23 @@ router.get('/performance-trend', async (req, res) => {
         SUM(CASE WHEN ch.call_outcome = 'Converted' THEN 1 ELSE 0 END) as conversions,
         SUM(CASE WHEN ch.call_outcome = 'Interested' THEN 1 ELSE 0 END) as interested
       FROM call_history ch
-      WHERE ch.call_date >= CURRENT_DATE - INTERVAL '1 day' * $1
+      WHERE ch.call_date >= CURRENT_DATE - INTERVAL ? DAY
     `;
 
     const params = [parseInt(days)];
-    let paramCounter = 2;
 
     if (telecallerId) {
-      query += ` AND ch.caller_id = $${paramCounter}`;
+      query += ` AND ch.caller_id = ?`;
       params.push(telecallerId);
-      paramCounter++;
     }
 
     query += ' GROUP BY DATE(ch.call_date) ORDER BY date ASC';
 
-    const result = await pool.query(query, params);
+    const [rows] = await pool.query(query, params);
 
     res.json({
       success: true,
-      data: result.rows
+      data: rows
     });
 
   } catch (error) {
@@ -134,46 +126,44 @@ router.get('/performance-trend', async (req, res) => {
 // GET /api/analytics/summary
 router.get('/summary', async (req, res) => {
   try {
-    // Get overall stats
-    const totalCallsResult = await pool.query('SELECT COUNT(*) as count FROM call_history');
-    const totalConversionsResult = await pool.query(
-      'SELECT COUNT(*) as count FROM call_history WHERE call_outcome = $1',
+    const [totalCallsRows] = await pool.query('SELECT COUNT(*) as count FROM call_history');
+    const [totalConversionsRows] = await pool.query(
+      'SELECT COUNT(*) as count FROM call_history WHERE call_outcome = ?',
       ['Converted']
     );
-    const totalTelecallersResult = await pool.query(
-      'SELECT COUNT(*) as count FROM users WHERE role = $1 AND status = $2',
+    const [totalTelecallersRows] = await pool.query(
+      'SELECT COUNT(*) as count FROM users WHERE role = ? AND status = ?',
       ['Telecaller', 'active']
     );
 
-    // Get today's stats
-    const todayCallsResult = await pool.query(
+    const [todayCallsRows] = await pool.query(
       'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE'
     );
-    const todayConversionsResult = await pool.query(
-      'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE AND call_outcome = $1',
+    const [todayConversionsRows] = await pool.query(
+      'SELECT COUNT(*) as count FROM call_history WHERE DATE(call_date) = CURRENT_DATE AND call_outcome = ?',
       ['Converted']
     );
 
     // Get top performer (most conversions this month)
-    const topPerformerResult = await pool.query(`
+    const [topPerformerRows] = await pool.query(`
       SELECT
         u.name,
         COUNT(ch.id) as conversions
       FROM users u
       INNER JOIN call_history ch ON ch.caller_id = u.id
       WHERE ch.call_outcome = 'Converted'
-        AND EXTRACT(MONTH FROM ch.call_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-        AND EXTRACT(YEAR FROM ch.call_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND MONTH(ch.call_date) = MONTH(CURRENT_DATE)
+        AND YEAR(ch.call_date) = YEAR(CURRENT_DATE)
       GROUP BY u.id, u.name
       ORDER BY conversions DESC
       LIMIT 1
     `);
 
-    const totalCalls = parseInt(totalCallsResult.rows[0].count);
-    const totalConversions = parseInt(totalConversionsResult.rows[0].count);
-    const totalTelecallers = parseInt(totalTelecallersResult.rows[0].count);
-    const todayCalls = parseInt(todayCallsResult.rows[0].count);
-    const todayConversions = parseInt(todayConversionsResult.rows[0].count);
+    const totalCalls = parseInt(totalCallsRows[0].count);
+    const totalConversions = parseInt(totalConversionsRows[0].count);
+    const totalTelecallers = parseInt(totalTelecallersRows[0].count);
+    const todayCalls = parseInt(todayCallsRows[0].count);
+    const todayConversions = parseInt(todayConversionsRows[0].count);
 
     res.json({
       success: true,
@@ -183,7 +173,7 @@ router.get('/summary', async (req, res) => {
         totalTelecallers,
         todayCalls,
         todayConversions,
-        topPerformer: topPerformerResult.rows[0] || null,
+        topPerformer: topPerformerRows[0] || null,
         overallSuccessRate: totalCalls > 0
           ? ((totalConversions / totalCalls) * 100).toFixed(2)
           : 0

@@ -10,7 +10,7 @@ router.post('/', uploadFields, async (req, res) => {
       // Personal Details
       firstMiddleName, lastName, dateOfBirth, gender, nationality, aadhar, passportStatus,
 
-      // Passport Details (New)
+      // Passport Details
       passportNumber, fileNumber, passportIssueDate, passportExpiryDate,
 
       // Family Details
@@ -26,10 +26,10 @@ router.post('/', uploadFields, async (req, res) => {
       // Academic Details - 12th
       school12Status, school12Name, board12, percentage12, year12,
 
-      // UG Details (New)
+      // UG Details
       ugStatus, ugDegree, ugCollege, ugPercentage, ugYear,
 
-      // PG Details (New)
+      // PG Details
       pgStatus, pgDegree, pgCollege, pgPercentage, pgYear,
 
       // Other Academic Details
@@ -236,14 +236,13 @@ router.post('/', uploadFields, async (req, res) => {
       course || 'Other Courses', source || 'Other Courses Application Form'
     ];
 
-    const resultResult = await pool.query(query, values);
-    const result = resultResult.rows;
+    const [insertResult] = await pool.query(query, values);
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       data: {
-        applicationId: result.rows[0].id
+        applicationId: insertResult.insertId
       }
     });
   } catch (error) {
@@ -259,15 +258,14 @@ router.post('/', uploadFields, async (req, res) => {
 // Get all other courses applications
 router.get('/', async (req, res) => {
   try {
-    const applicationsResult = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT * FROM other_courses_applications
       ORDER BY created_at DESC
     `);
-    const applications = applicationsResult.rows;
 
     res.json({
       success: true,
-      data: applications
+      data: rows
     });
   } catch (error) {
     console.error('Error fetching other courses applications:', error);
@@ -282,19 +280,18 @@ router.get('/', async (req, res) => {
 // Get statistics
 router.get('/stats/overview', async (req, res) => {
   try {
-    const statsResult = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT
         COUNT(*) as total_applications,
         SUM(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_applications,
-        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 ELSE 0 END) as this_week_applications,
-        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 ELSE 0 END) as this_month_applications
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL 7 DAY THEN 1 ELSE 0 END) as this_week_applications,
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL 30 DAY THEN 1 ELSE 0 END) as this_month_applications
       FROM other_courses_applications
     `);
-    const stats = statsResult.rows;
 
     res.json({
       success: true,
-      data: stats[0]
+      data: rows[0]
     });
   } catch (error) {
     console.error('Error fetching statistics:', error);
@@ -326,7 +323,6 @@ router.patch('/:id/upload-document', upload.single('document'), async (req, res)
       });
     }
 
-    // Map frontend field names to database column names
     const fieldMapping = {
       'document_marksheet_10': 'document_marksheet_10',
       'document_marksheet_12': 'document_marksheet_12',
@@ -349,7 +345,6 @@ router.patch('/:id/upload-document', upload.single('document'), async (req, res)
       });
     }
 
-    // Update the document path in database
     const query = `UPDATE other_courses_applications SET ${dbColumn} = ? WHERE id = ?`;
     await pool.query(query, [req.file.path, id]);
 
@@ -385,7 +380,6 @@ router.put('/:id', async (req, res) => {
       updateData.entrance_exams = JSON.stringify(updateData.entrance_exams);
     }
 
-    // Build dynamic UPDATE query
     const fields = Object.keys(updateData);
     const values = Object.values(updateData);
 
@@ -420,8 +414,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = 'DELETE FROM other_courses_applications WHERE id = ?';
-    await pool.query(query, [id]);
+    await pool.query('DELETE FROM other_courses_applications WHERE id = ?', [id]);
 
     res.json({
       success: true,

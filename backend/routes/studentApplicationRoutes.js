@@ -116,7 +116,7 @@ router.post('/', uploadFields, async (req, res) => {
         document_marksheet_10, document_marksheet_12, document_neet_scorecard,
         document_aadhar_front, document_aadhar_back, document_photograph,
         course, source
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -134,14 +134,13 @@ router.post('/', uploadFields, async (req, res) => {
       course || 'MBBS', source || 'MBBS Application Form'
     ];
 
-    const resultResult = await pool.query(query, values);
-    const result = resultResult.rows;
+    const [insertResult] = await pool.query(query, values);
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       data: {
-        applicationId: result.rows[0].id
+        applicationId: insertResult.insertId
       }
     });
   } catch (error) {
@@ -161,59 +160,50 @@ router.get('/', async (req, res) => {
 
     let query = 'SELECT * FROM student_applications WHERE 1=1';
     const params = [];
-    let paramCounter = 1;
 
     if (status) {
-      query += ` AND status = $${paramCounter}`;
+      query += ` AND status = ?`;
       params.push(status);
-      paramCounter++;
     }
 
     if (course) {
-      query += ` AND course = $${paramCounter}`;
+      query += ` AND course = ?`;
       params.push(course);
-      paramCounter++;
     }
 
     if (search) {
       const searchPattern = `%${search}%`;
-      query += ` AND (first_name LIKE $${paramCounter} OR last_name LIKE $${paramCounter+1} OR email LIKE $${paramCounter+2} OR mobile LIKE $${paramCounter+3})`;
+      query += ` AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR mobile LIKE ?)`;
       params.push(searchPattern, searchPattern, searchPattern, searchPattern);
-      paramCounter += 4;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT $${paramCounter} OFFSET $${paramCounter+1}`;
+    query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
     params.push(parseInt(limit), parseInt(offset));
 
-    const applicationsResult = await pool.query(query, params);
-    const applications = applicationsResult.rows;
+    const [applications] = await pool.query(query, params);
 
     // Get total count
     let countQuery = 'SELECT COUNT(*) as total FROM student_applications WHERE 1=1';
     const countParams = [];
-    let countParamCounter = 1;
 
     if (status) {
-      countQuery += ` AND status = $${countParamCounter}`;
+      countQuery += ` AND status = ?`;
       countParams.push(status);
-      countParamCounter++;
     }
 
     if (course) {
-      countQuery += ` AND course = $${countParamCounter}`;
+      countQuery += ` AND course = ?`;
       countParams.push(course);
-      countParamCounter++;
     }
 
     if (search) {
       const searchPattern = `%${search}%`;
-      countQuery += ` AND (first_name LIKE $${countParamCounter} OR last_name LIKE $${countParamCounter+1} OR email LIKE $${countParamCounter+2} OR mobile LIKE $${countParamCounter+3})`;
+      countQuery += ` AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR mobile LIKE ?)`;
       countParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
     }
 
-    const countResultResult = await pool.query(countQuery, countParams);
-    const countResult = countResultResult.rows;
-    const total = parseInt(countResult[0].total);
+    const [countRows] = await pool.query(countQuery, countParams);
+    const total = parseInt(countRows[0].total);
 
     res.json({
       success: true,
@@ -239,13 +229,12 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const applicationsResult = await pool.query(
-      'SELECT * FROM student_applications WHERE id = $1',
+    const [rows] = await pool.query(
+      'SELECT * FROM student_applications WHERE id = ?',
       [id]
     );
-    const applications = applicationsResult.rows;
 
-    if (applications.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Application not found'
@@ -253,9 +242,13 @@ router.get('/:id', async (req, res) => {
     }
 
     // Parse JSON fields
-    const application = applications[0];
+    const application = rows[0];
     if (application.neet_scores) {
-      application.neet_scores = JSON.parse(application.neet_scores);
+      try {
+        application.neet_scores = JSON.parse(application.neet_scores);
+      } catch (e) {
+        // already parsed or invalid, leave as-is
+      }
     }
 
     res.json({
@@ -287,7 +280,7 @@ router.patch('/:id/status', async (req, res) => {
     }
 
     await pool.query(
-      'UPDATE student_applications SET status = $1 WHERE id = $2',
+      'UPDATE student_applications SET status = ? WHERE id = ?',
       [status, id]
     );
 
@@ -308,11 +301,11 @@ router.patch('/:id/status', async (req, res) => {
 // Get statistics
 router.get('/stats/overview', async (req, res) => {
   try {
-    const statsResult = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT
         COUNT(*) as total_applications,
         SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 ELSE 0 END) as this_week_applications,
+        SUM(CASE WHEN created_at >= CURRENT_DATE - INTERVAL 7 DAY THEN 1 ELSE 0 END) as this_week_applications,
         SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
         SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected,
         SUM(CASE WHEN status = 'Documents Required' THEN 1 ELSE 0 END) as documents_required,
@@ -320,11 +313,10 @@ router.get('/stats/overview', async (req, res) => {
         SUM(CASE WHEN course = 'MBBS' THEN 1 ELSE 0 END) as mbbs_applications
       FROM student_applications
     `);
-    const stats = statsResult.rows;
 
     res.json({
       success: true,
-      data: stats[0]
+      data: rows[0]
     });
   } catch (error) {
     console.error('Error fetching statistics:', error);
@@ -356,7 +348,6 @@ router.patch('/:id/upload-document', upload.single('document'), async (req, res)
       });
     }
 
-    // Map frontend field names to database column names
     const fieldMapping = {
       'document_marksheet_10': 'document_marksheet_10',
       'document_marksheet_12': 'document_marksheet_12',
@@ -376,7 +367,6 @@ router.patch('/:id/upload-document', upload.single('document'), async (req, res)
       });
     }
 
-    // Update the document path in database
     const query = `UPDATE student_applications SET ${dbColumn} = ? WHERE id = ?`;
     await pool.query(query, [req.file.path, id]);
 
@@ -412,7 +402,6 @@ router.put('/:id', async (req, res) => {
       updateData.neet_scores = JSON.stringify(updateData.neet_scores);
     }
 
-    // Build dynamic UPDATE query
     const fields = Object.keys(updateData);
     const values = Object.values(updateData);
 
@@ -447,8 +436,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = 'DELETE FROM student_applications WHERE id = ?';
-    await pool.query(query, [id]);
+    await pool.query('DELETE FROM student_applications WHERE id = ?', [id]);
 
     res.json({
       success: true,

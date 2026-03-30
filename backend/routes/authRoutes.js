@@ -18,19 +18,19 @@ router.post('/login', async (req, res) => {
     }
 
     // Find user by email
-    const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1 AND status = $2',
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE email = ? AND status = ?',
       [email, 'active']
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    const user = result.rows[0];
+    const user = rows[0];
 
     // Compare password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -103,12 +103,12 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingResult = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
+    const [existingRows] = await pool.query(
+      'SELECT id FROM users WHERE email = ?',
       [email]
     );
 
-    if (existingResult.rows.length > 0) {
+    if (existingRows.length > 0) {
       return res.status(409).json({
         success: false,
         message: 'User with this email already exists'
@@ -129,9 +129,9 @@ router.post('/register', async (req, res) => {
     }
 
     // Insert new user
-    const insertResult = await pool.query(
+    const [insertResult] = await pool.query(
       `INSERT INTO users (name, email, password, role, phone, department, status, permissions)
-       VALUES ($1, $2, $3, $4, $5, $6, 'active', $7) RETURNING id`,
+       VALUES (?, ?, ?, ?, ?, ?, 'active', ?)`,
       [name, email, hashedPassword, role, phone || null, department || null, JSON.stringify(permissions)]
     );
 
@@ -139,7 +139,7 @@ router.post('/register', async (req, res) => {
       success: true,
       message: 'User registered successfully',
       data: {
-        id: insertResult.rows[0].id,
+        id: insertResult.insertId,
         name,
         email,
         role
@@ -160,19 +160,19 @@ router.get('/me/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const userResult = await pool.query(
-      'SELECT id, name, email, role, phone, department, status, permissions, created_at FROM users WHERE id = $1',
+    const [rows] = await pool.query(
+      'SELECT id, name, email, role, phone, department, status, permissions, created_at FROM users WHERE id = ?',
       [userId]
     );
 
-    if (userResult.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
-    const user = userResult.rows[0];
+    const user = rows[0];
 
     // Parse permissions if it's a string
     if (typeof user.permissions === 'string') {

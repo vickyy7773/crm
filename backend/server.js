@@ -94,19 +94,16 @@ app.get('/api/migrate', async (req, res) => {
   const results = [];
 
   try {
-    // FIX LEADS TABLE - Convert status from ENUM to VARCHAR
+    // Check leads.status column type
     try {
-      const leadsStatusCheck = await pool.query(`
+      const [leadsStatusRows] = await pool.query(`
         SELECT data_type FROM information_schema.columns
         WHERE table_name = 'leads' AND column_name = 'status'
+        AND table_schema = DATABASE()
       `);
 
-      if (leadsStatusCheck.rows.length > 0 && leadsStatusCheck.rows[0].data_type === 'USER-DEFINED') {
-        // Create temp column, copy data, drop old, rename new
-        await pool.query(`ALTER TABLE leads ADD COLUMN status_new VARCHAR(100)`);
-        await pool.query(`UPDATE leads SET status_new = status::text`);
-        await pool.query(`ALTER TABLE leads DROP COLUMN status`);
-        await pool.query(`ALTER TABLE leads RENAME COLUMN status_new TO status`);
+      if (leadsStatusRows.length > 0 && leadsStatusRows[0].data_type === 'enum') {
+        await pool.query(`ALTER TABLE leads MODIFY COLUMN status VARCHAR(100)`);
         results.push({ step: 'Fix leads.status (ENUM to VARCHAR)', status: 'success' });
       } else {
         results.push({ step: 'leads.status already VARCHAR or not found', status: 'skipped' });
@@ -116,26 +113,25 @@ app.get('/api/migrate', async (req, res) => {
     }
 
     // Check if call_history table exists
-    const tableCheck = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_name = 'call_history'
-      )
+    const [tableRows] = await pool.query(`
+      SELECT COUNT(*) as cnt FROM information_schema.tables
+      WHERE table_schema = DATABASE() AND table_name = 'call_history'
     `);
-    results.push({ step: 'Table check', exists: tableCheck.rows[0].exists });
+    results.push({ step: 'Table check', exists: tableRows[0].cnt > 0 });
 
-    // Fix call_reason column - change from ENUM to VARCHAR if it exists as ENUM
+    // Fix call_reason column
     try {
-      const typeCheck = await pool.query(`
+      const [typeRows] = await pool.query(`
         SELECT data_type FROM information_schema.columns
         WHERE table_name = 'call_history' AND column_name = 'call_reason'
+        AND table_schema = DATABASE()
       `);
 
-      if (typeCheck.rows.length > 0 && typeCheck.rows[0].data_type === 'USER-DEFINED') {
+      if (typeRows.length > 0 && typeRows[0].data_type === 'enum') {
         await pool.query(`ALTER TABLE call_history DROP COLUMN IF EXISTS call_reason`);
         await pool.query(`ALTER TABLE call_history ADD COLUMN call_reason VARCHAR(100) NULL`);
         results.push({ step: 'Fix call_reason (ENUM to VARCHAR)', status: 'success' });
-      } else if (typeCheck.rows.length === 0) {
+      } else if (typeRows.length === 0) {
         await pool.query(`ALTER TABLE call_history ADD COLUMN call_reason VARCHAR(100) NULL`);
         results.push({ step: 'Add call_reason', status: 'success' });
       } else {
@@ -145,18 +141,19 @@ app.get('/api/migrate', async (req, res) => {
       results.push({ step: 'Fix call_reason', status: 'error', error: e.message });
     }
 
-    // Fix call_outcome column - change from ENUM to VARCHAR if it exists as ENUM
+    // Fix call_outcome column
     try {
-      const outcomeCheck = await pool.query(`
+      const [outcomeRows] = await pool.query(`
         SELECT data_type FROM information_schema.columns
         WHERE table_name = 'call_history' AND column_name = 'call_outcome'
+        AND table_schema = DATABASE()
       `);
 
-      if (outcomeCheck.rows.length > 0 && outcomeCheck.rows[0].data_type === 'USER-DEFINED') {
+      if (outcomeRows.length > 0 && outcomeRows[0].data_type === 'enum') {
         await pool.query(`ALTER TABLE call_history DROP COLUMN IF EXISTS call_outcome`);
         await pool.query(`ALTER TABLE call_history ADD COLUMN call_outcome VARCHAR(100) NULL`);
         results.push({ step: 'Fix call_outcome (ENUM to VARCHAR)', status: 'success' });
-      } else if (outcomeCheck.rows.length === 0) {
+      } else if (outcomeRows.length === 0) {
         await pool.query(`ALTER TABLE call_history ADD COLUMN call_outcome VARCHAR(100) NULL`);
         results.push({ step: 'Add call_outcome', status: 'success' });
       } else {
@@ -168,7 +165,7 @@ app.get('/api/migrate', async (req, res) => {
 
     // Add created_ip column to call_history
     try {
-      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS created_ip VARCHAR(45) NULL`);
+      await pool.query(`ALTER TABLE call_history ADD COLUMN created_ip VARCHAR(45) NULL`);
       results.push({ step: 'Add created_ip', status: 'success' });
     } catch (e) {
       results.push({ step: 'Add created_ip', status: 'error', error: e.message });
@@ -176,17 +173,17 @@ app.get('/api/migrate', async (req, res) => {
 
     // Add user_agent column to call_history
     try {
-      await pool.query(`ALTER TABLE call_history ADD COLUMN IF NOT EXISTS user_agent TEXT NULL`);
+      await pool.query(`ALTER TABLE call_history ADD COLUMN user_agent TEXT NULL`);
       results.push({ step: 'Add user_agent', status: 'success' });
     } catch (e) {
       results.push({ step: 'Add user_agent', status: 'error', error: e.message });
     }
 
     // Get current columns in call_history
-    const columnsResult = await pool.query(`
+    const [columnsRows] = await pool.query(`
       SELECT column_name, data_type
       FROM information_schema.columns
-      WHERE table_name = 'call_history'
+      WHERE table_name = 'call_history' AND table_schema = DATABASE()
       ORDER BY ordinal_position
     `);
 
@@ -194,7 +191,7 @@ app.get('/api/migrate', async (req, res) => {
       success: true,
       message: 'Migration completed!',
       results: results,
-      currentColumns: columnsResult.rows
+      currentColumns: columnsRows
     });
   } catch (error) {
     console.error('Migration error:', error);
@@ -212,36 +209,30 @@ app.get('/api/debug/leads-status', async (req, res) => {
   const { pool } = require('./config/database');
   try {
     // Get status column info
-    const statusInfo = await pool.query(`
-      SELECT column_name, data_type, udt_name, is_nullable
+    const [statusRows] = await pool.query(`
+      SELECT column_name, data_type, is_nullable
       FROM information_schema.columns
       WHERE table_name = 'leads' AND column_name = 'status'
-    `);
-
-    // Check if lead_status enum exists
-    const enumCheck = await pool.query(`
-      SELECT typname, enumlabel
-      FROM pg_type t
-      JOIN pg_enum e ON t.oid = e.enumtypid
-      WHERE typname = 'lead_status'
-      ORDER BY enumsortorder
+      AND table_schema = DATABASE()
     `);
 
     // Try test update
     let testUpdate = 'Not tested';
+    const conn = await pool.getConnection();
     try {
-      await pool.query('BEGIN');
-      await pool.query(`UPDATE leads SET status = 'Office Meeting' WHERE id = 1`);
+      await conn.beginTransaction();
+      await conn.query(`UPDATE leads SET status = 'Office Meeting' WHERE id = 1`);
       testUpdate = 'UPDATE works!';
-      await pool.query('ROLLBACK');
+      await conn.rollback();
     } catch (updateErr) {
-      await pool.query('ROLLBACK');
+      await conn.rollback();
       testUpdate = 'UPDATE FAILED: ' + updateErr.message;
+    } finally {
+      conn.release();
     }
 
     res.json({
-      statusColumn: statusInfo.rows,
-      enumValues: enumCheck.rows,
+      statusColumn: statusRows,
       testUpdate: testUpdate
     });
   } catch (error) {
@@ -249,53 +240,38 @@ app.get('/api/debug/leads-status', async (req, res) => {
   }
 });
 
-// Force fix leads status - drop and recreate
+// Force fix leads status - modify column to VARCHAR if it is ENUM
 app.get('/api/fix-leads-status', async (req, res) => {
   const { pool } = require('./config/database');
   try {
-    // Check current type
-    const check = await pool.query(`
-      SELECT data_type, udt_name FROM information_schema.columns
+    const [checkRows] = await pool.query(`
+      SELECT data_type FROM information_schema.columns
       WHERE table_name = 'leads' AND column_name = 'status'
+      AND table_schema = DATABASE()
     `);
 
-    if (check.rows.length === 0) {
-      return res.json({ message: 'status column not found', check: check.rows });
+    if (checkRows.length === 0) {
+      return res.json({ message: 'status column not found' });
     }
 
-    const udtName = check.rows[0].udt_name;
-
-    if (udtName === 'lead_status' || check.rows[0].data_type === 'USER-DEFINED') {
-      // It's still an ENUM, force convert
-      await pool.query(`ALTER TABLE leads ADD COLUMN status_temp VARCHAR(100)`);
-      await pool.query(`UPDATE leads SET status_temp = status::text`);
-      await pool.query(`ALTER TABLE leads DROP COLUMN status`);
-      await pool.query(`ALTER TABLE leads RENAME COLUMN status_temp TO status`);
-
-      // Also drop the enum type
-      try {
-        await pool.query(`DROP TYPE IF EXISTS lead_status`);
-      } catch (e) {
-        // Ignore if can't drop
-      }
-
+    if (checkRows[0].data_type === 'enum') {
+      await pool.query(`ALTER TABLE leads MODIFY COLUMN status VARCHAR(100)`);
       res.json({
         success: true,
         message: 'Fixed! status column converted from ENUM to VARCHAR',
-        oldType: udtName
+        oldType: 'enum'
       });
     } else {
       res.json({
         success: true,
         message: 'status column is already VARCHAR',
-        currentType: check.rows[0]
+        currentType: checkRows[0]
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
-      detail: error.detail
+      error: error.message
     });
   }
 });
@@ -305,46 +281,48 @@ app.get('/api/debug/call-history', async (req, res) => {
   const { pool } = require('./config/database');
   try {
     // Get table columns
-    const columns = await pool.query(`
+    const [columns] = await pool.query(`
       SELECT column_name, data_type, is_nullable, column_default
       FROM information_schema.columns
-      WHERE table_name = 'call_history'
+      WHERE table_name = 'call_history' AND table_schema = DATABASE()
       ORDER BY ordinal_position
     `);
 
     // Get table constraints
-    const constraints = await pool.query(`
+    const [constraints] = await pool.query(`
       SELECT constraint_name, constraint_type
       FROM information_schema.table_constraints
-      WHERE table_name = 'call_history'
+      WHERE table_name = 'call_history' AND table_schema = DATABASE()
     `);
 
     // Try a test insert (will rollback)
     let testInsertResult = 'Not tested';
+    const conn = await pool.getConnection();
     try {
-      await pool.query('BEGIN');
-      await pool.query(`
+      await conn.beginTransaction();
+      await conn.query(`
         INSERT INTO call_history (lead_id, caller_id, caller_name, call_date, call_remark, call_outcome)
         VALUES (1, 1, 'Test', NOW(), 'Test remark for debugging', 'Contacted')
       `);
       testInsertResult = 'INSERT works!';
-      await pool.query('ROLLBACK');
+      await conn.rollback();
     } catch (insertErr) {
-      await pool.query('ROLLBACK');
-      testInsertResult = 'INSERT FAILED: ' + insertErr.message + ' | Code: ' + insertErr.code + ' | Detail: ' + insertErr.detail;
+      await conn.rollback();
+      testInsertResult = 'INSERT FAILED: ' + insertErr.message + ' | Code: ' + insertErr.code;
+    } finally {
+      conn.release();
     }
 
     res.json({
       success: true,
-      columns: columns.rows,
-      constraints: constraints.rows,
+      columns: columns,
+      constraints: constraints,
       testInsert: testInsertResult
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
-      detail: error.detail
+      error: error.message
     });
   }
 });
@@ -356,7 +334,7 @@ app.get('/api/reset-admin', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await pool.query(
-      `UPDATE users SET password = $1 WHERE email = 'admin@pulseeducation.com'`,
+      `UPDATE users SET password = ? WHERE email = 'admin@pulseeducation.com'`,
       [hashedPassword]
     );
     res.json({ success: true, message: 'Admin password reset to admin123' });
@@ -379,7 +357,7 @@ app.get('/api/health/db', async (req, res) => {
 const runStartupMigrations = async () => {
   const { pool } = require('./config/database');
   try {
-    await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS father_name VARCHAR(100)`);
+    await pool.query(`ALTER TABLE leads ADD COLUMN father_name VARCHAR(100)`);
     console.log('✅ Startup migration: father_name column ensured');
   } catch (err) {
     console.error('⚠️ Startup migration warning:', err.message);

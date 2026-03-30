@@ -5,53 +5,48 @@ const { pool } = require('../config/database');
 // GET dashboard stats
 router.get('/stats', async (req, res) => {
   try {
-    // Get total leads count
-    const totalLeads = await pool.query('SELECT COUNT(*) as count FROM leads');
+    const [totalLeadsRows] = await pool.query('SELECT COUNT(*) as count FROM leads');
 
-    // Get conversions count
-    const conversions = await pool.query(
-      'SELECT COUNT(*) as count FROM leads WHERE status = $1',
+    const [conversionsRows] = await pool.query(
+      'SELECT COUNT(*) as count FROM leads WHERE status = ?',
       ['Converted']
     );
 
-    // Get pending follow-ups count (where next_followup_date is in future and not null)
-    const pendingFollowups = await pool.query(
+    const [pendingFollowupsRows] = await pool.query(
       `SELECT COUNT(*) as count FROM leads
        WHERE next_followup_date IS NOT NULL
        AND next_followup_date >= CURRENT_DATE`
     );
 
-    // Get active users count
-    const activeUsers = await pool.query(
-      'SELECT COUNT(*) as count FROM users WHERE status = $1',
+    const [activeUsersRows] = await pool.query(
+      'SELECT COUNT(*) as count FROM users WHERE status = ?',
       ['active']
     );
 
-    // Get status-wise counts for dashboard boxes
-    const interestedCount = await pool.query(
+    const [interestedRows] = await pool.query(
       "SELECT COUNT(*) as count FROM leads WHERE status = 'Interested'"
     );
-    const followUpCount = await pool.query(
+    const [followUpRows] = await pool.query(
       "SELECT COUNT(*) as count FROM leads WHERE status = 'Follow Up'"
     );
-    const officeVisitCount = await pool.query(
+    const [officeVisitRows] = await pool.query(
       "SELECT COUNT(*) as count FROM leads WHERE status = 'Office Visit'"
     );
-    const otherCourseCount = await pool.query(
+    const [otherCourseRows] = await pool.query(
       "SELECT COUNT(*) as count FROM leads WHERE status = 'Other Course'"
     );
 
     res.json({
       success: true,
       data: {
-        totalLeads: totalLeads.rows[0].count,
-        conversions: conversions.rows[0].count,
-        pendingFollowups: pendingFollowups.rows[0].count,
-        activeUsers: activeUsers.rows[0].count,
-        interestedCount: parseInt(interestedCount.rows[0].count),
-        followUpCount: parseInt(followUpCount.rows[0].count),
-        officeVisitCount: parseInt(officeVisitCount.rows[0].count),
-        otherCourseCount: parseInt(otherCourseCount.rows[0].count),
+        totalLeads: totalLeadsRows[0].count,
+        conversions: conversionsRows[0].count,
+        pendingFollowups: pendingFollowupsRows[0].count,
+        activeUsers: activeUsersRows[0].count,
+        interestedCount: parseInt(interestedRows[0].count),
+        followUpCount: parseInt(followUpRows[0].count),
+        officeVisitCount: parseInt(officeVisitRows[0].count),
+        otherCourseCount: parseInt(otherCourseRows[0].count),
       }
     });
   } catch (error) {
@@ -68,7 +63,6 @@ router.get('/activities', async (req, res) => {
   try {
     const { limit = 10 } = req.query;
 
-    // Get recent call logs with lead and user information
     const query = `
       SELECT
         ch.id,
@@ -78,24 +72,24 @@ router.get('/activities', async (req, res) => {
         l.name as lead_name,
         l.id as lead_id,
         CASE
-          WHEN ch.call_date >= NOW() - INTERVAL '5 minutes' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 60, ' mins ago')
-          WHEN ch.call_date >= NOW() - INTERVAL '1 hour' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 60, ' mins ago')
-          WHEN ch.call_date >= NOW() - INTERVAL '24 hours' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 3600, ' hours ago')
-          WHEN ch.call_date >= NOW() - INTERVAL '7 days' THEN CONCAT(EXTRACT(EPOCH FROM (NOW() - ch.call_date))::integer / 86400, ' days ago')
-          ELSE TO_CHAR(ch.call_date, 'Mon DD')
+          WHEN ch.call_date >= NOW() - INTERVAL 5 MINUTE THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 1 HOUR THEN CONCAT(TIMESTAMPDIFF(MINUTE, ch.call_date, NOW()), ' mins ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 24 HOUR THEN CONCAT(TIMESTAMPDIFF(HOUR, ch.call_date, NOW()), ' hours ago')
+          WHEN ch.call_date >= NOW() - INTERVAL 7 DAY THEN CONCAT(TIMESTAMPDIFF(DAY, ch.call_date, NOW()), ' days ago')
+          ELSE DATE_FORMAT(ch.call_date, '%b %d')
         END as time_ago,
         'call' as type
       FROM call_history ch
       JOIN leads l ON ch.lead_id = l.id
       ORDER BY ch.call_date DESC
-      LIMIT $1
+      LIMIT ?
     `;
 
-    const activities = await pool.query(query, [parseInt(limit)]);
+    const [rows] = await pool.query(query, [parseInt(limit)]);
 
     res.json({
       success: true,
-      data: activities.rows
+      data: rows
     });
   } catch (error) {
     res.status(500).json({
@@ -128,11 +122,11 @@ router.get('/pending-followups', async (req, res) => {
       LIMIT 50
     `;
 
-    const followups = await pool.query(query);
+    const [rows] = await pool.query(query);
 
     res.json({
       success: true,
-      data: followups.rows
+      data: rows
     });
   } catch (error) {
     res.status(500).json({
@@ -155,13 +149,13 @@ router.get('/leads-progress', async (req, res) => {
       GROUP BY status
     `;
 
-    const progress = await pool.query(query);
+    const [rows] = await pool.query(query);
 
     // Calculate total for percentage
-    const total = progress.rows.reduce((sum, item) => sum + parseInt(item.count), 0);
+    const total = rows.reduce((sum, item) => sum + parseInt(item.count), 0);
 
     // Add percentage to each status
-    const progressWithPercentage = progress.rows.map(item => ({
+    const progressWithPercentage = rows.map(item => ({
       status: item.status,
       count: parseInt(item.count),
       percentage: total > 0 ? Math.round((parseInt(item.count) / total) * 100) : 0

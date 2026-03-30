@@ -25,8 +25,7 @@ router.get('/leads-csv', async (req, res) => {
       ORDER BY l.created_at DESC
     `;
 
-    const result = await pool.query(query);
-    const leads = result.rows;
+    const [leads] = await pool.query(query);
 
     // Create CSV header
     const csvHeader = 'ID,Name,Phone,City,Destination,Status,Remark,Assigned To,Next Follow-up,Created At,Updated At\n';
@@ -35,7 +34,7 @@ router.get('/leads-csv', async (req, res) => {
     const csvRows = leads.map(lead => {
       return [
         lead.id,
-        `"${(lead.name || '').replace(/"/g, '""')}"`, // Escape quotes in names
+        `"${(lead.name || '').replace(/"/g, '""')}"`,
         lead.phone || '',
         `"${(lead.city || '').replace(/"/g, '""')}"`,
         `"${(lead.destination || '').replace(/"/g, '""')}"`,
@@ -50,7 +49,6 @@ router.get('/leads-csv', async (req, res) => {
 
     const csvContent = csvHeader + csvRows;
 
-    // Set headers for file download
     const filename = `leads_export_${new Date().toISOString().split('T')[0]}.csv`;
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -71,7 +69,7 @@ router.get('/database-backup', async (req, res) => {
   try {
     const dbHost = process.env.DB_HOST || 'localhost';
     const dbUser = process.env.DB_USER;
-    const dbPassword = process.env.DB_PASSWORD || ''; // Empty password is valid for local dev
+    const dbPassword = process.env.DB_PASSWORD || '';
     const dbName = process.env.DB_NAME;
 
     if (!dbUser || !dbName) {
@@ -95,7 +93,6 @@ router.get('/database-backup', async (req, res) => {
 
     // Use mysqldump to create backup
     const mysqldumpPath = 'C:\\xampp\\mysql\\bin\\mysqldump.exe';
-    // Only add -p flag if password exists (empty password for local XAMPP is valid)
     const passwordFlag = dbPassword ? `-p${dbPassword}` : '';
     const command = `"${mysqldumpPath}" -h ${dbHost} -u ${dbUser} ${passwordFlag} ${dbName} > "${backupPath}"`;
 
@@ -110,16 +107,13 @@ router.get('/database-backup', async (req, res) => {
       }
 
       try {
-        // Read the backup file and send it
         const backupContent = await fs.readFile(backupPath, 'utf8');
 
-        // Set headers for file download
         res.setHeader('Content-Type', 'application/sql');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
         res.send(backupContent);
 
-        // Delete the temporary backup file after sending
         setTimeout(async () => {
           try {
             await fs.unlink(backupPath);
