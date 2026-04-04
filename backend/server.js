@@ -72,20 +72,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Auto-setup endpoint - creates all tables if they don't exist
-app.get('/api/setup', async (req, res) => {
-  const { pool } = require('./config/database');
-  const fs = require('fs');
-  const path = require('path');
-
-  try {
-    const migrationPath = path.join(__dirname, 'migrations', 'full_migration.sql');
-    const sql = fs.readFileSync(migrationPath, 'utf8');
-    await pool.query(sql);
-    res.json({ success: true, message: 'Database setup completed! All tables created.' });
-  } catch (error) {
-    console.error('Setup error:', error);
-    res.status(500).json({ success: false, message: 'Setup failed', error: error.message });
-  }
+// Setup endpoint disabled in production
+app.get('/api/setup', (_req, res) => {
+  res.status(403).json({ success: false, message: 'This endpoint is disabled.' });
 });
 
 // Database migration endpoint - adds missing columns
