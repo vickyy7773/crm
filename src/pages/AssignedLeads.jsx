@@ -1026,21 +1026,9 @@ const AssignedLeads = () => {
                 </div>
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Status</label>
-                  <select
-                    value={editFormData.status || 'Follow Up'}
-                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                  >
-                    <option value="Interested">Interested</option>
-                    <option value="Follow Up">Follow Up</option>
-                    <option value="Call Back">Call Back</option>
-                    <option value="Office Visit">Office Visit</option>
-                    <option value="After Result / Counseling">After Result / Counseling</option>
-                    <option value="Other Course">Other Course</option>
-                    <option value="Not Interested">Not Interested</option>
-                    <option value="Drop">Drop</option>
-                    <option value="Invalid Lead">Invalid Lead</option>
-                  </select>
+                  <div className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-100 bg-gray-50 rounded-lg md:rounded-xl text-gray-700 font-semibold select-none cursor-not-allowed">
+                    {editFormData.status || '-'}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Next Follow-up Date</label>
@@ -1053,33 +1041,9 @@ const AssignedLeads = () => {
                 </div>
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Assigned To</label>
-                  <select
-                    value={editFormData.assigned_to || ''}
-                    onChange={(e) => {
-                      if (e.target.value === 'self') {
-                        setEditFormData({
-                          ...editFormData,
-                          assigned_to: user.id,
-                          assigned_to_name: user.name
-                        });
-                      } else {
-                        const telecaller = telecallers.find(t => t.id === parseInt(e.target.value));
-                        setEditFormData({
-                          ...editFormData,
-                          assigned_to: e.target.value ? parseInt(e.target.value) : null,
-                          assigned_to_name: telecaller ? telecaller.name : null
-                        });
-                      }
-                    }}
-                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                  >
-                    <option value="">-- Unassigned --</option>
-                    <option value="self" className="font-semibold">🔷 Self (Assign to me)</option>
-                    <option disabled>──────────</option>
-                    {telecallers.map((tc) => (
-                      <option key={tc.id} value={tc.id}>{tc.name}</option>
-                    ))}
-                  </select>
+                  <div className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-100 bg-gray-50 rounded-lg md:rounded-xl text-gray-700 font-semibold select-none cursor-not-allowed">
+                    {editFormData.assigned_to_name || 'Unassigned'}
+                  </div>
                 </div>
               </div>
               <div>
