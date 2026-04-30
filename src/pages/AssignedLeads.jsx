@@ -594,6 +594,7 @@ const AssignedLeads = () => {
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned To</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                 </tr>
@@ -656,6 +657,17 @@ const AssignedLeads = () => {
                         <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
                           {lead.latest_call_reason}
                         </span>
+                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    </td>
+                    {/* Assigned To */}
+                    <td className="px-2 py-1.5">
+                      {lead.assigned_to_name ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[9px] text-gray-400 font-semibold uppercase">Assigned To</span>
+                          <span className="inline-block bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                            {lead.assigned_to_name}
+                          </span>
+                        </div>
                       ) : <span className="text-[10px] text-gray-400">-</span>}
                     </td>
                     {/* Remarks */}
