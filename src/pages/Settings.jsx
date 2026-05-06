@@ -8,7 +8,7 @@ const Settings = () => {
   const [saved, setSaved] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [leads, setLeads] = useState([]);
-  const [selectedLeadId, setSelectedLeadId] = useState('');
+  const [selectedLeadIds, setSelectedLeadIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -156,42 +156,46 @@ const Settings = () => {
     }
   };
 
+  const toggleLeadSelection = (id) => {
+    setSelectedLeadIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(filteredLeads.map(l => l.id));
+    }
+  };
+
   const handleDeleteLead = async () => {
-    if (!selectedLeadId) {
-      alert('Please select a lead to delete');
+    if (selectedLeadIds.length === 0) {
+      alert('Please select at least one lead to delete');
       return;
     }
 
-    const selectedLead = leads.find(l => l.id === parseInt(selectedLeadId));
-    if (!selectedLead) {
-      alert('Lead not found');
-      return;
-    }
-
-    if (!confirm(`Are you sure you want to delete lead "${selectedLead.name}" (${selectedLead.phone})? This action cannot be undone!`)) {
+    if (!confirm(`Are you sure you want to permanently delete ${selectedLeadIds.length} lead(s)? This action cannot be undone!`)) {
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/leads/${selectedLeadId}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert('Lead deleted successfully!');
-        setDeleteModalOpen(false);
-        setSelectedLeadId('');
-        setSearchTerm('');
-        fetchLeads(); // Refresh the list
-      } else {
-        alert('Failed to delete lead: ' + (data.message || 'Unknown error'));
+      let successCount = 0;
+      for (const id of selectedLeadIds) {
+        const response = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (data.success) successCount++;
       }
+      alert(`${successCount} lead(s) deleted successfully!`);
+      setDeleteModalOpen(false);
+      setSelectedLeadIds([]);
+      setSearchTerm('');
+      fetchLeads();
     } catch (error) {
-      console.error('Error deleting lead:', error);
-      alert('Failed to delete lead. Please try again.');
+      console.error('Error deleting leads:', error);
+      alert('Failed to delete leads. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -483,12 +487,17 @@ const Settings = () => {
             <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Trash2 size={28} />
-                <h2 className="text-2xl font-bold">Delete Lead</h2>
+                <div>
+                  <h2 className="text-2xl font-bold">Delete Leads</h2>
+                  {selectedLeadIds.length > 0 && (
+                    <p className="text-red-100 text-sm">{selectedLeadIds.length} lead(s) selected</p>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => {
                   setDeleteModalOpen(false);
-                  setSelectedLeadId('');
+                  setSelectedLeadIds([]);
                   setSearchTerm('');
                 }}
                 className="p-2 hover:bg-white/20 rounded-lg transition-all"
@@ -504,7 +513,7 @@ const Settings = () => {
                 <div>
                   <p className="text-red-900 font-semibold">Warning: Permanent Action</p>
                   <p className="text-red-700 text-sm">
-                    Deleting a lead will permanently remove it from the database. This action cannot be undone!
+                    Deleting leads will permanently remove them from the database. This action cannot be undone!
                   </p>
                 </div>
               </div>
@@ -515,49 +524,62 @@ const Settings = () => {
                   type="text"
                   placeholder="Search leads by name, phone, or city..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => { setSearchTerm(e.target.value); setSelectedLeadIds([]); }}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
                 />
               </div>
 
-              {/* Lead Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Select Lead to Delete ({filteredLeads.length} leads)
+              {/* Select All + Count */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={filteredLeads.length > 0 && selectedLeadIds.length === filteredLeads.length}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 accent-red-600"
+                  />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Select All ({filteredLeads.length} leads)
+                  </span>
                 </label>
-                <select
-                  value={selectedLeadId}
-                  onChange={(e) => setSelectedLeadId(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
-                >
-                  <option value="">-- Select a lead --</option>
-                  {filteredLeads.map((lead) => (
-                    <option key={lead.id} value={lead.id}>
-                      {lead.name} - {lead.phone} - {lead.city || 'No city'} - {lead.status}
-                    </option>
-                  ))}
-                </select>
+                {selectedLeadIds.length > 0 && (
+                  <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded-lg">
+                    {selectedLeadIds.length} selected
+                  </span>
+                )}
               </div>
 
-              {/* Selected Lead Preview */}
-              {selectedLeadId && (
-                <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Selected Lead Details:</p>
-                  {(() => {
-                    const lead = leads.find(l => l.id === parseInt(selectedLeadId));
-                    return lead ? (
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <p><strong>Name:</strong> {lead.name}</p>
-                        <p><strong>Phone:</strong> <a href={`tel:${lead.phone}`} className="text-blue-600 hover:underline">{lead.phone}</a></p>
-                        <p><strong>City:</strong> {lead.city || 'N/A'}</p>
-                        <p><strong>Destination:</strong> {lead.destination || 'N/A'}</p>
-                        <p><strong>Status:</strong> {lead.status}</p>
-                        <p><strong>Assigned To:</strong> {lead.assigned_to_name || 'Unassigned'}</p>
+              {/* Checkbox Lead List */}
+              <div className="border-2 border-gray-200 rounded-xl overflow-hidden max-h-[30vh] overflow-y-auto">
+                {filteredLeads.length === 0 ? (
+                  <div className="p-6 text-center text-gray-400 text-sm">No leads found</div>
+                ) : (
+                  filteredLeads.map((lead, idx) => (
+                    <label
+                      key={lead.id}
+                      className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all ${
+                        selectedLeadIds.includes(lead.id) ? 'bg-red-50 border-l-4 border-red-500' : 'hover:bg-gray-50'
+                      } ${idx !== 0 ? 'border-t border-gray-100' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedLeadIds.includes(lead.id)}
+                        onChange={() => toggleLeadSelection(lead.id)}
+                        className="w-4 h-4 accent-red-600 flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{lead.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{lead.phone} · {lead.city || 'No city'} · {lead.status}</p>
                       </div>
-                    ) : null;
-                  })()}
-                </div>
-              )}
+                      {lead.assigned_to_name && (
+                        <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-semibold flex-shrink-0">
+                          {lead.assigned_to_name}
+                        </span>
+                      )}
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -565,7 +587,7 @@ const Settings = () => {
               <button
                 onClick={() => {
                   setDeleteModalOpen(false);
-                  setSelectedLeadId('');
+                  setSelectedLeadIds([]);
                   setSearchTerm('');
                 }}
                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all"
@@ -574,11 +596,11 @@ const Settings = () => {
               </button>
               <button
                 onClick={handleDeleteLead}
-                disabled={!selectedLeadId || loading}
+                disabled={selectedLeadIds.length === 0 || loading}
                 className="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Trash2 size={18} />
-                {loading ? 'Deleting...' : 'Delete Lead'}
+                {loading ? 'Deleting...' : `Delete ${selectedLeadIds.length > 0 ? `(${selectedLeadIds.length})` : ''} Lead(s)`}
               </button>
             </div>
           </div>
