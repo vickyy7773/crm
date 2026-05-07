@@ -44,6 +44,8 @@ const Leads = () => {
   const [rangeTo, setRangeTo] = useState('');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState(null);
+  const [callLogData, setCallLogData] = useState({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
+  const [savingCallLog, setSavingCallLog] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newLeadType, setNewLeadType] = useState('raw'); // 'raw' or 'qualified'
   const [newStudent, setNewStudent] = useState({
@@ -714,6 +716,42 @@ const Leads = () => {
     return false;
   };
 
+  const handleSaveCallLog = async () => {
+    if (!callLogData.callOutcome || !callLogData.callRemark) {
+      alert('Please select an Outcome and add a Remark');
+      return;
+    }
+    try {
+      setSavingCallLog(true);
+      const response = await fetch(`${API_URL}/leads/${selectedLead.id}/call-log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callRemark: callLogData.callRemark,
+          callOutcome: callLogData.callOutcome,
+          callReason: callLogData.callReason || null,
+          nextFollowUpDate: callLogData.nextFollowUpDate || null,
+          userId: user.id,
+          userName: user.name,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Call log saved successfully!');
+        setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
+        setViewModalOpen(false);
+        fetchLeads();
+      } else {
+        alert('Failed to save: ' + (data.message || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Error saving call log:', err);
+      alert('Failed to save call log. Please try again.');
+    } finally {
+      setSavingCallLog(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -1375,24 +1413,99 @@ const Leads = () => {
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleEditLead(selectedLead)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
-                  >
-                    <Edit2 size={18} />
-                    Edit Details
-                  </button>
-                  <button
-                    onClick={() => handleDeleteLead(selectedLead.id)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow"
-                  >
-                    <X size={18} />
-                    Delete Lead
-                  </button>
+              {/* Add to Call History */}
+              <div className="bg-white rounded-xl shadow-sm border border-purple-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Phone size={20} className="text-purple-600" />
+                  <h3 className="text-xl font-bold text-purple-800">Add to Call History</h3>
+                  <span className="text-xs text-gray-500">(Optional)</span>
+                </div>
+                <div className="space-y-3 bg-purple-50 p-4 rounded-xl border border-purple-200">
+                  {/* Outcome */}
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-700 mb-2">Outcome *</label>
+                    <select
+                      value={callLogData.callOutcome}
+                      onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value, callReason: '' })}
+                      className="w-full px-4 py-2 text-sm border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                    >
+                      <option value="">-- Select --</option>
+                      <option value="Interested">⭐ Interested</option>
+                      <option value="Follow Up">📋 Follow Up</option>
+                      <option value="Call Back">🔄 Call Back</option>
+                      <option value="Office Visit">🏢 Office Visit</option>
+                      <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+                      <option value="Other Course">📚 Other Course</option>
+                      <option value="Not Interested">✖ Not Interested</option>
+                      <option value="Drop">❌ Drop</option>
+                      <option value="Invalid Lead">🚫 Invalid Lead</option>
+                      {(user?.role === 'Super Admin' || user?.role === 'Manager' || user?.role === 'Admin') && (
+                        <option value="Converted">✅ Converted</option>
+                      )}
+                    </select>
+                  </div>
+
+                  {/* Sub Category */}
+                  {callLogData.callOutcome && {
+                    'Interested': [{ value: 'India', label: '🇮🇳 India' }, { value: 'Abroad', label: '🌍 Abroad' }, { value: 'Counselling Only', label: '💬 Counselling Only' }, { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' }],
+                    'Follow Up': [{ value: 'Details Shared', label: '📋 Details Shared' }, { value: 'Discussed on Phone', label: '📞 Discussed on Phone' }, { value: 'Documents Pending', label: '📄 Documents Pending' }, { value: 'Meeting Planned', label: '📅 Meeting Planned' }],
+                    'Call Back': [{ value: 'Not Reachable', label: '📴 Not Reachable' }, { value: 'Busy', label: '📵 Busy' }, { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' }, { value: 'Call Back Next Week', label: '📆 Call Back Next Week' }],
+                    'Office Visit': [{ value: 'Address Shared', label: '📍 Address Shared' }, { value: 'Visit Scheduled', label: '📅 Visit Scheduled' }, { value: 'Visit Done', label: '✅ Visit Done' }],
+                    'After Result / Counseling': [{ value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' }, { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' }],
+                    'Other Course': [{ value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' }, { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' }, { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' }, { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' }],
+                    'Not Interested': [{ value: 'Budget Issue', label: '💰 Budget Issue' }, { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' }, { value: 'Already Admission Taken', label: '📄 Already Admission Taken' }, { value: 'Just Inquiry', label: '❓ Just Inquiry' }],
+                    'Drop': [{ value: 'Not Qualified', label: '❌ Not Qualified' }, { value: 'Improvement Year', label: '📖 Improvement Year' }, { value: 'Financial Problem', label: '💸 Financial Problem' }],
+                    'Invalid Lead': [{ value: 'Wrong Number', label: '📞 Wrong Number' }, { value: 'Not Reachable', label: '📴 Not Reachable' }, { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' }],
+                  }[callLogData.callOutcome] && (
+                    <div className={`border-2 rounded-xl p-3 ${['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome) ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+                      <label className={`block text-sm font-semibold mb-2 ${['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome) ? 'text-red-700' : 'text-blue-700'}`}>{callLogData.callOutcome} - Sub Category *</label>
+                      <select
+                        value={callLogData.callReason}
+                        onChange={(e) => setCallLogData({ ...callLogData, callReason: e.target.value })}
+                        className={`w-full px-4 py-2 text-sm border-2 rounded-xl focus:ring-2 outline-none bg-white ${['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome) ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'}`}
+                      >
+                        <option value="">-- Select Reason --</option>
+                        {{
+                          'Interested': [{ value: 'India', label: '🇮🇳 India' }, { value: 'Abroad', label: '🌍 Abroad' }, { value: 'Counselling Only', label: '💬 Counselling Only' }, { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' }],
+                          'Follow Up': [{ value: 'Details Shared', label: '📋 Details Shared' }, { value: 'Discussed on Phone', label: '📞 Discussed on Phone' }, { value: 'Documents Pending', label: '📄 Documents Pending' }, { value: 'Meeting Planned', label: '📅 Meeting Planned' }],
+                          'Call Back': [{ value: 'Not Reachable', label: '📴 Not Reachable' }, { value: 'Busy', label: '📵 Busy' }, { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' }, { value: 'Call Back Next Week', label: '📆 Call Back Next Week' }],
+                          'Office Visit': [{ value: 'Address Shared', label: '📍 Address Shared' }, { value: 'Visit Scheduled', label: '📅 Visit Scheduled' }, { value: 'Visit Done', label: '✅ Visit Done' }],
+                          'After Result / Counseling': [{ value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' }, { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' }],
+                          'Other Course': [{ value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' }, { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' }, { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' }, { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' }],
+                          'Not Interested': [{ value: 'Budget Issue', label: '💰 Budget Issue' }, { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' }, { value: 'Already Admission Taken', label: '📄 Already Admission Taken' }, { value: 'Just Inquiry', label: '❓ Just Inquiry' }],
+                          'Drop': [{ value: 'Not Qualified', label: '❌ Not Qualified' }, { value: 'Improvement Year', label: '📖 Improvement Year' }, { value: 'Financial Problem', label: '💸 Financial Problem' }],
+                          'Invalid Lead': [{ value: 'Wrong Number', label: '📞 Wrong Number' }, { value: 'Not Reachable', label: '📴 Not Reachable' }, { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' }],
+                        }[callLogData.callOutcome]?.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Follow-up Date */}
+                  {['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling'].includes(callLogData.callOutcome) && (
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}</label>
+                      <input
+                        type="datetime-local"
+                        value={callLogData.nextFollowUpDate}
+                        onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
+                        className="w-full px-4 py-2 text-sm border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      />
+                    </div>
+                  )}
+
+                  {/* Remark */}
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-700 mb-2">Remark *</label>
+                    <textarea
+                      value={callLogData.callRemark}
+                      onChange={(e) => setCallLogData({ ...callLogData, callRemark: e.target.value })}
+                      placeholder="Enter call remarks..."
+                      className="w-full px-4 py-2 text-sm border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"
+                      rows="2"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1400,13 +1513,18 @@ const Leads = () => {
             {/* Modal Footer */}
             <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 flex items-center justify-end gap-3">
               <button
-                onClick={() => setViewModalOpen(false)}
+                onClick={() => { setViewModalOpen(false); setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' }); }}
                 className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                disabled={savingCallLog}
               >
                 Close
               </button>
-              <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow">
-                Save Changes
+              <button
+                onClick={handleSaveCallLog}
+                disabled={savingCallLog}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow disabled:opacity-50"
+              >
+                {savingCallLog ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
