@@ -42,6 +42,9 @@ const Leads = () => {
   const [rangeModalOpen, setRangeModalOpen] = useState(false);
   const [rangeFrom, setRangeFrom] = useState('');
   const [rangeTo, setRangeTo] = useState('');
+  const [conflictWarningOpen, setConflictWarningOpen] = useState(false);
+  const [conflictLeads, setConflictLeads] = useState([]);
+  const [pendingAssign, setPendingAssign] = useState(null); // { assignedTo, assignedToName }
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState(null);
   const [callLogData, setCallLogData] = useState({ callOutcome: '', callRemark: '', nextFollowUpDate: '', callReason: '' });
@@ -353,50 +356,55 @@ const Leads = () => {
     }
 
     let assignedTo, assignedToName;
-
-    // Check if self-assign
     if (selectedTelecaller === 'self') {
-      if (!user) {
-        alert('User not found');
-        return;
-      }
+      if (!user) { alert('User not found'); return; }
       assignedTo = user.id;
       assignedToName = user.name;
     } else {
       const telecaller = telecallers.find(t => t.id === parseInt(selectedTelecaller));
-      if (!telecaller) {
-        alert('Telecaller not found');
-        return;
-      }
+      if (!telecaller) { alert('Telecaller not found'); return; }
       assignedTo = parseInt(selectedTelecaller);
       assignedToName = telecaller.name;
     }
 
+    // Check for already assigned leads
+    const alreadyAssigned = selectedLeads
+      .map(id => leads.find(l => l.id === id))
+      .filter(l => l && l.assigned_to_name && l.assigned_to_name !== 'Unassigned' && l.assigned_to !== assignedTo);
+
+    if (alreadyAssigned.length > 0) {
+      setConflictLeads(alreadyAssigned);
+      setPendingAssign({ assignedTo, assignedToName });
+      setConflictWarningOpen(true);
+      return;
+    }
+
+    await doAssign(selectedLeads, assignedTo, assignedToName);
+  };
+
+  const doAssign = async (leadIds, assignedTo, assignedToName) => {
     try {
-      // Assign all selected leads
-      const assignPromises = selectedLeads.map(leadId =>
+      const assignPromises = leadIds.map(leadId =>
         fetch(`${API_URL}/leads/${leadId}/assign`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            assignedTo: assignedTo,
-            assignedToName: assignedToName
-          })
+          body: JSON.stringify({ assignedTo, assignedToName })
         }).then(res => res.json())
       );
-
       const results = await Promise.all(assignPromises);
       const successCount = results.filter(r => r.success).length;
-
-      alert(`${successCount} out of ${selectedLeads.length} leads assigned successfully!`);
+      alert(`${successCount} leads assigned to ${assignedToName} successfully!`);
       setAssignModalOpen(false);
       setSelectedTelecaller('');
       setSelectedLeads([]);
       setBulkAssignMode(false);
+      setConflictWarningOpen(false);
+      setConflictLeads([]);
+      setPendingAssign(null);
       fetchLeads();
     } catch (err) {
       console.error('Error bulk assigning leads:', err);
-      alert('Error assigning leads. Check console for details.');
+      alert('Error assigning leads.');
     }
   };
 
@@ -1526,6 +1534,64 @@ const Leads = () => {
               >
                 {savingCallLog ? 'Saving...' : 'Save Changes'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Conflict Warning Modal */}
+      {conflictWarningOpen && pendingAssign && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-5 rounded-t-2xl flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <UserCheck size={20} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Already Assigned Leads</h2>
+                <p className="text-orange-100 text-xs">{conflictLeads.length} leads are already assigned to someone else</p>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 max-h-40 overflow-y-auto">
+                {conflictLeads.map(l => (
+                  <div key={l.id} className="flex items-center justify-between py-1 border-b border-orange-100 last:border-0">
+                    <span className="text-sm font-semibold text-gray-800">{l.name}</span>
+                    <span className="text-xs bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full font-medium">{l.assigned_to_name}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">Yeh leads kya karni hain?</p>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => {
+                    // Skip already assigned — only assign unassigned ones
+                    const onlyUnassigned = selectedLeads.filter(id => {
+                      const lead = leads.find(l => l.id === id);
+                      return !lead?.assigned_to_name || lead.assigned_to_name === 'Unassigned' || lead.assigned_to === pendingAssign.assignedTo;
+                    });
+                    doAssign(onlyUnassigned, pendingAssign.assignedTo, pendingAssign.assignedToName);
+                  }}
+                  className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <UserCheck size={16} />
+                  Purane telecaller ke paas rehne do — sirf nayi leads assign karo
+                </button>
+                <button
+                  onClick={() => doAssign(selectedLeads, pendingAssign.assignedTo, pendingAssign.assignedToName)}
+                  className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <X size={16} />
+                  Saari leads {pendingAssign.assignedToName} ko de do (overwrite)
+                </button>
+                <button
+                  onClick={() => { setConflictWarningOpen(false); setConflictLeads([]); setPendingAssign(null); }}
+                  className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold text-sm transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
