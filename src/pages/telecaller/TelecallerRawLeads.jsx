@@ -29,6 +29,7 @@ const TelecallerRawLeads = () => {
     course: 'MBBS',
     destination: '',
     fatherName: '',
+    fatherPhone: '',
     email: '',
     remark: '',
     source: ''
@@ -86,6 +87,7 @@ const TelecallerRawLeads = () => {
       course: 'MBBS',
       destination: '',
       fatherName: '',
+      fatherPhone: '',
       email: '',
       remark: '',
       source: ''
@@ -103,6 +105,7 @@ const TelecallerRawLeads = () => {
       course: 'MBBS',
       destination: '',
       fatherName: '',
+      fatherPhone: '',
       email: '',
       remark: '',
       source: ''
@@ -119,8 +122,8 @@ const TelecallerRawLeads = () => {
 
     if (!formData.name) { alert('Please fill student name!'); return; }
     if (!formData.course) { alert('Please select course!'); return; }
-    if (formData.course === 'MBBS' && (!formData.neet || !formData.destination)) {
-      alert('Please fill NEET Score and Preferred Destination!');
+    if (formData.course === 'MBBS' && !formData.neet) {
+      alert('Please fill NEET Score!');
       return;
     }
     if (formData.course === 'Other' && !formData.neet) {
@@ -139,8 +142,9 @@ const TelecallerRawLeads = () => {
           city: formData.city || '',
           neet: formData.neet,
           course: formData.course,
-          destination: formData.course === 'MBBS' ? formData.destination : '',
+          destination: formData.destination || '',
           father_name: formData.fatherName || '',
+          father_phone: formData.fatherPhone || '',
           email: formData.email || '',
           remark: formData.remark || '',
           source: formData.source || 'Telecaller Qualified',
@@ -425,166 +429,73 @@ const TelecallerRawLeads = () => {
             </div>
 
             {/* Qualification Form */}
-            <form onSubmit={handleSubmitQualification} className="p-6 space-y-5">
+            <form onSubmit={handleSubmitQualification} className="p-6 space-y-4">
 
-              {/* 1. Name - Editable */}
+              {/* 1. Name */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <User size={18} className="text-blue-600" />
-                  Student Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter student name"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  required
-                />
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><User size={16} className="text-blue-600" />Student Name *</label>
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter student name" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" required />
               </div>
 
               {/* 2. City */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <MapPin size={18} className="text-blue-600" />
-                  City {!selectedLead?.city && <span className="text-red-500">(Missing - Please fill)</span>}
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  placeholder="Enter city name (e.g., Mumbai, Delhi)"
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:outline-none text-lg ${
-                    !formData.city ? 'border-orange-300 bg-orange-50' : 'border-gray-300'
-                  }`}
-                />
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><MapPin size={16} className="text-blue-600" />City {!selectedLead?.city && <span className="text-red-500">(Missing)</span>}</label>
+                <input type="text" name="city" value={formData.city} onChange={handleInputChange} placeholder="Enter city name" className={`w-full px-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:outline-none text-base ${!formData.city ? 'border-orange-300 bg-orange-50' : 'border-gray-300'}`} />
               </div>
 
               {/* 3. Course */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <FileText size={18} className="text-blue-600" />
-                  Course *
-                </label>
-                <select
-                  name="course"
-                  value={formData.course}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  required
-                >
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><FileText size={16} className="text-blue-600" />Course *</label>
+                <select name="course" value={formData.course} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" required>
                   <option value="MBBS">MBBS</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
 
-              {/* 4a. MBBS - NEET Score */}
+              {/* MBBS: NEET Score */}
               {formData.course === 'MBBS' && (
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                    <GraduationCap size={18} className="text-blue-600" />
-                    NEET Score *
-                  </label>
-                  <input
-                    type="number"
-                    name="neet"
-                    value={formData.neet}
-                    onChange={handleInputChange}
-                    placeholder="Enter NEET score (e.g., 520)"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                    min="0"
-                  />
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><GraduationCap size={16} className="text-blue-600" />NEET Score *</label>
+                  <input type="number" name="neet" value={formData.neet} onChange={handleInputChange} placeholder="e.g., 520" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" min="0" />
                 </div>
               )}
 
-              {/* 4b. MBBS - Preferred Destination */}
-              {formData.course === 'MBBS' && (
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                    <Globe size={18} className="text-blue-600" />
-                    Preferred Destination *
-                  </label>
-                  <input
-                    type="text"
-                    name="destination"
-                    value={formData.destination}
-                    onChange={handleInputChange}
-                    placeholder="Enter destination (e.g., Russia, Philippines)"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  />
-                </div>
-              )}
-
-              {/* 4c. Other - Exam/Score */}
+              {/* Other: Exam/Score */}
               {formData.course === 'Other' && (
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                    <GraduationCap size={18} className="text-blue-600" />
-                    Exam / Score *
-                  </label>
-                  <input
-                    type="text"
-                    name="neet"
-                    value={formData.neet}
-                    onChange={handleInputChange}
-                    placeholder="e.g., JEE 85%, CLAT 120"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  />
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><GraduationCap size={16} className="text-blue-600" />Exam / Score *</label>
+                  <input type="text" name="neet" value={formData.neet} onChange={handleInputChange} placeholder="e.g., JEE 85%, CLAT 120" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" />
                 </div>
               )}
 
-              {/* 4d. Other - Email ID */}
-              {formData.course === 'Other' && (
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                    <MessageSquare size={18} className="text-blue-600" />
-                    Email ID
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="e.g., student@gmail.com"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  />
-                </div>
-              )}
+              {/* Email ID - both */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><MessageSquare size={16} className="text-blue-600" />Email ID</label>
+                <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="student@gmail.com" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" />
+              </div>
 
-              {/* 4e. Other - Father Name */}
-              {formData.course === 'Other' && (
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                    <User size={18} className="text-blue-600" />
-                    Father's Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherName"
-                    value={formData.fatherName}
-                    onChange={handleInputChange}
-                    placeholder="Enter father's name"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  />
-                </div>
-              )}
+              {/* Father Name - both */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><User size={16} className="text-blue-600" />Father's Name</label>
+                <input type="text" name="fatherName" value={formData.fatherName} onChange={handleInputChange} placeholder="Enter father's name" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" />
+              </div>
+
+              {/* Father Mobile - both */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><Phone size={16} className="text-blue-600" />Father's Mobile Number</label>
+                <input type="tel" name="fatherPhone" value={formData.fatherPhone} onChange={handleInputChange} placeholder="Enter father's mobile number" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" />
+              </div>
+
+              {/* Destination - both */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><Globe size={16} className="text-blue-600" />{formData.course === 'MBBS' ? 'Preferred Destination' : 'Destination'}</label>
+                <input type="text" name="destination" value={formData.destination} onChange={handleInputChange} placeholder="e.g., Russia, Philippines, Delhi" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base" />
+              </div>
 
               {/* Remark */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <MessageSquare size={18} className="text-blue-600" />
-                  Remark / Notes
-                </label>
-                <textarea
-                  name="remark"
-                  value={formData.remark}
-                  onChange={handleInputChange}
-                  placeholder="Add any additional notes or remarks..."
-                  rows="3"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg resize-none"
-                />
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2"><MessageSquare size={16} className="text-blue-600" />Remark / Notes</label>
+                <textarea name="remark" value={formData.remark} onChange={handleInputChange} placeholder="Add any additional notes..." rows="3" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base resize-none" />
               </div>
 
               {/* Action Buttons */}
