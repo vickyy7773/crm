@@ -800,6 +800,50 @@ const Leads = () => {
         ))}
       </div>
 
+      {/* Assignment Summary Bar */}
+      {(() => {
+        const totalCount = leads.length;
+        const assignedCount = leads.filter(l => l.assigned_to_name && l.assigned_to_name !== 'Unassigned').length;
+        const unassignedCount = totalCount - assignedCount;
+        const pct = totalCount > 0 ? Math.round((assignedCount / totalCount) * 100) : 0;
+        return (
+          <div className="bg-white rounded-lg md:rounded-xl shadow-md border border-gray-100 px-3 md:px-5 py-3 mb-4 flex flex-wrap items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-500">Total</span>
+              <span className="text-sm font-bold text-gray-800">{totalCount}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>
+              <span className="text-xs font-semibold text-gray-500">Assigned</span>
+              <span className="text-sm font-bold text-green-700">{assignedCount}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0"></span>
+              <span className="text-xs font-semibold text-gray-500">Unassigned</span>
+              <span className="text-sm font-bold text-red-600">{unassignedCount}</span>
+            </div>
+            <div className="flex-1 hidden sm:block">
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }}></div>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-0.5">{pct}% assigned</p>
+            </div>
+            {unassignedCount > 0 && (
+              <button
+                onClick={() => setAssignedFilter(assignedFilter === 'Unassigned' ? 'all' : 'Unassigned')}
+                className={`ml-auto px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                  assignedFilter === 'Unassigned'
+                    ? 'bg-red-500 text-white border-red-500'
+                    : 'bg-red-50 text-red-600 border-red-300 hover:bg-red-100'
+                }`}
+              >
+                {assignedFilter === 'Unassigned' ? 'Show All' : `Show Unassigned (${unassignedCount})`}
+              </button>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Filters and Search */}
       <div className="bg-white rounded-lg md:rounded-xl shadow-md p-2 md:p-4 border border-gray-100 mb-4">
         {/* Search Bar */}
