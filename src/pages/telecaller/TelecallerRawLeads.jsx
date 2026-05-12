@@ -23,10 +23,13 @@ const TelecallerRawLeads = () => {
 
   // Qualification form data
   const [formData, setFormData] = useState({
+    name: '',
     city: '',
     neet: '',
     course: 'MBBS',
     destination: '',
+    fatherName: '',
+    email: '',
     remark: '',
     source: ''
   });
@@ -77,10 +80,13 @@ const TelecallerRawLeads = () => {
   const handleQualifyClick = (lead) => {
     setSelectedLead(lead);
     setFormData({
+      name: lead.name || '',
       city: lead.city || '',
       neet: '',
       course: 'MBBS',
       destination: '',
+      fatherName: '',
+      email: '',
       remark: '',
       source: ''
     });
@@ -91,10 +97,13 @@ const TelecallerRawLeads = () => {
     setShowModal(false);
     setSelectedLead(null);
     setFormData({
+      name: '',
       city: '',
       neet: '',
       course: 'MBBS',
       destination: '',
+      fatherName: '',
+      email: '',
       remark: '',
       source: ''
     });
@@ -108,8 +117,14 @@ const TelecallerRawLeads = () => {
   const handleSubmitQualification = async (e) => {
     e.preventDefault();
 
-    if (!formData.neet || !formData.course || !formData.destination) {
-      alert('Please fill NEET score, course, and destination!');
+    if (!formData.name) { alert('Please fill student name!'); return; }
+    if (!formData.course) { alert('Please select course!'); return; }
+    if (formData.course === 'MBBS' && (!formData.neet || !formData.destination)) {
+      alert('Please fill NEET Score and Preferred Destination!');
+      return;
+    }
+    if (formData.course === 'Other' && !formData.neet) {
+      alert('Please fill Exam/Score!');
       return;
     }
 
@@ -118,17 +133,18 @@ const TelecallerRawLeads = () => {
     try {
       const response = await fetch(`${API_URL}/leads/${selectedLead.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: formData.name,
           city: formData.city || '',
           neet: formData.neet,
           course: formData.course,
-          destination: formData.destination,
+          destination: formData.course === 'MBBS' ? formData.destination : '',
+          father_name: formData.fatherName || '',
+          email: formData.email || '',
           remark: formData.remark || '',
           source: formData.source || 'Telecaller Qualified',
-          status: 'Contacted'  // Lead is qualified means telecaller has connected
+          status: 'Contacted'
         })
       });
 
@@ -400,43 +416,35 @@ const TelecallerRawLeads = () => {
               </button>
             </div>
 
-            {/* Lead Info */}
+            {/* Lead Info - Phone fixed */}
             <div className="bg-blue-50 p-4 border-b border-blue-100">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Phone size={18} className="text-blue-600" />
-                  <span className="font-mono font-semibold">{selectedLead.phone}</span>
-                </div>
-                {selectedLead.city && (
-                  <div className="flex items-center gap-2">
-                    <MapPin size={18} className="text-blue-600" />
-                    <span className="font-semibold">{selectedLead.city}</span>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <Phone size={18} className="text-blue-600" />
+                <span className="font-mono font-semibold">{selectedLead.phone}</span>
               </div>
             </div>
 
             {/* Qualification Form */}
-            <form onSubmit={handleSubmitQualification} className="p-6 space-y-6">
-              {/* Course - FIRST */}
+            <form onSubmit={handleSubmitQualification} className="p-6 space-y-5">
+
+              {/* 1. Name - Editable */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <FileText size={18} className="text-blue-600" />
-                  Course *
+                  <User size={18} className="text-blue-600" />
+                  Student Name *
                 </label>
-                <select
-                  name="course"
-                  value={formData.course}
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
+                  placeholder="Enter student name"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
                   required
-                >
-                  <option value="MBBS">MBBS</option>
-                  <option value="Other">Other</option>
-                </select>
+                />
               </div>
 
-              {/* City */}
+              {/* 2. City */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
                   <MapPin size={18} className="text-blue-600" />
@@ -454,56 +462,114 @@ const TelecallerRawLeads = () => {
                 />
               </div>
 
-              {/* Score - Label changes based on course */}
+              {/* 3. Course */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <GraduationCap size={18} className="text-blue-600" />
-                  {formData.course === 'Other' ? 'Score *' : 'NEET Score *'}
+                  <FileText size={18} className="text-blue-600" />
+                  Course *
                 </label>
-                <input
-                  type="number"
-                  name="neet"
-                  value={formData.neet}
+                <select
+                  name="course"
+                  value={formData.course}
                   onChange={handleInputChange}
-                  placeholder={formData.course === 'Other' ? 'Enter score' : 'Enter NEET score (e.g., 520)'}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
                   required
-                  min="0"
-                />
+                >
+                  <option value="MBBS">MBBS</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
-              {/* Destination - Manual input */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <Globe size={18} className="text-blue-600" />
-                  Preferred Destination *
-                </label>
-                <input
-                  type="text"
-                  name="destination"
-                  value={formData.destination}
-                  onChange={handleInputChange}
-                  placeholder="Enter destination (e.g., Russia, Philippines)"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                  required
-                />
-              </div>
+              {/* 4a. MBBS - NEET Score */}
+              {formData.course === 'MBBS' && (
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                    <GraduationCap size={18} className="text-blue-600" />
+                    NEET Score *
+                  </label>
+                  <input
+                    type="number"
+                    name="neet"
+                    value={formData.neet}
+                    onChange={handleInputChange}
+                    placeholder="Enter NEET score (e.g., 520)"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                    min="0"
+                  />
+                </div>
+              )}
 
-              {/* Source */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                  <Tag size={18} className="text-blue-600" />
-                  Lead Source
-                </label>
-                <input
-                  type="text"
-                  name="source"
-                  value={formData.source}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Facebook, Referral, Direct Call"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-                />
-              </div>
+              {/* 4b. MBBS - Preferred Destination */}
+              {formData.course === 'MBBS' && (
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                    <Globe size={18} className="text-blue-600" />
+                    Preferred Destination *
+                  </label>
+                  <input
+                    type="text"
+                    name="destination"
+                    value={formData.destination}
+                    onChange={handleInputChange}
+                    placeholder="Enter destination (e.g., Russia, Philippines)"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  />
+                </div>
+              )}
+
+              {/* 4c. Other - Exam/Score */}
+              {formData.course === 'Other' && (
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                    <GraduationCap size={18} className="text-blue-600" />
+                    Exam / Score *
+                  </label>
+                  <input
+                    type="text"
+                    name="neet"
+                    value={formData.neet}
+                    onChange={handleInputChange}
+                    placeholder="e.g., JEE 85%, CLAT 120"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  />
+                </div>
+              )}
+
+              {/* 4d. Other - Email ID */}
+              {formData.course === 'Other' && (
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                    <MessageSquare size={18} className="text-blue-600" />
+                    Email ID
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="e.g., student@gmail.com"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  />
+                </div>
+              )}
+
+              {/* 4e. Other - Father Name */}
+              {formData.course === 'Other' && (
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                    <User size={18} className="text-blue-600" />
+                    Father's Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fatherName"
+                    value={formData.fatherName}
+                    onChange={handleInputChange}
+                    placeholder="Enter father's name"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  />
+                </div>
+              )}
 
               {/* Remark */}
               <div>
@@ -516,7 +582,7 @@ const TelecallerRawLeads = () => {
                   value={formData.remark}
                   onChange={handleInputChange}
                   placeholder="Add any additional notes or remarks..."
-                  rows="4"
+                  rows="3"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg resize-none"
                 />
               </div>
