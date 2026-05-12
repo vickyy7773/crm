@@ -1562,7 +1562,7 @@ const Leads = () => {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-gray-600">Yeh leads kya karni hain?</p>
+              <p className="text-sm text-gray-600">What do you want to do with these leads?</p>
               <div className="grid grid-cols-1 gap-2">
                 <button
                   onClick={() => {
@@ -1576,14 +1576,14 @@ const Leads = () => {
                   className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
                 >
                   <UserCheck size={16} />
-                  Purane telecaller ke paas rehne do — sirf nayi leads assign karo
+                  Keep with previous telecaller — assign only new leads
                 </button>
                 <button
                   onClick={() => doAssign(selectedLeads, pendingAssign.assignedTo, pendingAssign.assignedToName)}
                   className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
                 >
                   <X size={16} />
-                  Saari leads {pendingAssign.assignedToName} ko de do (overwrite)
+                  Assign all leads to {pendingAssign.assignedToName} (overwrite)
                 </button>
                 <button
                   onClick={() => { setConflictWarningOpen(false); setConflictLeads([]); setPendingAssign(null); }}
