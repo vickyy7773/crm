@@ -135,13 +135,14 @@ const TelecallerLeads = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editFormData.name,
-          father_name: editFormData.course === 'Other' ? (editFormData.father_name || '') : editFormData.father_name,
+          father_name: editFormData.father_name || '',
+          father_phone: editFormData.father_phone || '',
           phone: editFormData.phone,
           city: editFormData.city,
           neet: editFormData.neet,
           course: editFormData.course,
-          destination: editFormData.course === 'MBBS' ? (editFormData.destination || '') : '',
-          email: editFormData.course === 'Other' ? (editFormData.email || '') : editFormData.email,
+          destination: editFormData.destination || '',
+          email: editFormData.email || '',
           remark: editFormData.remark,
         })
       });
@@ -623,7 +624,7 @@ const TelecallerLeads = () => {
             </div>
 
             {/* Body */}
-            <div className="p-5 space-y-3">
+            <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 {/* Name */}
                 <div>
@@ -649,37 +650,39 @@ const TelecallerLeads = () => {
                   </select>
                 </div>
 
-                {/* MBBS fields */}
+                {/* MBBS: NEET Score */}
                 {(editFormData.course === 'MBBS' || !editFormData.course) && (
-                  <>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Score</label>
-                      <input type="text" value={editFormData.neet || ''} onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. 520" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Preferred Destination</label>
-                      <input type="text" value={editFormData.destination || ''} onChange={(e) => setEditFormData({ ...editFormData, destination: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. Russia, Philippines" />
-                    </div>
-                  </>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Score</label>
+                    <input type="text" value={editFormData.neet || ''} onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. 520" />
+                  </div>
                 )}
 
-                {/* Other course fields */}
+                {/* Other: Exam/Score */}
                 {editFormData.course === 'Other' && (
-                  <>
-                    <div className="col-span-2">
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Exam / Score</label>
-                      <input type="text" value={editFormData.neet || ''} onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. JEE 85%, CLAT 120" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Email ID</label>
-                      <input type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="student@gmail.com" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
-                      <input type="text" value={editFormData.father_name || ''} onChange={(e) => setEditFormData({ ...editFormData, father_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="Father's full name" />
-                    </div>
-                  </>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Exam / Score</label>
+                    <input type="text" value={editFormData.neet || ''} onChange={(e) => setEditFormData({ ...editFormData, neet: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. JEE 85%, CLAT 120" />
+                  </div>
                 )}
+
+                {/* Common fields for both courses */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email ID</label>
+                  <input type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="student@gmail.com" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
+                  <input type="text" value={editFormData.father_name || ''} onChange={(e) => setEditFormData({ ...editFormData, father_name: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="Father's full name" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Father Mobile Number</label>
+                  <input type="text" value={editFormData.father_phone || ''} onChange={(e) => setEditFormData({ ...editFormData, father_phone: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="Father's mobile" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Preferred Destination</label>
+                  <input type="text" value={editFormData.destination || ''} onChange={(e) => setEditFormData({ ...editFormData, destination: e.target.value })} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. Russia, Philippines" />
+                </div>
               </div>
 
               <div>
