@@ -82,7 +82,7 @@ function App() {
               </RoleBasedRoute>
             } />
             <Route path="assigned-leads" element={
-              <RoleBasedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.MANAGER]}>
+              <RoleBasedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.MANAGER, ROLES.COUNSELLOR]}>
                 <AssignedLeads />
               </RoleBasedRoute>
             } />

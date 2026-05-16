@@ -251,7 +251,7 @@ export const getDashboardRoute = (user) => {
       return '/telecaller/dashboard';
 
     case ROLES.COUNSELLOR:
-      return '/counsellor/dashboard';
+      return '/assigned-leads';
 
     default:
       return '/login';
