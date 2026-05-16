@@ -7,6 +7,7 @@ const BulkUpload = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
+  const [source, setSource] = useState('');
 
   // Download sample CSV
   const downloadSample = () => {
@@ -61,6 +62,7 @@ Jane Smith,David Smith,8765432109,485,Delhi`;
     try {
       const formData = new FormData();
       formData.append('file', file);
+      if (source.trim()) formData.append('source', source.trim());
 
       const endpoint = activeTab === 'raw'
         ? `${API_URL}/leads/bulk-upload`
@@ -198,6 +200,20 @@ Jane Smith,David Smith,8765432109,485,Delhi`;
           <Download size={16} className="md:w-5 md:h-5" />
           Download Sample CSV
         </button>
+      </div>
+
+      {/* Source Field */}
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 mb-4 border border-gray-200">
+        <label className="block text-sm md:text-base font-bold text-gray-800 mb-2">
+          Source <span className="text-gray-400 font-normal text-xs md:text-sm">(optional — applies to all uploaded leads)</span>
+        </label>
+        <input
+          type="text"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          placeholder="e.g. Google Ads, Facebook, Indiamart, Walk-in..."
+          className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none text-sm"
+        />
       </div>
 
       {/* Upload Section */}

@@ -404,7 +404,7 @@ router.post('/bulk-upload', upload.single('file'), async (req, res) => {
     bufferStream
       .pipe(csv())
       .on('data', (data) => results.push(data))
-      .on('end', async () => { await importLeadsToDatabase(results, res); });
+      .on('end', async () => { await importLeadsToDatabase(results, res, req.body.source || null); });
   } catch (error) {
     console.error('Bulk upload error:', error);
     res.status(500).json({ success: false, message: 'Error uploading file', error: error.message });
@@ -430,7 +430,7 @@ router.post('/import/file', upload.single('file'), async (req, res) => {
       .pipe(csv())
       .on('data', (data) => results.push(data))
       .on('end', async () => {
-        await importLeadsToDatabase(results, res);
+        await importLeadsToDatabase(results, res, req.body.source || null);
       });
   } catch (error) {
     console.error('File import error:', error);
@@ -443,7 +443,7 @@ router.post('/import/file', upload.single('file'), async (req, res) => {
 });
 
 // Helper function to import leads to database
-async function importLeadsToDatabase(leadsData, res) {
+async function importLeadsToDatabase(leadsData, res, defaultSource) {
   try {
     let imported = 0;
     let failed = 0;
@@ -463,7 +463,7 @@ async function importLeadsToDatabase(leadsData, res) {
             row.course || null,
             row.destination || null,
             row.remark || null,
-            row.source || null
+            row.source || defaultSource || null
           ]
         );
         imported++;
@@ -1280,9 +1280,10 @@ router.post('/bulk-upload', upload.single('file'), async (req, res) => {
         }
 
         // Insert lead with NULL values for course, neet, destination, remark, source
+        const defaultSource = req.body.source || null;
         await pool.query(
-          'INSERT INTO leads (name, phone, city, neet, course, destination, remark, source, status, created_at) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, NULL, ?, NOW())',
-          [name.trim(), phone.trim(), city?.trim() || null, 'New']
+          'INSERT INTO leads (name, phone, city, neet, course, destination, remark, source, status, created_at) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, NOW())',
+          [name.trim(), phone.trim(), city?.trim() || null, defaultSource, 'New']
         );
 
         imported++;
