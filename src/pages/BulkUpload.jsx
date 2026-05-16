@@ -15,15 +15,15 @@ const BulkUpload = () => {
     let filename;
 
     if (activeTab === 'raw') {
-      csv = `name,father_name,phone,city
-Rajesh Kumar,Suresh Kumar,9876543210,Udaipur
-Priya Sharma,Ramesh Sharma,8765432109,Jaipur
-Amit Singh,Vijay Singh,7654321098,Delhi`;
+      csv = `name,father_name,phone,city,source
+Rajesh Kumar,Suresh Kumar,9876543210,Udaipur,Google Ads
+Priya Sharma,Ramesh Sharma,8765432109,Jaipur,Facebook
+Amit Singh,Vijay Singh,7654321098,Delhi,Walk-in`;
       filename = 'raw_leads_sample.csv';
     } else {
-      csv = `name,father_name,phone,neet,city
-John Doe,Robert Doe,9876543210,520,Mumbai
-Jane Smith,David Smith,8765432109,485,Delhi`;
+      csv = `name,father_name,phone,neet,city,source
+John Doe,Robert Doe,9876543210,520,Mumbai,Google Ads
+Jane Smith,David Smith,8765432109,485,Delhi,Facebook`;
       filename = 'qualified_leads_sample.csv';
     }
 
@@ -157,7 +157,7 @@ Jane Smith,David Smith,8765432109,485,Delhi`;
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">2.</span>
-              Add data with <strong>3 columns: name, phone, city</strong>
+              Add data with <strong>5 columns: name, father_name, phone, city, source</strong>
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">3.</span>
@@ -165,6 +165,10 @@ Jane Smith,David Smith,8765432109,485,Delhi`;
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-blue-600">4.</span>
+              Source: optional (e.g. Google Ads, Facebook)
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="font-bold text-blue-600">5.</span>
               Upload and click "Upload Leads"
             </p>
           </div>
@@ -302,10 +306,9 @@ Jane Smith,David Smith,8765432109,485,Delhi`;
         </h3>
         {activeTab === 'raw' ? (
           <ul className="text-xs md:text-sm text-blue-800 space-y-0.5 md:space-y-1">
-            <li>• Headers: <strong>name,phone,city</strong></li>
-            <li>• Name: Student name (Required)</li>
-            <li>• Phone: 10-digit number (Required)</li>
-            <li>• City: City name (Optional)</li>
+            <li>• Headers: <strong>name, father_name, phone, city, source</strong></li>
+            <li>• Name, Phone: Required</li>
+            <li>• Father Name, City, Source: Optional</li>
             <li>• Duplicates will be skipped</li>
           </ul>
         ) : (
