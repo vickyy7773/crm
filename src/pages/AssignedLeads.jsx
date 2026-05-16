@@ -972,6 +972,26 @@ const AssignedLeads = () => {
                   />
                 </div>
                 <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Father's Name</label>
+                  <input
+                    type="text"
+                    value={editFormData.father_name || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, father_name: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder="Father's full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Father Mobile Number</label>
+                  <input
+                    type="text"
+                    value={editFormData.father_phone || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, father_phone: e.target.value })}
+                    className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder="Father's mobile number"
+                  />
+                </div>
+                <div>
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">City</label>
                   <input
                     type="text"
