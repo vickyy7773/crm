@@ -344,8 +344,8 @@ const Layout = () => {
             </>
           )}
 
-          {/* Telecaller Menu */}
-          {isTelecaller(user) && (
+          {/* Telecaller Menu — shown to all non-Super Admin roles */}
+          {!isSuperAdmin(user) && (
             <>
               <NavItem to="/telecaller/dashboard" icon={LayoutDashboard}>
                 Dashboard
