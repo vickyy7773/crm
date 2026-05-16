@@ -739,8 +739,8 @@ const Leads = () => {
           callOutcome: callLogData.callOutcome,
           callReason: callLogData.callReason || null,
           nextFollowUpDate: callLogData.nextFollowUpDate || null,
-          userId: user.id,
-          userName: user.name,
+          callerId: user.id,
+          callerName: user.name,
         }),
       });
       const data = await response.json();
