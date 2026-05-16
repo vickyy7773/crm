@@ -244,17 +244,13 @@ export const getDashboardRoute = (user) => {
 
   switch (user.role) {
     case ROLES.SUPER_ADMIN:
-    case ROLES.MANAGER:
       return '/dashboard';
 
+    case ROLES.MANAGER:
     case ROLES.TELECALLER:
-      return '/telecaller/dashboard';
-
     case ROLES.COUNSELLOR:
-      return '/assigned-leads';
-
     default:
-      return '/login';
+      return '/telecaller/dashboard';
   }
 };
 

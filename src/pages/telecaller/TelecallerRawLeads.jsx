@@ -281,7 +281,7 @@ const TelecallerRawLeads = () => {
           Raw Leads - Qualify Students
         </h1>
         <p className="text-gray-600 text-sm md:text-lg">
-          Convert raw leads into qualified students by adding their details
+          {currentUser?.role} — Convert raw leads into qualified students by adding their details
         </p>
       </div>
 

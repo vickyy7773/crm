@@ -296,7 +296,7 @@ const TelecallerLeads = () => {
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">My Assigned Leads</h1>
-          <p className="text-gray-500 text-sm">Manage and follow up with your assigned enquiries</p>
+          <p className="text-gray-500 text-sm">{user?.role} — Manage and follow up with your assigned enquiries</p>
         </div>
         {user?.permissions?.includes('create_lead') && (
           <button

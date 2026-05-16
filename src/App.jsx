@@ -142,19 +142,19 @@ function App() {
               </RoleBasedRoute>
             } />
 
-            {/* Telecaller Routes */}
+            {/* Telecaller Routes — open to all roles */}
             <Route path="telecaller/dashboard" element={
-              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER]}>
+              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER, ROLES.COUNSELLOR, ROLES.MANAGER, ROLES.SUPER_ADMIN]}>
                 <TelecallerDashboard />
               </RoleBasedRoute>
             } />
             <Route path="telecaller/raw-leads" element={
-              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER]}>
+              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER, ROLES.COUNSELLOR, ROLES.MANAGER, ROLES.SUPER_ADMIN]}>
                 <TelecallerRawLeads />
               </RoleBasedRoute>
             } />
             <Route path="telecaller/leads" element={
-              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER]}>
+              <RoleBasedRoute allowedRoles={[ROLES.TELECALLER, ROLES.COUNSELLOR, ROLES.MANAGER, ROLES.SUPER_ADMIN]}>
                 <TelecallerLeads />
               </RoleBasedRoute>
             } />
