@@ -184,6 +184,7 @@ const AllUsers = () => {
         },
         body: JSON.stringify({
           name: editFormData.name,
+          username: editFormData.username || '',
           email: editFormData.email,
           role: editFormData.role,
           phone: editFormData.phone,
@@ -577,6 +578,18 @@ const AllUsers = () => {
                     value={editFormData.email}
                     onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Username <span className="text-xs text-gray-400 font-normal">(for login)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.username || ''}
+                    onChange={(e) => setEditFormData({...editFormData, username: e.target.value.toLowerCase().replace(/\s/g, '')})}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    placeholder="e.g. rahul123"
                   />
                 </div>
                 <div>

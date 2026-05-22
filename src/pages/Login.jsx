@@ -117,19 +117,19 @@ const Login = () => {
 
                 <div className="space-y-2">
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
-                    Email Address
+                    Email or Username
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="text-gray-400" size={20} />
                     </div>
                     <input
-                      type="email"
+                      type="text"
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-gray-50 focus:bg-white"
-                      placeholder="you@example.com"
+                      placeholder="Email or username"
                       required
                     />
                   </div>
