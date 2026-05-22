@@ -307,6 +307,15 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Check for duplicate phone number
+    const [existing] = await pool.query('SELECT id FROM leads WHERE phone = ?', [phone.trim()]);
+    if (existing.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: `A lead with phone number ${phone} already exists (Lead #${1000 + existing[0].id})`
+      });
+    }
+
     // Ensure course is null for raw leads
     const courseValue = course ? course : null;
 
