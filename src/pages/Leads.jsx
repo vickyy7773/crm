@@ -445,6 +445,8 @@ const Leads = () => {
   const calculateStats = () => {
     const totalStudents = leads.length;
     const newLeads = leads.filter(l => l.status?.toLowerCase() === 'new').length;
+    const today = new Date().toDateString();
+    const recentLeads = leads.filter(l => l.created_at && new Date(l.created_at).toDateString() === today).length;
     const inProcess = leads.filter(l => {
       const status = l.status?.toLowerCase();
       return status === 'contacted' || status === 'interested' || status === 'call back';
@@ -462,9 +464,9 @@ const Leads = () => {
         iconColor: 'text-blue-600'
       },
       {
-        title: 'New Inquiries',
-        value: newLeads.toString(),
-        change: 'Unassigned',
+        title: 'Added Today',
+        value: recentLeads.toString(),
+        change: 'New leads today',
         icon: Zap,
         gradient: 'from-purple-500 to-purple-600',
         bg: 'bg-purple-50',
