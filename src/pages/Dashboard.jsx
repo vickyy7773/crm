@@ -201,7 +201,7 @@ const Dashboard = () => {
         <div className="lg:col-span-2 bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="text-lg md:text-2xl font-bold text-gray-900">Lead Pipeline</h2>
-            <button className="text-purple-600 hover:text-purple-700 font-semibold text-xs md:text-sm">View All</button>
+            <button onClick={() => navigate('/leads')} className="text-purple-600 hover:text-purple-700 font-semibold text-xs md:text-sm">View All</button>
           </div>
 
           <div className="space-y-5">
