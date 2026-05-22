@@ -7,6 +7,7 @@ const AddUser = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -90,6 +91,7 @@ const AddUser = () => {
         // Reset form
         setFormData({
           name: '',
+          username: '',
           email: '',
           password: '',
           confirmPassword: '',
@@ -191,6 +193,25 @@ const AddUser = () => {
                 required
               />
             </div>
+          </div>
+
+          {/* Username */}
+          <div>
+            <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1 md:mb-2">
+              Username <span className="text-xs text-gray-400 font-normal">(for login — optional)</span>
+            </label>
+            <div className="relative">
+              <UserPlus className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                placeholder="e.g. rahul123"
+                className="w-full pl-10 md:pl-12 pr-4 py-2 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+              />
+            </div>
+            <p className="text-[10px] md:text-xs text-gray-500 mt-1">User can login with this username or their email</p>
           </div>
 
           {/* Password and Confirm Password - Side by side */}
