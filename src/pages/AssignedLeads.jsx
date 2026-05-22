@@ -104,6 +104,32 @@ const AssignedLeads = () => {
   const handleUpdateLead = async () => {
     if (!editFormData) return;
 
+    // Validate call log section if user has touched any field
+    const callLogTouched = callLogData.callOutcome || callLogData.callRemark || callLogData.nextFollowUpDate || callLogData.callReason;
+    if (callLogTouched) {
+      if (!callLogData.callOutcome) {
+        alert('Please select a Call Outcome before saving.');
+        return;
+      }
+      const subCategoryOptions = {
+        'Interested': true, 'Follow Up': true, 'Call Back': true, 'Office Visit': true,
+        'After Result / Counseling': true, 'Other Course': true, 'Not Interested': true,
+        'Drop': true, 'Invalid Lead': true,
+      };
+      if (subCategoryOptions[callLogData.callOutcome] && !callLogData.callReason) {
+        alert(`Please select a Sub Category for "${callLogData.callOutcome}".`);
+        return;
+      }
+      if (['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && !callLogData.nextFollowUpDate) {
+        alert(`Please select a Follow-up Date for "${callLogData.callOutcome}".`);
+        return;
+      }
+      if (!callLogData.callRemark.trim()) {
+        alert('Please enter a Remark before saving.');
+        return;
+      }
+    }
+
     try {
       // First update the lead data
       const response = await fetch(`${API_URL}/leads/${editFormData.id}`, {
