@@ -445,8 +445,12 @@ const Leads = () => {
   const calculateStats = () => {
     const totalStudents = leads.length;
     const newLeads = leads.filter(l => l.status?.toLowerCase() === 'new').length;
-    const today = new Date().toDateString();
-    const recentLeads = leads.filter(l => l.created_at && new Date(l.created_at).toDateString() === today).length;
+    const latestDate = leads.reduce((max, l) => {
+      if (!l.created_at) return max;
+      const d = new Date(l.created_at).toDateString();
+      return !max || new Date(d) > new Date(max) ? d : max;
+    }, null);
+    const recentLeads = latestDate ? leads.filter(l => l.created_at && new Date(l.created_at).toDateString() === latestDate).length : 0;
     const inProcess = leads.filter(l => {
       const status = l.status?.toLowerCase();
       return status === 'contacted' || status === 'interested' || status === 'call back';
@@ -464,9 +468,9 @@ const Leads = () => {
         iconColor: 'text-blue-600'
       },
       {
-        title: 'Added Today',
+        title: 'New Inquiries',
         value: recentLeads.toString(),
-        change: 'New leads today',
+        change: latestDate ? `Last added: ${latestDate}` : 'No leads yet',
         icon: Zap,
         gradient: 'from-purple-500 to-purple-600',
         bg: 'bg-purple-50',
