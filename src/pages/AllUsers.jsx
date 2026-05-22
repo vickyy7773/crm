@@ -403,13 +403,15 @@ const AllUsers = () => {
                           <Key size={14} className="md:hidden" />
                           <span className="hidden md:inline-flex items-center gap-1"><Key size={14} />Reset</span>
                         </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow"
-                        >
-                          <Trash2 size={14} className="md:hidden" />
-                          <span className="hidden md:inline-flex items-center gap-1"><Trash2 size={14} />Delete</span>
-                        </button>
+                        {user.role !== 'Super Admin' && (
+                          <button
+                            onClick={() => handleDelete(user.id)}
+                            className="p-1.5 md:p-0 md:px-3 md:py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-xs md:text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow"
+                          >
+                            <Trash2 size={14} className="md:hidden" />
+                            <span className="hidden md:inline-flex items-center gap-1"><Trash2 size={14} />Delete</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
