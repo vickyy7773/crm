@@ -206,10 +206,14 @@ const Dashboard = () => {
 
           <div className="space-y-5">
             {progressWithColors.map((lead, index) => (
-              <div key={index}>
+              <div
+                key={index}
+                className="cursor-pointer group"
+                onClick={() => navigate(`/leads?status=${encodeURIComponent(lead.status)}`)}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-700 font-semibold">{lead.status}</span>
-                  <span className="text-gray-900 font-bold">{lead.count} leads</span>
+                  <span className="text-gray-700 font-semibold group-hover:text-purple-600 transition-colors">{lead.status}</span>
+                  <span className="text-gray-900 font-bold group-hover:text-purple-600 transition-colors">{lead.count} leads →</span>
                 </div>
                 <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div

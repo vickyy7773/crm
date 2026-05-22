@@ -20,7 +20,7 @@ const Leads = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
   const [cityFilter, setCityFilter] = useState('all');
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
