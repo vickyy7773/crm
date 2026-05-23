@@ -21,9 +21,9 @@ Priya Sharma,Ramesh Sharma,8765432109,Jaipur,Facebook
 Amit Singh,Vijay Singh,7654321098,Delhi,Walk-in`;
       filename = 'raw_leads_sample.csv';
     } else {
-      csv = `name,father_name,phone,neet,city,source
-John Doe,Robert Doe,9876543210,520,Mumbai,Google Ads
-Jane Smith,David Smith,8765432109,485,Delhi,Facebook`;
+      csv = `name,father_name,phone,course,score,city,source
+John Doe,Robert Doe,9876543210,MBBS,520,Mumbai,Google Ads
+Jane Smith,David Smith,8765432109,Other,75,Delhi,Facebook`;
       filename = 'qualified_leads_sample.csv';
     }
 
@@ -139,7 +139,7 @@ Jane Smith,David Smith,8765432109,485,Delhi,Facebook`;
           }`}
         >
           ⭐ Qualified Leads
-          <p className="text-[10px] md:text-sm font-normal mt-0.5 md:mt-1 opacity-90">8 fields</p>
+          <p className="text-[10px] md:text-sm font-normal mt-0.5 md:mt-1 opacity-90">course, score, city...</p>
         </button>
       </div>
 
@@ -180,14 +180,18 @@ Jane Smith,David Smith,8765432109,485,Delhi,Facebook`;
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">2.</span>
-              <span>Add with <strong>8 columns</strong></span>
+              <span>Columns: <strong>name, father_name, phone, course, score, city, source</strong></span>
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">3.</span>
-              All columns are required
+              <span><strong>course</strong> column mein <strong>MBBS</strong> ya <strong>Other</strong> likhein (case insensitive)</span>
             </p>
             <p className="flex items-start gap-2">
               <span className="font-bold text-purple-600">4.</span>
+              <span>MBBS ke liye score = NEET marks, Other ke liye = exam score</span>
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="font-bold text-purple-600">5.</span>
               Upload and click "Upload Leads"
             </p>
           </div>
@@ -313,10 +317,11 @@ Jane Smith,David Smith,8765432109,485,Delhi,Facebook`;
           </ul>
         ) : (
           <ul className="text-xs md:text-sm text-purple-800 space-y-0.5 md:space-y-1">
-            <li>• Headers: <strong className="text-[10px] md:text-sm">name,phone,city,neet,course,destination,remark,source</strong></li>
-            <li>• Name, Phone, City: Required</li>
-            <li>• NEET, Course, Destination: Required</li>
-            <li>• Remark, Source: Optional</li>
+            <li>• Headers: <strong>name, father_name, phone, course, score, city, source</strong></li>
+            <li>• Name, Phone: Required</li>
+            <li>• course: MBBS ya Other likhein</li>
+            <li>• score: MBBS = NEET marks, Other = exam score</li>
+            <li>• Father Name, City, Source: Optional</li>
             <li>• Duplicates will be skipped</li>
           </ul>
         )}
