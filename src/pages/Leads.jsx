@@ -60,6 +60,7 @@ const Leads = () => {
     status: 'Followup',
     neetPrevious: '',
     neet2026: '',
+    score: '',
     course: '',
     destination: '',
     nextFollowUpDate: '',
@@ -271,7 +272,10 @@ const Leads = () => {
         city: newStudent.city,
         source: newStudent.source,
         status: newStudent.status || 'Followup',
-        neet: [newStudent.neetPrevious, newStudent.neet2026].filter(Boolean).join(' | 2026: ') || null,
+        neet: (newStudent.course === 'MBBS' || newStudent.course === 'BAMS/BDS')
+          ? ([newStudent.neetPrevious, newStudent.neet2026].filter(Boolean).join(' | 2026: ') || null)
+          : null,
+        other_score: newStudent.course === 'Other' ? (newStudent.score || null) : null,
         course: newStudent.course || null,
         destination: newStudent.destination || null,
         remark: newStudent.remark || null,
@@ -305,6 +309,7 @@ const Leads = () => {
           status: 'Followup',
           neetPrevious: '',
           neet2026: '',
+          score: '',
           course: '',
           destination: '',
           nextFollowUpDate: '',
@@ -2126,38 +2131,56 @@ const Leads = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
-                        <input
-                          type="text"
-                          value={newStudent.neetPrevious}
-                          onChange={(e) => setNewStudent({...newStudent, neetPrevious: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="Previous NEET score"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
-                        <input
-                          type="text"
-                          value={newStudent.neet2026}
-                          onChange={(e) => setNewStudent({...newStudent, neet2026: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="NEET 2026 score"
-                        />
-                      </div>
-                      <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
                         <select
                           value={newStudent.course}
-                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                          onChange={(e) => setNewStudent({...newStudent, course: e.target.value, neetPrevious: '', neet2026: '', score: ''})}
                           className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
                         >
                           <option value="">-- Select Course --</option>
                           <option value="MBBS">MBBS</option>
                           <option value="BAMS/BDS">BAMS / BDS</option>
-                          <option value="Other Course">Other Course</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
+                      {/* NEET fields — only for MBBS or BAMS/BDS */}
+                      {(newStudent.course === 'MBBS' || newStudent.course === 'BAMS/BDS') && (
+                        <>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
+                            <input
+                              type="text"
+                              value={newStudent.neetPrevious}
+                              onChange={(e) => setNewStudent({...newStudent, neetPrevious: e.target.value})}
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                              placeholder="Previous NEET score"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
+                            <input
+                              type="text"
+                              value={newStudent.neet2026}
+                              onChange={(e) => setNewStudent({...newStudent, neet2026: e.target.value})}
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                              placeholder="NEET 2026 score"
+                            />
+                          </div>
+                        </>
+                      )}
+                      {/* Score field — only for Other course */}
+                      {newStudent.course === 'Other' && (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Score</label>
+                          <input
+                            type="text"
+                            value={newStudent.score || ''}
+                            onChange={(e) => setNewStudent({...newStudent, score: e.target.value})}
+                            className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                            placeholder="Enter exam score"
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Interested Location</label>
                         <select
