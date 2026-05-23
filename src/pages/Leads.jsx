@@ -903,8 +903,8 @@ const Leads = () => {
               className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-purple-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none transition-all text-xs md:text-sm font-medium bg-white"
             >
               <option value="all">All Course</option>
-              <option value="MBBS">MBBS (NEET)</option>
-              <option value="Other">Other (Score)</option>
+              <option value="MBBS">MBBS</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
@@ -1032,7 +1032,7 @@ const Leads = () => {
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
-                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
+                      <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">{courseTypeFilter === 'Other' ? 'Score' : 'NEET Score'}</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
                       <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
@@ -1083,14 +1083,17 @@ const Leads = () => {
                       <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 hover:underline">{lead.phone}</a>
                     </div>
                   </td>
-                  {/* NEET Score */}
+                  {/* NEET Score / Other Score */}
                   <td className="px-2 py-1.5">
-                    {lead.neet ? (
-                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
-                        <Target size={11} />
-                        {lead.neet}
-                      </div>
-                    ) : <span className="text-[10px] text-gray-400">-</span>}
+                    {(() => {
+                      const scoreVal = lead.course?.toLowerCase() === 'other' ? lead.other_score : lead.neet;
+                      return scoreVal ? (
+                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
+                          <Target size={11} />
+                          {scoreVal}
+                        </div>
+                      ) : <span className="text-[10px] text-gray-400">-</span>;
+                    })()}
                   </td>
                   {/* City */}
                   <td className="px-2 py-1.5">
