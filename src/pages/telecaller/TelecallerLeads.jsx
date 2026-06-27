@@ -129,7 +129,12 @@ const TelecallerLeads = () => {
       leadName: lead.name,
       leadId: lead.id,
       nextFollowUp: lead.next_followup_date,
-      callDate: lead.latest_call_date
+      callDate: lead.latest_call_date,
+      phone: lead.phone,
+      status: lead.status,
+      city: lead.city,
+      course: lead.course,
+      score: lead.course?.toLowerCase() === 'other' ? lead.other_score : lead.neet,
     });
     setRemarkModal(true);
     setHistoryLoading(true);
@@ -672,15 +677,41 @@ const TelecallerLeads = () => {
               </div>
             </div>
             <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {selectedRemark.nextFollowUp && (
-                <div className="flex items-center gap-2 text-sm mb-4 bg-orange-50 px-4 py-3 rounded-lg border-2 border-orange-200">
-                  <Calendar size={18} className="text-orange-600" />
+              {/* Lead Info */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <Phone size={16} className="text-blue-600 flex-shrink-0" />
                   <div>
-                    <span className="font-bold text-orange-900">Next Follow-up:</span>
-                    <span className="ml-2 text-orange-700 font-semibold">
-                      {new Date(selectedRemark.nextFollowUp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <p className="text-[10px] text-blue-500 font-semibold uppercase">Mobile</p>
+                    <p className="font-bold text-blue-800 text-sm">{selectedRemark.phone || '-'}</p>
                   </div>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <Target size={16} className="text-purple-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-purple-500 font-semibold uppercase">Course / Score</p>
+                    <p className="font-bold text-purple-800 text-sm">{selectedRemark.course || '-'} {selectedRemark.score ? `· ${selectedRemark.score}` : ''}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Follow-up — prominent */}
+              {selectedRemark.nextFollowUp ? (
+                <div className={`flex items-center gap-3 mb-4 px-4 py-3 rounded-xl border-2 ${isOverdue(selectedRemark.nextFollowUp) ? 'bg-red-50 border-red-300' : 'bg-orange-50 border-orange-300'}`}>
+                  <Calendar size={22} className={isOverdue(selectedRemark.nextFollowUp) ? 'text-red-600' : 'text-orange-600'} />
+                  <div>
+                    <p className={`text-xs font-bold uppercase ${isOverdue(selectedRemark.nextFollowUp) ? 'text-red-600' : 'text-orange-600'}`}>
+                      {isOverdue(selectedRemark.nextFollowUp) ? '⚠️ Follow-up Overdue!' : '📅 Next Follow-up'}
+                    </p>
+                    <p className={`font-bold text-base ${isOverdue(selectedRemark.nextFollowUp) ? 'text-red-800' : 'text-orange-800'}`}>
+                      {new Date(selectedRemark.nextFollowUp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl border-2 bg-gray-50 border-gray-200">
+                  <Calendar size={22} className="text-gray-400" />
+                  <p className="text-gray-500 font-semibold text-sm">Koi follow-up schedule nahi hai</p>
                 </div>
               )}
               <div className="space-y-4">
