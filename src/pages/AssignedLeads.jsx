@@ -1092,16 +1092,6 @@ const AssignedLeads = () => {
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">Remark</label>
-                <textarea
-                  value={editFormData.remark || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })}
-                  rows="3"
-                  className="w-full px-2 md:px-4 py-1.5 md:py-2 text-sm border-2 border-gray-200 rounded-lg md:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                  placeholder="Add any remarks..."
-                ></textarea>
-              </div>
 
               {/* Call Log Section - Add entry to call history */}
               <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t-2 border-purple-200">
