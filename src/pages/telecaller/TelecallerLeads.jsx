@@ -21,7 +21,6 @@ const TelecallerLeads = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
-  const [subStatusFilter, setSubStatusFilter] = useState('all');
   const [callLogModalOpen, setCallLogModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
 
@@ -224,14 +223,12 @@ const TelecallerLeads = () => {
       lead.father_name?.toLowerCase().includes(q);
 
     const matchCity = cityFilter === 'all' || lead.city === cityFilter;
-    const matchSubStatus = subStatusFilter === 'all' || lead.latest_call_reason === subStatusFilter;
 
-    return matchSearch && matchCity && matchSubStatus;
+    return matchSearch && matchCity;
   });
 
   // Unique cities and sub-statuses for filter dropdowns
   const uniqueCities = [...new Set(leads.map(l => l.city).filter(Boolean))].sort();
-  const uniqueSubStatuses = [...new Set(leads.map(l => l.latest_call_reason).filter(Boolean))].sort();
 
   // Stats
   const stats = {
@@ -384,26 +381,12 @@ const TelecallerLeads = () => {
             </select>
           </div>
 
-          {/* Sub Status Filter */}
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-600 mb-1">Sub Status:</label>
-            <select
-              value={subStatusFilter}
-              onChange={(e) => setSubStatusFilter(e.target.value)}
-              className="w-full px-2 py-1.5 border border-gray-200 rounded-lg focus:border-purple-500 outline-none text-xs font-medium bg-white"
-            >
-              <option value="all">All Sub Status</option>
-              {uniqueSubStatuses.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {/* Clear filters */}
-        {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all' || subStatusFilter !== 'all') && (
+        {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all') && (
           <button
-            onClick={() => { setSearchTerm(''); setStatusFilter('all'); setCityFilter('all'); setSubStatusFilter('all'); }}
+            onClick={() => { setSearchTerm(''); setStatusFilter('all'); setCityFilter('all'); }}
             className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-semibold border border-purple-300 px-3 py-1 rounded-lg hover:bg-purple-50 transition-all"
           >
             Clear Filters
@@ -434,7 +417,6 @@ const TelecallerLeads = () => {
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                 </tr>
@@ -522,14 +504,6 @@ const TelecallerLeads = () => {
                       </div>
                     </td>
 
-                    {/* Sub Status */}
-                    <td className="px-3 py-2">
-                      {lead.latest_call_reason ? (
-                        <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
-                          {lead.latest_call_reason}
-                        </span>
-                      ) : <span className="text-[10px] text-gray-400">-</span>}
-                    </td>
 
                     {/* Remarks */}
                     <td className="px-3 py-2 max-w-[150px]">

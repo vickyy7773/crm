@@ -234,7 +234,6 @@ const ConvertedLeads = () => {
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sub Status</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned To</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
@@ -299,14 +298,6 @@ const ConvertedLeads = () => {
                           Converted
                         </span>
                       )}
-                    </td>
-                    {/* Sub Status */}
-                    <td className="px-3 py-2.5">
-                      {lead.latest_call_reason ? (
-                        <span className="inline-block bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
-                          {lead.latest_call_reason}
-                        </span>
-                      ) : <span className="text-[10px] text-gray-400">-</span>}
                     </td>
                     {/* Assigned To */}
                     <td className="px-3 py-2.5">
