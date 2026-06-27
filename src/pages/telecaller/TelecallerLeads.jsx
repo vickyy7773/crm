@@ -484,7 +484,7 @@ const TelecallerLeads = () => {
                     <td className="px-2 py-1.5">
                       <div className="space-y-1">
                         {getStatusBadge(lead.status)}
-                        {lead.is_transferred && (
+                        {!!lead.is_transferred && (
                           <div className="bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 w-fit">
                             <span className="text-[9px] font-bold text-purple-700">TRANSFERRED</span>
                           </div>
