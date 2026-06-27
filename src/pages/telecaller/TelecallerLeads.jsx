@@ -677,11 +677,6 @@ const TelecallerLeads = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
-                <textarea value={editFormData.remark || ''} onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })} rows={2} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none resize-none" placeholder="Add remarks..." />
-              </div>
-
               {/* Call Log Section */}
               <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-3">
                 <p className="text-xs font-bold text-purple-700">Call Log (Optional)</p>
