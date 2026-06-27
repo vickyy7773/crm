@@ -28,6 +28,7 @@ const TelecallerLeads = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [callLogData, setCallLogData] = useState({ callOutcome: '', callRemark: '', nextFollowUpDate: '' });
 
   // Add Lead modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -121,6 +122,7 @@ const TelecallerLeads = () => {
   // Edit lead handler
   const handleEditLead = (lead) => {
     setEditFormData({ ...lead });
+    setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '' });
     setEditModalOpen(true);
   };
 
@@ -148,9 +150,22 @@ const TelecallerLeads = () => {
 
       const result = await response.json();
       if (result.success) {
-        alert('Lead updated successfully!');
+        if (callLogData.callOutcome && callLogData.callRemark.trim()) {
+          await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              callRemark: callLogData.callRemark,
+              callOutcome: callLogData.callOutcome,
+              nextFollowUpDate: callLogData.nextFollowUpDate || null,
+              callerId: user.id,
+            })
+          });
+        }
+        alert('Saved successfully!');
         setEditModalOpen(false);
         setEditFormData(null);
+        setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '' });
         fetchLeads();
       } else {
         alert('Failed to update: ' + result.message);
@@ -545,29 +560,20 @@ const TelecallerLeads = () => {
                           </button>
                           <button
                             onClick={() => handleEditLead(lead)}
-                            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-semibold transition-all"
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-2 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-semibold shadow-sm"
                           >
                             <Edit2 size={10} />
                             Edit
                           </button>
                         </div>
                       ) : (
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => { setSelectedLead(lead); setCallLogModalOpen(true); }}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-2 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-semibold shadow-sm"
-                          >
-                            <Phone size={10} />
-                            Call Log
-                          </button>
-                          <button
-                            onClick={() => handleEditLead(lead)}
-                            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-semibold transition-all"
-                          >
-                            <Edit2 size={10} />
-                            Edit
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleEditLead(lead)}
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-2 py-1.5 rounded-lg flex items-center gap-1 text-[10px] font-semibold shadow-sm"
+                        >
+                          <Edit2 size={10} />
+                          Edit
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -604,7 +610,7 @@ const TelecallerLeads = () => {
                   <p className="text-indigo-100 text-xs">{editFormData.name}</p>
                 </div>
               </div>
-              <button onClick={() => { setEditModalOpen(false); setEditFormData(null); }} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
+              <button onClick={() => { setEditModalOpen(false); setEditFormData(null); setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '' }); }} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
                 <X size={16} />
               </button>
             </div>
@@ -673,17 +679,61 @@ const TelecallerLeads = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
-                <textarea value={editFormData.remark || ''} onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })} rows={3} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none resize-none" placeholder="Add remarks..." />
+                <textarea value={editFormData.remark || ''} onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })} rows={2} className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-indigo-500 outline-none resize-none" placeholder="Add remarks..." />
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                <p className="text-xs text-blue-700"><strong>Note:</strong> To change status or add call outcome, use the <strong>Call Log</strong> button.</p>
+
+              {/* Call Log Section */}
+              <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-3">
+                <p className="text-xs font-bold text-purple-700">Call Log (Optional)</p>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Call Outcome</label>
+                  <select
+                    value={callLogData.callOutcome}
+                    onChange={(e) => setCallLogData({ ...callLogData, callOutcome: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 outline-none bg-white"
+                  >
+                    <option value="">-- Select --</option>
+                    <option value="Interested">⭐ Interested</option>
+                    <option value="Follow Up">📋 Follow Up</option>
+                    <option value="Call Back">🔄 Call Back</option>
+                    <option value="Office Visit">🏢 Office Visit</option>
+                    <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+                    <option value="Other Course">📚 Other Course</option>
+                    <option value="Not Interested">✖ Not Interested</option>
+                    <option value="Drop">❌ Drop</option>
+                    <option value="Invalid Lead">🚫 Invalid Lead</option>
+                  </select>
+                </div>
+                {['Call Back', 'Follow Up', 'Interested', 'Office Visit', 'After Result / Counseling'].includes(callLogData.callOutcome) && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={callLogData.nextFollowUpDate}
+                      onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 outline-none bg-white"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Call Remark</label>
+                  <textarea
+                    value={callLogData.callRemark}
+                    onChange={(e) => setCallLogData({ ...callLogData, callRemark: e.target.value })}
+                    rows={2}
+                    placeholder="Call ke baare mein likhein..."
+                    className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 outline-none resize-none bg-white"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Footer */}
             <div className="bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl flex justify-end gap-3">
               <button
-                onClick={() => { setEditModalOpen(false); setEditFormData(null); }}
+                onClick={() => { setEditModalOpen(false); setEditFormData(null); setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '' }); }}
                 className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold text-sm transition-all"
               >
                 Cancel
