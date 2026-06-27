@@ -711,7 +711,7 @@ const TelecallerLeads = () => {
               ) : (
                 <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl border-2 bg-gray-50 border-gray-200">
                   <Calendar size={22} className="text-gray-400" />
-                  <p className="text-gray-500 font-semibold text-sm">Koi follow-up schedule nahi hai</p>
+                  <p className="text-gray-500 font-semibold text-sm">No follow-up scheduled</p>
                 </div>
               )}
               <div className="space-y-4">
