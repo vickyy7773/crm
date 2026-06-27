@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Phone, Search, Filter, AlertCircle, Target, MapPin,
   Clock, Calendar, TrendingUp, CheckCircle,
-  RefreshCw, X, Edit2, UserCircle, UserPlus
+  RefreshCw, X, Edit2, UserCircle, UserPlus, MessageSquare, User
 } from 'lucide-react';
 import CallLogModal from '../../components/CallLogModal';
 import API_URL from '../../config/api';
@@ -23,6 +23,10 @@ const TelecallerLeads = () => {
   const [cityFilter, setCityFilter] = useState('all');
   const [callLogModalOpen, setCallLogModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [remarkModal, setRemarkModal] = useState(false);
+  const [selectedRemark, setSelectedRemark] = useState(null);
+  const [callHistory, setCallHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -117,6 +121,33 @@ const TelecallerLeads = () => {
       console.error('Error requesting re-open:', error);
       alert('Error submitting re-open request.');
     }
+  };
+
+  const openRemarkModal = async (lead) => {
+    setSelectedRemark({
+      remark: lead.latest_call_remark || lead.remark || 'No remark available',
+      leadName: lead.name,
+      leadId: lead.id,
+      nextFollowUp: lead.next_followup_date,
+      callDate: lead.latest_call_date
+    });
+    setRemarkModal(true);
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/leads/${lead.id}/call-history`);
+      const data = await res.json();
+      setCallHistory(data.success ? data.data : []);
+    } catch {
+      setCallHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const closeRemarkModal = () => {
+    setRemarkModal(false);
+    setSelectedRemark(null);
+    setCallHistory([]);
   };
 
   // Edit lead handler
@@ -552,10 +583,16 @@ const TelecallerLeads = () => {
                     </td>
 
                     {/* Remarks */}
-                    <td className="px-2 py-1.5 max-w-[150px]">
-                      <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
-                        <div className="text-[10px] text-gray-700 truncate font-medium">
-                          {lead.latest_call_remark || lead.remark || '-'}
+                    <td className="px-2 py-1.5 max-w-[180px]">
+                      <div
+                        onClick={() => openRemarkModal(lead)}
+                        className="bg-gradient-to-r from-purple-50 to-pink-50 px-2 py-1.5 rounded-md border border-purple-200 cursor-pointer hover:from-purple-100 hover:to-pink-100 transition-all group"
+                      >
+                        <div className="flex items-center gap-1">
+                          <MessageSquare size={10} className="text-purple-600 flex-shrink-0" />
+                          <div className="text-[10px] text-purple-800 truncate font-medium group-hover:font-bold">
+                            {lead.latest_call_remark || lead.remark || '-'}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -613,6 +650,103 @@ const TelecallerLeads = () => {
         lead={selectedLead}
         onSuccess={fetchLeads}
       />
+
+      {/* Remark Modal */}
+      {remarkModal && selectedRemark && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
+                    <MessageSquare size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Call Remark</h2>
+                    <p className="text-purple-100 text-sm">{selectedRemark.leadName}</p>
+                  </div>
+                </div>
+                <button onClick={closeRemarkModal} className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all">
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {selectedRemark.nextFollowUp && (
+                <div className="flex items-center gap-2 text-sm mb-4 bg-orange-50 px-4 py-3 rounded-lg border-2 border-orange-200">
+                  <Calendar size={18} className="text-orange-600" />
+                  <div>
+                    <span className="font-bold text-orange-900">Next Follow-up:</span>
+                    <span className="ml-2 text-orange-700 font-semibold">
+                      {new Date(selectedRemark.nextFollowUp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b-2 border-purple-200 pb-2">
+                  <MessageSquare size={20} className="text-purple-600" />
+                  Complete Call History ({callHistory.length} calls)
+                </h3>
+                {historyLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                    <p className="text-gray-500 text-sm">Loading call history...</p>
+                  </div>
+                ) : callHistory.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                    <MessageSquare className="mx-auto text-gray-300 mb-2" size={40} />
+                    <p className="text-gray-500">No call history yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {callHistory.map((call, index) => (
+                      <div key={call.id} className={`relative pl-8 pb-4 ${index !== callHistory.length - 1 ? 'border-l-2 border-purple-200' : ''}`}>
+                        <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-purple-600 border-4 border-white shadow-md"></div>
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200 shadow-sm">
+                          <div className="flex items-center justify-between mb-3 border-b border-purple-200 pb-2">
+                            <div className="flex items-center gap-2">
+                              <User size={14} className="text-purple-600" />
+                              <span className="font-bold text-purple-900">{call.caller_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-purple-700">
+                              <Calendar size={12} />
+                              {new Date(call.call_date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div className="bg-white/60 px-3 py-2 rounded-lg">
+                              <p className="text-xs text-gray-600 mb-1">Outcome</p>
+                              <p className="font-bold text-sm text-gray-900">{call.call_outcome}</p>
+                            </div>
+                            {call.next_followup_date && (
+                              <div className="bg-orange-100 px-3 py-2 rounded-lg col-span-2 border border-orange-300">
+                                <p className="text-xs text-orange-700 mb-1">Scheduled Follow-up</p>
+                                <p className="font-bold text-sm text-orange-900">
+                                  {new Date(call.next_followup_date).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border border-purple-200">
+                            <p className="text-xs font-semibold text-purple-700 mb-1">Call Remark:</p>
+                            <p className="text-sm text-gray-800 leading-relaxed">{call.call_remark}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="bg-gray-50 border-t border-gray-200 p-4 flex justify-end">
+              <button onClick={closeRemarkModal} className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Lead Modal */}
       {editModalOpen && editFormData && (
