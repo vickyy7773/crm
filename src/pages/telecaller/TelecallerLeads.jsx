@@ -23,6 +23,7 @@ const TelecallerLeads = () => {
   const [cityFilter, setCityFilter] = useState('all');
   const [callLogModalOpen, setCallLogModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [statusPopupId, setStatusPopupId] = useState(null);
 
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -178,6 +179,20 @@ const TelecallerLeads = () => {
     }
   };
 
+
+  const handleQuickStatusChange = async (leadId, newStatus) => {
+    setStatusPopupId(null);
+    try {
+      await fetch(`${API_URL}/leads/${leadId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      fetchLeads();
+    } catch (err) {
+      console.error('Status update failed:', err);
+    }
+  };
 
   // Add new lead (auto-assigned to this telecaller)
   const handleAddLead = async (e) => {
@@ -498,7 +513,27 @@ const TelecallerLeads = () => {
                     {/* Status */}
                     <td className="px-2 py-1.5">
                       <div className="space-y-1">
-                        {getStatusBadge(lead.status)}
+                        <div className="relative">
+                          <button
+                            onClick={() => setStatusPopupId(statusPopupId === lead.id ? null : lead.id)}
+                            className="cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            {getStatusBadge(lead.status)}
+                          </button>
+                          {statusPopupId === lead.id && (
+                            <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-1.5 min-w-[160px]">
+                              {['Interested','Follow Up','Call Back','Office Visit','After Result / Counseling','Other Course','Not Interested','Drop','Invalid Lead'].map(s => (
+                                <button
+                                  key={s}
+                                  onClick={() => handleQuickStatusChange(lead.id, s)}
+                                  className={`w-full text-left px-3 py-1.5 text-[11px] font-semibold rounded-lg hover:bg-purple-50 transition-all ${lead.status === s ? 'bg-purple-100 text-purple-700' : 'text-gray-700'}`}
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                         {!!lead.is_transferred && (
                           <div className="bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 w-fit">
                             <span className="text-[9px] font-bold text-purple-700">TRANSFERRED</span>
