@@ -1892,36 +1892,6 @@ const Leads = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                  <select
-                    value={editFormData.status || 'Followup'}
-                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                  >
-                    <option value="Followup">Followup</option>
-                    <option value="After Result">After Result</option>
-                    <option value="Call Back">Call Back</option>
-                    <option value="Office Meeting">Office Meeting</option>
-                    <option value="Interested">Interested</option>
-                    <option value="India First">India First</option>
-                    <option value="Other Course">Other Course</option>
-                    <option value="Not Interested">Not Interested</option>
-                    <option value="Drop">Drop</option>
-                    {(user?.role === 'Super Admin' || user?.role === 'Manager' || user?.role === 'Admin') && (
-                      <option value="Converted">Converted</option>
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Next Follow-up Date</label>
-                  <input
-                    type="datetime-local"
-                    value={editFormData.next_followup_date ? new Date(editFormData.next_followup_date).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, next_followup_date: e.target.value })}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Assigned To</label>
                   <input
                     type="text"
@@ -1931,16 +1901,6 @@ const Leads = () => {
                     placeholder="Telecaller name"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Remark</label>
-                <textarea
-                  value={editFormData.remark || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, remark: e.target.value })}
-                  rows="3"
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                  placeholder="Add any remarks..."
-                ></textarea>
               </div>
             </div>
 
