@@ -128,6 +128,23 @@ const TelecallerLeads = () => {
 
   const handleUpdateLead = async () => {
     if (!editFormData) return;
+
+    const callLogTouched = callLogData.callOutcome || callLogData.callRemark || callLogData.nextFollowUpDate;
+    if (callLogTouched) {
+      if (!callLogData.callOutcome) {
+        alert('Please select a Call Outcome before saving.');
+        return;
+      }
+      if (['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && !callLogData.nextFollowUpDate) {
+        alert(`Please select a Follow-up Date for "${callLogData.callOutcome}".`);
+        return;
+      }
+      if (!callLogData.callRemark.trim()) {
+        alert('Please enter a Remark before saving.');
+        return;
+      }
+    }
+
     setEditSaving(true);
 
     try {
@@ -715,13 +732,13 @@ const TelecallerLeads = () => {
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Call Remark</label>
+                  <label className="block text-xs font-semibold text-purple-700 mb-1">Remark *</label>
                   <textarea
                     value={callLogData.callRemark}
                     onChange={(e) => setCallLogData({ ...callLogData, callRemark: e.target.value })}
                     rows={2}
-                    placeholder="Call ke baare mein likhein..."
-                    className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 outline-none resize-none bg-white"
+                    placeholder="Enter call remarks..."
+                    className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none resize-none bg-white"
                   />
                 </div>
               </div>
