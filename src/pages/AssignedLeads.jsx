@@ -105,19 +105,10 @@ const AssignedLeads = () => {
     if (!editFormData) return;
 
     // Validate call log section if user has touched any field
-    const callLogTouched = callLogData.callOutcome || callLogData.callRemark || callLogData.nextFollowUpDate || callLogData.callReason;
+    const callLogTouched = callLogData.callOutcome || callLogData.callRemark || callLogData.nextFollowUpDate;
     if (callLogTouched) {
       if (!callLogData.callOutcome) {
         alert('Please select a Call Outcome before saving.');
-        return;
-      }
-      const subCategoryOptions = {
-        'Interested': true, 'Follow Up': true, 'Call Back': true, 'Office Visit': true,
-        'After Result / Counseling': true, 'Other Course': true, 'Not Interested': true,
-        'Drop': true, 'Invalid Lead': true,
-      };
-      if (subCategoryOptions[callLogData.callOutcome] && !callLogData.callReason) {
-        alert(`Please select a Sub Category for "${callLogData.callOutcome}".`);
         return;
       }
       if (['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && !callLogData.nextFollowUpDate) {
@@ -1126,132 +1117,6 @@ const AssignedLeads = () => {
                     </select>
                   </div>
 
-                  {/* 2. Sub Category */}
-                  {callLogData.callOutcome && {
-                    'Interested': [
-                      { value: 'India', label: '🇮🇳 India' },
-                      { value: 'Abroad', label: '🌍 Abroad' },
-                      { value: 'Counselling Only', label: '💬 Counselling Only' },
-                      { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
-                    ],
-                    'Follow Up': [
-                      { value: 'Details Shared', label: '📋 Details Shared' },
-                      { value: 'Discussed on Phone', label: '📞 Discussed on Phone' },
-                      { value: 'Documents Pending', label: '📄 Documents Pending' },
-                      { value: 'Meeting Planned', label: '📅 Meeting Planned' },
-                    ],
-                    'Call Back': [
-                      { value: 'Not Reachable', label: '📴 Not Reachable' },
-                      { value: 'Busy', label: '📵 Busy' },
-                      { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
-                      { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
-                    ],
-                    'Office Visit': [
-                      { value: 'Address Shared', label: '📍 Address Shared' },
-                      { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
-                      { value: 'Visit Done', label: '✅ Visit Done' },
-                    ],
-                    'After Result / Counseling': [
-                      { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
-                      { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
-                    ],
-                    'Other Course': [
-                      { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
-                      { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' },
-                      { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' },
-                      { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' },
-                    ],
-                    'Not Interested': [
-                      { value: 'Budget Issue', label: '💰 Budget Issue' },
-                      { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' },
-                      { value: 'Already Admission Taken', label: '📄 Already Admission Taken' },
-                      { value: 'Just Inquiry', label: '❓ Just Inquiry' },
-                    ],
-                    'Drop': [
-                      { value: 'Not Qualified', label: '❌ Not Qualified' },
-                      { value: 'Improvement Year', label: '📖 Improvement Year' },
-                      { value: 'Financial Problem', label: '💸 Financial Problem' },
-                    ],
-                    'Invalid Lead': [
-                      { value: 'Wrong Number', label: '📞 Wrong Number' },
-                      { value: 'Not Reachable', label: '📴 Not Reachable' },
-                      { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
-                    ],
-                  }[callLogData.callOutcome] && (
-                    <div className={`border-2 rounded-lg md:rounded-xl p-2 md:p-3 ${
-                      ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
-                        ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
-                    }`}>
-                      <label className={`block text-xs md:text-sm font-semibold mb-1 md:mb-2 ${
-                        ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
-                          ? 'text-red-700' : 'text-blue-700'
-                      }`}>{callLogData.callOutcome} - Sub Category *</label>
-                      <select
-                        value={callLogData.callReason}
-                        onChange={(e) => setCallLogData({ ...callLogData, callReason: e.target.value })}
-                        className={`w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 rounded-lg md:rounded-xl focus:ring-2 outline-none bg-white ${
-                          ['Not Interested', 'Drop', 'Invalid Lead'].includes(callLogData.callOutcome)
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                            : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                        }`}
-                      >
-                        <option value="">-- Select Reason --</option>
-                        {{
-                          'Interested': [
-                            { value: 'India', label: '🇮🇳 India' },
-                            { value: 'Abroad', label: '🌍 Abroad' },
-                            { value: 'Counselling Only', label: '💬 Counselling Only' },
-                            { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
-                          ],
-                          'Follow Up': [
-                            { value: 'Details Shared', label: '📋 Details Shared' },
-                            { value: 'Discussed on Phone', label: '📞 Discussed on Phone' },
-                            { value: 'Documents Pending', label: '📄 Documents Pending' },
-                            { value: 'Meeting Planned', label: '📅 Meeting Planned' },
-                          ],
-                          'Call Back': [
-                            { value: 'Not Reachable', label: '📴 Not Reachable' },
-                            { value: 'Busy', label: '📵 Busy' },
-                            { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
-                            { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
-                          ],
-                          'Office Visit': [
-                            { value: 'Address Shared', label: '📍 Address Shared' },
-                            { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
-                            { value: 'Visit Done', label: '✅ Visit Done' },
-                          ],
-                          'After Result / Counseling': [
-                            { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
-                            { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
-                          ],
-                          'Other Course': [
-                            { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
-                            { value: 'B.Sc. / BCom / BA', label: '📚 B.Sc. / BCom / BA' },
-                            { value: 'Allied Health Sciences', label: '🏥 Allied Health Sciences' },
-                            { value: 'Other Professional Courses', label: '🎯 Other Professional Courses' },
-                          ],
-                          'Not Interested': [
-                            { value: 'Budget Issue', label: '💰 Budget Issue' },
-                            { value: 'Parents Not Agree', label: '👨‍👩‍👧 Parents Not Agree' },
-                            { value: 'Already Admission Taken', label: '📄 Already Admission Taken' },
-                            { value: 'Just Inquiry', label: '❓ Just Inquiry' },
-                          ],
-                          'Drop': [
-                            { value: 'Not Qualified', label: '❌ Not Qualified' },
-                            { value: 'Improvement Year', label: '📖 Improvement Year' },
-                            { value: 'Financial Problem', label: '💸 Financial Problem' },
-                          ],
-                          'Invalid Lead': [
-                            { value: 'Wrong Number', label: '📞 Wrong Number' },
-                            { value: 'Not Reachable', label: '📴 Not Reachable' },
-                            { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
-                          ],
-                        }[callLogData.callOutcome]?.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
 
                   {/* 3. Follow-up Date */}
                   {['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling'].includes(callLogData.callOutcome) && (
