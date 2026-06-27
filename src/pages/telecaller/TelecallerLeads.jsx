@@ -414,9 +414,10 @@ const TelecallerLeads = () => {
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Student Name</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Father's Name</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Mobile Number</th>
-                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">NEET Score</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Score</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">City</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Assigned To</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Remarks</th>
                   <th className="px-3 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Action</th>
                 </tr>
@@ -433,7 +434,7 @@ const TelecallerLeads = () => {
                     } ${lead.is_transferred ? 'opacity-60' : ''}`}
                   >
                     {/* Student Name */}
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {lead.name?.charAt(0)}
@@ -446,33 +447,33 @@ const TelecallerLeads = () => {
                     </td>
 
                     {/* Father's Name */}
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <span className="text-[10px] font-medium text-gray-700">{lead.father_name || '-'}</span>
                     </td>
 
                     {/* Mobile Number */}
-                    <td className="px-3 py-2">
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit hover:bg-blue-100 transition-colors"
-                      >
+                    <td className="px-2 py-1.5">
+                      <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md border border-blue-200 w-fit">
                         <Phone size={11} className="text-blue-600" />
-                        <span className="text-[10px] font-semibold text-blue-700">{lead.phone}</span>
-                      </a>
+                        <a href={`tel:${lead.phone}`} className="text-[10px] font-semibold text-blue-700 hover:underline">{lead.phone}</a>
+                      </div>
                     </td>
 
-                    {/* NEET Score */}
-                    <td className="px-3 py-2">
-                      {lead.neet ? (
-                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
-                          <Target size={11} />
-                          {lead.neet}
-                        </div>
-                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    {/* Score */}
+                    <td className="px-2 py-1.5">
+                      {(() => {
+                        const scoreVal = lead.course?.toLowerCase() === 'other' ? lead.other_score : lead.neet;
+                        return scoreVal ? (
+                          <div className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-md font-bold text-xs shadow-sm">
+                            <Target size={11} />
+                            {scoreVal}
+                          </div>
+                        ) : <span className="text-[10px] text-gray-400">-</span>;
+                      })()}
                     </td>
 
                     {/* City */}
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <div className="flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 w-fit">
                         <MapPin size={11} className="text-emerald-600" />
                         <span className="text-xs font-semibold text-emerald-700">{lead.city || '-'}</span>
@@ -480,7 +481,7 @@ const TelecallerLeads = () => {
                     </td>
 
                     {/* Status */}
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <div className="space-y-1">
                         {getStatusBadge(lead.status)}
                         {lead.is_transferred && (
@@ -504,9 +505,20 @@ const TelecallerLeads = () => {
                       </div>
                     </td>
 
+                    {/* Assigned To */}
+                    <td className="px-2 py-1.5">
+                      {lead.assigned_to_name ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[9px] text-gray-400 font-semibold uppercase">Assigned To</span>
+                          <span className="inline-block bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                            {lead.assigned_to_name}
+                          </span>
+                        </div>
+                      ) : <span className="text-[10px] text-gray-400">-</span>}
+                    </td>
 
                     {/* Remarks */}
-                    <td className="px-3 py-2 max-w-[150px]">
+                    <td className="px-2 py-1.5 max-w-[150px]">
                       <div className="bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
                         <div className="text-[10px] text-gray-700 truncate font-medium">
                           {lead.latest_call_remark || lead.remark || '-'}
@@ -515,7 +527,7 @@ const TelecallerLeads = () => {
                     </td>
 
                     {/* Action */}
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       {lead.is_transferred ? (
                         <div className="bg-purple-50 px-2 py-1.5 rounded-md border border-purple-200">
                           <span className="block text-[9px] font-semibold text-purple-500">TRANSFERRED TO</span>
