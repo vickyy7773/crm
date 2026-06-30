@@ -212,6 +212,7 @@ const TelecallerLeads = () => {
               callOutcome: callLogData.callOutcome,
               nextFollowUpDate: callLogData.nextFollowUpDate || null,
               callerId: user.id,
+              callerName: user.name || user.username || 'Telecaller',
             })
           });
         }
