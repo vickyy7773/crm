@@ -1116,7 +1116,7 @@ const AssignedLeads = () => {
                         Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}
                       </label>
                       <input
-                        type="datetime-local"
+                        type="date"
                         value={callLogData.nextFollowUpDate}
                         onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
                         className="w-full px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border-2 border-purple-200 rounded-lg md:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-white"

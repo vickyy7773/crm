@@ -890,7 +890,7 @@ const TelecallerLeads = () => {
                       Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}
                     </label>
                     <input
-                      type="datetime-local"
+                      type="date"
                       value={callLogData.nextFollowUpDate}
                       onChange={(e) => setCallLogData({ ...callLogData, nextFollowUpDate: e.target.value })}
                       className="w-full px-3 py-2 text-sm border-2 border-purple-200 rounded-lg focus:border-purple-500 outline-none bg-white"
