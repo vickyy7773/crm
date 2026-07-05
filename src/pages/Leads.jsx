@@ -1576,7 +1576,7 @@ const Leads = () => {
             <div className="p-6 space-y-4">
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <p className="text-blue-800 text-sm">
-                  Total leads available: <span className="font-bold">{leads.length}</span>
+                  Total leads available: <span className="font-bold">{filteredLeads.length}</span>
                 </p>
                 <p className="text-blue-600 text-xs mt-1">
                   Example: Select from 1 to 40 will select first 40 leads
@@ -1591,7 +1591,7 @@ const Leads = () => {
                   <input
                     type="number"
                     min="1"
-                    max={leads.length}
+                    max={filteredLeads.length}
                     value={rangeFrom}
                     onChange={(e) => setRangeFrom(e.target.value)}
                     placeholder="1"
@@ -1606,10 +1606,10 @@ const Leads = () => {
                   <input
                     type="number"
                     min="1"
-                    max={leads.length}
+                    max={filteredLeads.length}
                     value={rangeTo}
                     onChange={(e) => setRangeTo(e.target.value)}
-                    placeholder={leads.length.toString()}
+                    placeholder={filteredLeads.length.toString()}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-medium"
                   />
                 </div>
