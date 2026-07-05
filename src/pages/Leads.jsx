@@ -1178,19 +1178,45 @@ const Leads = () => {
                 >
                   Previous
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
-                      currentPage === page
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                        : 'border border-gray-300 hover:bg-gray-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {(() => {
+                  const groupSize = 10;
+                  const currentGroup = Math.floor((currentPage - 1) / groupSize);
+                  const groupStart = currentGroup * groupSize + 1;
+                  const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
+                  return (
+                    <>
+                      {groupStart > 1 && (
+                        <button
+                          onClick={() => setCurrentPage(groupStart - 1)}
+                          className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
+                        >
+                          ...
+                        </button>
+                      )}
+                      {Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
+                            currentPage === page
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                              : 'border border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      {groupEnd < totalPages && (
+                        <button
+                          onClick={() => setCurrentPage(groupEnd + 1)}
+                          className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
+                        >
+                          ...
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
