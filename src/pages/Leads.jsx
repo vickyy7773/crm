@@ -1946,28 +1946,27 @@ const Leads = () => {
                       placeholder="e.g. Google, Facebook, Referral"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
-                    <select
-                      value={newStudent.status || 'Followup'}
-                      onChange={(e) => setNewStudent({...newStudent, status: e.target.value})}
-                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    >
-                      <option value="Followup">Followup</option>
-                      <option value="After Result">After Result</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="Office Meeting">Office Meeting</option>
-                      <option value="Interested">Interested</option>
-                      <option value="India First">India First</option>
-                      <option value="Other Course">Other Course</option>
-                      <option value="Not Interested">Not Interested</option>
-                      <option value="Drop">Drop</option>
-                    </select>
-                  </div>
-
                   {/* Qualified Lead Additional Fields */}
                   {newLeadType === 'qualified' && (
                     <>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+                        <select
+                          value={newStudent.status || 'Followup'}
+                          onChange={(e) => setNewStudent({...newStudent, status: e.target.value})}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="Followup">Followup</option>
+                          <option value="After Result">After Result</option>
+                          <option value="Call Back">Call Back</option>
+                          <option value="Office Meeting">Office Meeting</option>
+                          <option value="Interested">Interested</option>
+                          <option value="India First">India First</option>
+                          <option value="Other Course">Other Course</option>
+                          <option value="Not Interested">Not Interested</option>
+                          <option value="Drop">Drop</option>
+                        </select>
+                      </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
                         <input
