@@ -1166,11 +1166,11 @@ const Leads = () => {
         {/* Pagination */}
         {filteredLeads.length > 0 ? (
           totalPages > 1 && (
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+            <div className="px-4 py-3 border-t border-gray-200 flex flex-wrap items-center justify-between gap-2 bg-gray-50">
               <div className="text-sm text-gray-600">
                 Showing <span className="font-semibold">{startIndex + 1}-{Math.min(startIndex + LEADS_PER_PAGE, filteredLeads.length)}</span> of <span className="font-semibold">{filteredLeads.length}</span> leads
               </div>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -1224,6 +1224,23 @@ const Leads = () => {
                 >
                   Next
                 </button>
+                <span className="flex items-center gap-1 ml-2 text-sm text-gray-600">
+                  Go to
+                  <input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    defaultValue={currentPage}
+                    key={currentPage}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= 1 && val <= totalPages) setCurrentPage(val);
+                      }
+                    }}
+                    className="w-14 px-2 py-1 border-2 border-gray-300 rounded-lg text-sm font-semibold text-center focus:border-purple-500 outline-none"
+                  />
+                </span>
               </div>
             </div>
           )

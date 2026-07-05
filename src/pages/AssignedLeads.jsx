@@ -723,11 +723,11 @@ const AssignedLeads = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+            <div className="px-4 py-3 border-t border-gray-200 flex flex-wrap items-center justify-between gap-2 bg-gray-50">
               <div className="text-sm text-gray-600">
                 Showing <span className="font-semibold">{startIndex + 1}-{Math.min(startIndex + LEADS_PER_PAGE, filteredLeads.length)}</span> of <span className="font-semibold">{filteredLeads.length}</span> leads
               </div>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -735,19 +735,45 @@ const AssignedLeads = () => {
                 >
                   Previous
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
-                      currentPage === page
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                        : 'border border-gray-300 hover:bg-gray-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {(() => {
+                  const groupSize = 10;
+                  const currentGroup = Math.floor((currentPage - 1) / groupSize);
+                  const groupStart = currentGroup * groupSize + 1;
+                  const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
+                  return (
+                    <>
+                      {groupStart > 1 && (
+                        <button
+                          onClick={() => setCurrentPage(groupStart - 1)}
+                          className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
+                        >
+                          ...
+                        </button>
+                      )}
+                      {Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
+                            currentPage === page
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                              : 'border border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      {groupEnd < totalPages && (
+                        <button
+                          onClick={() => setCurrentPage(groupEnd + 1)}
+                          className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
+                        >
+                          ...
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
@@ -755,6 +781,23 @@ const AssignedLeads = () => {
                 >
                   Next
                 </button>
+                <span className="flex items-center gap-1 ml-2 text-sm text-gray-600">
+                  Go to
+                  <input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    defaultValue={currentPage}
+                    key={currentPage}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= 1 && val <= totalPages) setCurrentPage(val);
+                      }
+                    }}
+                    className="w-14 px-2 py-1 border-2 border-gray-300 rounded-lg text-sm font-semibold text-center focus:border-purple-500 outline-none"
+                  />
+                </span>
               </div>
             </div>
           )}
