@@ -433,13 +433,13 @@ const Leads = () => {
       return;
     }
 
-    if (to > leads.length) {
-      alert(`Maximum lead number is ${leads.length}`);
+    if (to > filteredLeads.length) {
+      alert(`Maximum lead number is ${filteredLeads.length}`);
       return;
     }
 
-    // Select leads from index (from-1) to (to-1)
-    const rangeLeadIds = leads.slice(from - 1, to).map(lead => lead.id);
+    // Select leads from index (from-1) to (to-1) within currently filtered leads
+    const rangeLeadIds = filteredLeads.slice(from - 1, to).map(lead => lead.id);
     setSelectedLeads(rangeLeadIds);
     setRangeModalOpen(false);
     setRangeFrom('');
@@ -1556,7 +1556,7 @@ const Leads = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Select Lead Range</h2>
-                    <p className="text-blue-100 text-sm">Select leads from number X to Y</p>
+                    <p className="text-blue-100 text-sm">Select leads from number X to Y (from current filtered view — {filteredLeads.length} leads)</p>
                   </div>
                 </div>
                 <button
