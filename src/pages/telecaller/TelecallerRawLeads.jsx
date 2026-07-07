@@ -35,6 +35,18 @@ const TelecallerRawLeads = () => {
     source: ''
   });
 
+  const fetchWithRetry = async (url, options, retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(url, options);
+        return res;
+      } catch (err) {
+        if (attempt === retries) throw err;
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  };
+
   // Fetch raw leads assigned to this telecaller
   useEffect(() => {
     fetchRawLeads();
@@ -134,7 +146,7 @@ const TelecallerRawLeads = () => {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`${API_URL}/leads/${selectedLead.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${selectedLead.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -182,11 +194,9 @@ const TelecallerRawLeads = () => {
 
     setSubmitting(true);
     try {
-      const response = await fetch(`${API_URL}/leads/${callStatusLead.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${callStatusLead.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: status,
           remark: callRemark || `Call Status: ${status}`
@@ -225,11 +235,9 @@ const TelecallerRawLeads = () => {
 
     setSubmitting(true);
     try {
-      const response = await fetch(`${API_URL}/leads/${cityEditLead.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${cityEditLead.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           city: cityValue.trim()
         })

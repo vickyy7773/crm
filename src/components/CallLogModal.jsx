@@ -65,6 +65,18 @@ const requiredFollowUpOutcomes = ['Call Back', 'Follow Up'];
 // Negative outcomes (for styling)
 const negativeOutcomes = ['Not Interested', 'Drop', 'Invalid Lead'];
 
+const fetchWithRetry = async (url, options, retries = 2) => {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+};
+
 const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
   const { user } = useAuth();
   const [callRemark, setCallRemark] = useState('');
@@ -102,7 +114,7 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`${API_URL}/leads/${lead.id}/call-log`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${lead.id}/call-log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
