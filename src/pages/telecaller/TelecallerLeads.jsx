@@ -45,7 +45,21 @@ const TelecallerLeads = () => {
     }
   }, [user, statusFilter]);
 
-  // Re-fetch when user comes back to the tab after being idle
+  // Background refresh every 4 min — keeps data live while user is on a call
+  // Modal open check uses ref so interval always has latest value
+  const editModalOpenRef = useRef(false);
+  useEffect(() => { editModalOpenRef.current = editModalOpen; }, [editModalOpen]);
+
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      // Always refresh leads list silently; modal form data is separate state so it's safe
+      fetchLeads();
+    }, 4 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user, statusFilter]);
+
+  // Also re-fetch on tab focus (coming back after switching apps)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && user) {

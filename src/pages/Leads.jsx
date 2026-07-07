@@ -73,6 +73,12 @@ const Leads = () => {
     fetchTelecallers();
   }, []);
 
+  // Background refresh every 4 min + on tab focus
+  useEffect(() => {
+    const interval = setInterval(() => fetchLeads(), 4 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') fetchLeads();
