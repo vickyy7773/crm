@@ -73,6 +73,14 @@ const Leads = () => {
     fetchTelecallers();
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') fetchLeads();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Handle highlighted lead from URL parameter
   useEffect(() => {
     if (highlightedLeadId && leads.length > 0) {

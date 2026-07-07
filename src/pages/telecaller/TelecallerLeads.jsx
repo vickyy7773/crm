@@ -45,6 +45,17 @@ const TelecallerLeads = () => {
     }
   }, [user, statusFilter]);
 
+  // Re-fetch when user comes back to the tab after being idle
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        fetchLeads();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, statusFilter]);
+
   // Handle highlight from notification click
   useEffect(() => {
     if (highlightedLeadId && leads.length > 0) {
@@ -204,7 +215,7 @@ const TelecallerLeads = () => {
       const result = await response.json();
       if (result.success) {
         if (callLogData.callOutcome && callLogData.callRemark.trim()) {
-          await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
+          const logRes = await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -215,6 +226,15 @@ const TelecallerLeads = () => {
               callerName: user.name || user.username || 'Telecaller',
             })
           });
+          const logResult = await logRes.json();
+          if (!logResult.success) {
+            alert('Lead details saved, but call log failed: ' + (logResult.message || 'Unknown error'));
+            setEditModalOpen(false);
+            setEditFormData(null);
+            setCallLogData({ callOutcome: '', callRemark: '', nextFollowUpDate: '' });
+            fetchLeads();
+            return;
+          }
         }
         alert('Saved successfully!');
         setEditModalOpen(false);

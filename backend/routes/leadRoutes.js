@@ -455,21 +455,36 @@ router.post('/import/file', upload.single('file'), async (req, res) => {
 async function importLeadsToDatabase(leadsData, res, defaultSource) {
   try {
     let imported = 0;
+    let duplicates = 0;
     let failed = 0;
 
     for (const row of leadsData) {
       try {
+        const phone = (row.phone || '').toString().trim();
+        if (!phone) { failed++; continue; }
+
+        // Skip duplicate phone numbers
+        const [existing] = await pool.query('SELECT id FROM leads WHERE phone = ?', [phone]);
+        if (existing.length > 0) { duplicates++; continue; }
+
+        const courseRaw = (row.course || '').trim().toLowerCase();
+        const courseValue = courseRaw === 'mbbs' ? 'MBBS' : courseRaw === 'other' ? 'Other' : (row.course || null);
+        const scoreValue = row.score || null;
+        const neetValue = courseRaw === 'mbbs' ? scoreValue : null;
+        const otherScoreValue = courseRaw === 'other' ? scoreValue : null;
+
         await pool.query(
           `INSERT INTO leads (
-            name, father_name, phone, city, neet, course, destination, remark, source, status
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'New')`,
+            name, father_name, phone, city, neet, other_score, course, destination, remark, source, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'New')`,
           [
             row.name || '',
             row.father_name || null,
-            row.phone || '',
+            phone,
             row.city || null,
-            row.neet || null,
-            row.course || null,
+            neetValue,
+            otherScoreValue,
+            courseValue,
             row.destination || null,
             row.remark || null,
             row.source || defaultSource || null
@@ -484,7 +499,10 @@ async function importLeadsToDatabase(leadsData, res, defaultSource) {
 
     res.json({
       success: true,
-      message: `Import completed. ${imported} leads imported${failed > 0 ? `, ${failed} failed` : ''}.`,
+      message: `Import completed. ${imported} imported, ${duplicates} duplicates skipped${failed > 0 ? `, ${failed} failed` : ''}.`,
+      imported,
+      duplicates,
+      total: leadsData.length,
       data: { importedCount: imported, failed, total: leadsData.length }
     });
   } catch (error) {
@@ -576,14 +594,6 @@ router.post('/:id/call-log', async (req, res) => {
       });
     }
 
-    // Validate call reason for negative outcomes - Skip for Super Admin
-    const negativeOutcomes = ['Not Interested', 'Wrong Number', 'Not Reachable', 'Switched Off', 'Drop', 'Invalid Lead'];
-    if (!isSuperAdmin && negativeOutcomes.includes(callOutcome) && !callReason) {
-      return res.status(400).json({
-        success: false,
-        message: 'Call reason is required for negative outcomes (Not Interested, Wrong Number, etc.)'
-      });
-    }
 
     // Check if lead exists and get current status
     const [leadRows] = await pool.query('SELECT id, status, is_transferred FROM leads WHERE id = ?', [leadId]);
@@ -605,14 +615,6 @@ router.post('/:id/call-log', async (req, res) => {
     const currentStatus = leadRows[0].status || 'New';
 
     if (!isSuperAdmin) {
-      const finalStatuses = ['converted', 'drop'];
-      if (finalStatuses.includes(currentStatus.toLowerCase())) {
-        return res.status(400).json({
-          success: false,
-          message: `"${currentStatus}" lead ka status change nahi ho sakta.`
-        });
-      }
-
       // Same-day call limit check (max 5 attempts per day per telecaller)
       const [todayCallsRows] = await pool.query(
         `SELECT COUNT(*) as count FROM call_history
@@ -941,7 +943,7 @@ router.put('/:id', async (req, res) => {
     }
 
     // Build dynamic update query
-    const allowedFields = ['name', 'father_name', 'phone', 'city', 'neet', 'course', 'destination', 'remark', 'source', 'status'];
+    const allowedFields = ['name', 'father_name', 'father_phone', 'phone', 'city', 'neet', 'other_score', 'course', 'destination', 'remark', 'source', 'status', 'email'];
     const updateFields = [];
     const updateValues = [];
 

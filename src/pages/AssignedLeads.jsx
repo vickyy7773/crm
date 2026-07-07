@@ -45,6 +45,14 @@ const AssignedLeads = () => {
     fetchTelecallers();
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') fetchAssignedLeads();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Handle highlighted lead from URL parameter
   useEffect(() => {
     if (highlightedLeadId && assignedLeads.length > 0) {
