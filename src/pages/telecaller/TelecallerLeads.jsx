@@ -187,6 +187,19 @@ const TelecallerLeads = () => {
     setEditModalOpen(true);
   };
 
+  // Retry a fetch up to `retries` times with 2s delay between attempts
+  const fetchWithRetry = async (url, options, retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(url, options);
+        return res;
+      } catch (err) {
+        if (attempt === retries) throw err;
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  };
+
   const handleUpdateLead = async () => {
     if (!editFormData) return;
 
@@ -209,7 +222,7 @@ const TelecallerLeads = () => {
     setEditSaving(true);
 
     try {
-      const response = await fetch(`${API_URL}/leads/${editFormData.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${editFormData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -229,7 +242,7 @@ const TelecallerLeads = () => {
       const result = await response.json();
       if (result.success) {
         if (callLogData.callOutcome && callLogData.callRemark.trim()) {
-          const logRes = await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
+          const logRes = await fetchWithRetry(`${API_URL}/leads/${editFormData.id}/call-log`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -260,7 +273,7 @@ const TelecallerLeads = () => {
       }
     } catch (err) {
       console.error('Error updating lead:', err);
-      alert('Error updating lead.');
+      alert('Network error — please check your connection and try again.');
     } finally {
       setEditSaving(false);
     }

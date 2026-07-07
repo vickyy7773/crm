@@ -115,6 +115,18 @@ const AssignedLeads = () => {
   };
 
   // Update lead handler
+  const fetchWithRetry = async (url, options, retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(url, options);
+        return res;
+      } catch (err) {
+        if (attempt === retries) throw err;
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  };
+
   const handleUpdateLead = async () => {
     if (!editFormData) return;
 
@@ -137,7 +149,7 @@ const AssignedLeads = () => {
 
     try {
       // First update the lead data
-      const response = await fetch(`${API_URL}/leads/${editFormData.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/leads/${editFormData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editFormData)
@@ -153,7 +165,7 @@ const AssignedLeads = () => {
       if (callLogData.callOutcome && callLogData.callRemark) {
         setAddingCallLog(true);
         try {
-          const callLogResponse = await fetch(`${API_URL}/leads/${editFormData.id}/call-log`, {
+          const callLogResponse = await fetchWithRetry(`${API_URL}/leads/${editFormData.id}/call-log`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -163,7 +175,7 @@ const AssignedLeads = () => {
               callOutcome: callLogData.callOutcome,
               callReason: callLogData.callReason || null,
               nextFollowUpDate: callLogData.nextFollowUpDate || null,
-              isSuperAdmin: true // Skip validations for Super Admin
+              isSuperAdmin: true
             })
           });
 
@@ -178,7 +190,7 @@ const AssignedLeads = () => {
           }
         } catch (callLogErr) {
           console.error('Error adding call log:', callLogErr);
-          alert('Lead updated but call log failed. Check console for details.');
+          alert('Network error — please check your connection and try again.');
         }
         setAddingCallLog(false);
       }
