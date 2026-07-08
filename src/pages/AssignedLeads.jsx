@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { UserCheck, Phone, User, RefreshCw, CheckCircle, Target, MapPin, GraduationCap, MessageSquare, X, Calendar, Edit2, Trash2, Search } from 'lucide-react';
+import { UserCheck, Phone, User, RefreshCw, CheckCircle, Target, MapPin, GraduationCap, MessageSquare, X, Calendar, Edit2, Trash2, Search, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isSuperAdmin } from '../utils/permissions';
 import API_URL from '../config/api';
@@ -503,7 +503,7 @@ const AssignedLeads = () => {
             className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none text-xs md:text-sm"
           />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
           {/* Lead Type Filter */}
           <div>
             <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Lead Type:</label>
@@ -588,7 +588,9 @@ const AssignedLeads = () => {
 
           {/* Sort By */}
           <div>
-            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Sort By:</label>
+            <label className="flex items-center gap-1 text-[10px] md:text-xs font-semibold text-gray-600 mb-1">
+              <ArrowUpDown size={11} /> Sort:
+            </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -596,8 +598,8 @@ const AssignedLeads = () => {
             >
               <option value="default">Default</option>
               <option value="not_called">Not Called First</option>
-              <option value="oldest_call">Last Called (Oldest First)</option>
-              <option value="newest_call">Last Called (Newest First)</option>
+              <option value="oldest_call">Oldest Call First</option>
+              <option value="newest_call">Newest Call First</option>
               <option value="newest_lead">Newest Lead First</option>
             </select>
           </div>
