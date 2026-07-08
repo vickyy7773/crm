@@ -24,6 +24,7 @@ const AssignedLeads = () => {
   const [cityFilter, setCityFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('default');
   const [remarkModal, setRemarkModal] = useState(false);
   const [selectedRemark, setSelectedRemark] = useState(null);
   const [callHistory, setCallHistory] = useState([]);
@@ -308,6 +309,30 @@ const AssignedLeads = () => {
       filtered = filtered.filter(lead => lead.status === activeTab);
     }
 
+    // Sort
+    if (sortBy === 'not_called') {
+      filtered = [...filtered].sort((a, b) => {
+        if (!a.latest_call_date && !b.latest_call_date) return 0;
+        if (!a.latest_call_date) return -1;
+        if (!b.latest_call_date) return 1;
+        return 0;
+      });
+    } else if (sortBy === 'oldest_call') {
+      filtered = [...filtered].sort((a, b) => {
+        if (!a.latest_call_date) return -1;
+        if (!b.latest_call_date) return 1;
+        return new Date(a.latest_call_date) - new Date(b.latest_call_date);
+      });
+    } else if (sortBy === 'newest_call') {
+      filtered = [...filtered].sort((a, b) => {
+        if (!a.latest_call_date) return 1;
+        if (!b.latest_call_date) return -1;
+        return new Date(b.latest_call_date) - new Date(a.latest_call_date);
+      });
+    } else if (sortBy === 'newest_lead') {
+      filtered = [...filtered].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
     return filtered;
   };
 
@@ -560,6 +585,22 @@ const AssignedLeads = () => {
               }
             </select>
           </div>
+
+          {/* Sort By */}
+          <div>
+            <label className="block text-[10px] md:text-xs font-semibold text-gray-600 mb-1">Sort By:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 border border-orange-300 rounded-lg md:rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm font-medium bg-white text-orange-700"
+            >
+              <option value="default">Default</option>
+              <option value="not_called">Not Called First</option>
+              <option value="oldest_call">Last Called (Oldest First)</option>
+              <option value="newest_call">Last Called (Newest First)</option>
+              <option value="newest_lead">Newest Lead First</option>
+            </select>
+          </div>
         </div>
 
         {/* Clear Filters Button */}
@@ -573,6 +614,7 @@ const AssignedLeads = () => {
                 setCityFilter('all');
                 setAssignedFilter('all');
                 setSearchQuery('');
+                setSortBy('default');
               }}
               className="px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
             >
