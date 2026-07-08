@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Building2, User, Database, Save, CheckCircle, Download, Trash2, X } from 'lucide-react';
+import { Settings as SettingsIcon, Building2, User, Database, Save, CheckCircle, Download, Trash2, X, Filter } from 'lucide-react';
 
 import API_URL from '../config/api';
 
@@ -11,6 +11,10 @@ const Settings = () => {
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [delStatusFilter, setDelStatusFilter] = useState('all');
+  const [delAssignedFilter, setDelAssignedFilter] = useState('all');
+  const [delCityFilter, setDelCityFilter] = useState('all');
+  const [delTypeFilter, setDelTypeFilter] = useState('all');
 
   const [companySettings, setCompanySettings] = useState({
     companyName: 'Study Abroad Consultancy',
@@ -201,11 +205,34 @@ const Settings = () => {
     }
   };
 
-  const filteredLeads = leads.filter(lead =>
-    lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.phone?.includes(searchTerm) ||
-    lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const isRaw = (lead) => !lead.neet && !lead.course && !lead.destination;
+
+  const filteredLeads = leads.filter(lead => {
+    if (delStatusFilter !== 'all' && lead.status !== delStatusFilter) return false;
+    if (delAssignedFilter === 'unassigned' && lead.assigned_to_name) return false;
+    if (delAssignedFilter !== 'all' && delAssignedFilter !== 'unassigned' && lead.assigned_to_name !== delAssignedFilter) return false;
+    if (delCityFilter !== 'all' && lead.city !== delCityFilter) return false;
+    if (delTypeFilter === 'raw' && !isRaw(lead)) return false;
+    if (delTypeFilter === 'qualified' && isRaw(lead)) return false;
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      return lead.name?.toLowerCase().includes(q) || lead.phone?.includes(q) || lead.city?.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const resetDeleteFilters = () => {
+    setDelStatusFilter('all');
+    setDelAssignedFilter('all');
+    setDelCityFilter('all');
+    setDelTypeFilter('all');
+    setSearchTerm('');
+    setSelectedLeadIds([]);
+  };
+
+  const uniqueStatuses = [...new Set(leads.map(l => l.status).filter(Boolean))].sort();
+  const uniqueCities = [...new Set(leads.map(l => l.city).filter(Boolean))].sort();
+  const uniqueAssigned = [...new Set(leads.map(l => l.assigned_to_name).filter(Boolean))].sort();
 
   const tabs = [
     { id: 'company', label: 'Company', icon: Building2 },
@@ -507,40 +534,76 @@ const Settings = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3">
-                <Trash2 className="text-red-600 flex-shrink-0 mt-1" size={20} />
-                <div>
-                  <p className="text-red-900 font-semibold">Warning: Permanent Action</p>
-                  <p className="text-red-700 text-sm">
-                    Deleting leads will permanently remove them from the database. This action cannot be undone!
-                  </p>
+            <div className="p-4 space-y-3 max-h-[75vh] overflow-y-auto">
+              {/* Warning */}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <Trash2 className="text-red-600 flex-shrink-0 mt-0.5" size={16} />
+                <p className="text-red-700 text-xs font-medium">Permanent action — deleted leads cannot be recovered!</p>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center gap-1"><Filter size={11}/> Quick Select</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Not Interested', 'Drop', 'Invalid Lead'].map(status => (
+                    <button key={status} onClick={() => { setDelStatusFilter(status); setSelectedLeadIds([]); }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${delStatusFilter === status ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-300 hover:bg-red-50'}`}>
+                      {status} ({leads.filter(l => l.status === status).length})
+                    </button>
+                  ))}
+                  <button onClick={() => { setDelAssignedFilter('unassigned'); setSelectedLeadIds([]); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${delAssignedFilter === 'unassigned' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}>
+                    Unassigned ({leads.filter(l => !l.assigned_to_name).length})
+                  </button>
+                  <button onClick={resetDeleteFilters}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:bg-gray-50 transition-all">
+                    Clear
+                  </button>
                 </div>
               </div>
 
-              {/* Search Box */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search leads by name, phone, or city..."
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setSelectedLeadIds([]); }}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
-                />
+              {/* Filters Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <select value={delStatusFilter} onChange={e => { setDelStatusFilter(e.target.value); setSelectedLeadIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Statuses</option>
+                  {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <select value={delAssignedFilter} onChange={e => { setDelAssignedFilter(e.target.value); setSelectedLeadIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Users</option>
+                  <option value="unassigned">Unassigned</option>
+                  {uniqueAssigned.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <select value={delCityFilter} onChange={e => { setDelCityFilter(e.target.value); setSelectedLeadIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Cities</option>
+                  {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select value={delTypeFilter} onChange={e => { setDelTypeFilter(e.target.value); setSelectedLeadIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Types</option>
+                  <option value="raw">Raw Only</option>
+                  <option value="qualified">Qualified Only</option>
+                </select>
               </div>
+
+              {/* Search */}
+              <input type="text" placeholder="Search by name, phone, city..."
+                value={searchTerm}
+                onChange={e => { setSearchTerm(e.target.value); setSelectedLeadIds([]); }}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-red-400"
+              />
 
               {/* Select All + Count */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
+                  <input type="checkbox"
                     checked={filteredLeads.length > 0 && selectedLeadIds.length === filteredLeads.length}
                     onChange={toggleSelectAll}
                     className="w-4 h-4 accent-red-600"
                   />
-                  <span className="text-sm font-semibold text-gray-700">
-                    Select All ({filteredLeads.length} leads)
-                  </span>
+                  <span className="text-sm font-semibold text-gray-700">Select All ({filteredLeads.length} leads)</span>
                 </label>
                 {selectedLeadIds.length > 0 && (
                   <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded-lg">
@@ -549,31 +612,32 @@ const Settings = () => {
                 )}
               </div>
 
-              {/* Checkbox Lead List */}
-              <div className="border-2 border-gray-200 rounded-xl overflow-hidden max-h-[30vh] overflow-y-auto">
+              {/* Lead List */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden max-h-[30vh] overflow-y-auto">
                 {filteredLeads.length === 0 ? (
                   <div className="p-6 text-center text-gray-400 text-sm">No leads found</div>
                 ) : (
                   filteredLeads.map((lead, idx) => (
-                    <label
-                      key={lead.id}
-                      className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all ${
+                    <label key={lead.id}
+                      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-all ${
                         selectedLeadIds.includes(lead.id) ? 'bg-red-50 border-l-4 border-red-500' : 'hover:bg-gray-50'
                       } ${idx !== 0 ? 'border-t border-gray-100' : ''}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedLeadIds.includes(lead.id)}
+                      <input type="checkbox" checked={selectedLeadIds.includes(lead.id)}
                         onChange={() => toggleLeadSelection(lead.id)}
                         className="w-4 h-4 accent-red-600 flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">{lead.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{lead.phone} · {lead.city || 'No city'} · {lead.status}</p>
+                        <p className="text-xs text-gray-500 truncate">{lead.phone} · {lead.city || '—'} · {lead.status}</p>
                       </div>
-                      {lead.assigned_to_name && (
+                      {lead.assigned_to_name ? (
                         <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-semibold flex-shrink-0">
                           {lead.assigned_to_name}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-semibold flex-shrink-0">
+                          Unassigned
                         </span>
                       )}
                     </label>
