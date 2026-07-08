@@ -319,8 +319,9 @@ const AssignedLeads = () => {
       });
     } else if (sortBy === 'oldest_call') {
       filtered = [...filtered].sort((a, b) => {
-        if (!a.latest_call_date) return -1;
-        if (!b.latest_call_date) return 1;
+        if (!a.latest_call_date && !b.latest_call_date) return 0;
+        if (!a.latest_call_date) return 1;
+        if (!b.latest_call_date) return -1;
         return new Date(a.latest_call_date) - new Date(b.latest_call_date);
       });
     } else if (sortBy === 'newest_call') {
