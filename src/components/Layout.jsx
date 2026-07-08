@@ -56,18 +56,18 @@ const Layout = () => {
 
   const fetchNotifications = async () => {
     try {
-      // Fetch regular notifications
-      const response = await fetch(`${API_URL}/notifications?userId=${user.id}&limit=5`);
-      const data = await response.json();
+      const [response, followupResponse] = await Promise.all([
+        fetch(`${API_URL}/notifications?userId=${user.id}&limit=5`),
+        fetch(`${API_URL}/notifications/followups-today?userId=${user.id}&userRole=${user.role}`)
+      ]);
 
-      // Fetch follow-up notifications
-      const followupResponse = await fetch(`${API_URL}/notifications/followups-today?userId=${user.id}&userRole=${user.role}`);
-      const followupData = await followupResponse.json();
+      const data = response.ok ? await response.json().catch(() => null) : null;
+      const followupData = followupResponse.ok ? await followupResponse.json().catch(() => null) : null;
 
       let allNotifications = [];
 
-      if (data.success) {
-        const mappedNotifications = data.data.map(notif => ({
+      if (data?.success) {
+        allNotifications = data.data.map(notif => ({
           id: `notif-${notif.id}`,
           type: notif.type,
           title: notif.title,
@@ -76,10 +76,9 @@ const Layout = () => {
           unread: notif.unread,
           leadId: notif.lead_id
         }));
-        allNotifications = [...mappedNotifications];
       }
 
-      if (followupData.success && followupData.data.length > 0) {
+      if (followupData?.success && followupData.data.length > 0) {
         const mappedFollowups = followupData.data.map(followup => ({
           id: `followup-${followup.id}`,
           type: 'followup',
@@ -92,15 +91,11 @@ const Layout = () => {
         allNotifications = [...allNotifications, ...mappedFollowups];
       }
 
-      // Sort by time and limit to 10
       setNotifications(allNotifications.slice(0, 10));
+      setUnreadCount(allNotifications.filter(n => n.unread).length);
 
-      // Update unread count
-      const totalUnread = allNotifications.filter(n => n.unread).length;
-      setUnreadCount(totalUnread);
-
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+    } catch {
+      // Silently ignore — notifications are non-critical, will retry in 30s
     }
   };
 
