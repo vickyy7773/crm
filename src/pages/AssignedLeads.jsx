@@ -313,6 +313,28 @@ const AssignedLeads = () => {
 
   const filteredLeads = getFilteredLeads();
 
+  // Leads with all filters EXCEPT active tab — used for stats cards and tab counts
+  const filteredForStats = (() => {
+    let f = assignedLeads;
+    if (leadTypeFilter === 'raw') f = f.filter(lead => isRawLead(lead));
+    else if (leadTypeFilter === 'qualified') f = f.filter(lead => !isRawLead(lead));
+    if (courseFilter !== 'all') f = f.filter(lead => lead.course?.toLowerCase() === courseFilter.toLowerCase());
+    if (statusFilter !== 'all') f = f.filter(lead => lead.status === statusFilter);
+    if (cityFilter !== 'all') f = f.filter(lead => lead.city === cityFilter);
+    if (assignedFilter !== 'all') f = f.filter(lead => lead.assigned_to_name === assignedFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      f = f.filter(lead =>
+        lead.name?.toLowerCase().includes(q) ||
+        lead.phone?.includes(q) ||
+        lead.city?.toLowerCase().includes(q) ||
+        lead.father_name?.toLowerCase().includes(q) ||
+        lead.assigned_to_name?.toLowerCase().includes(q)
+      );
+    }
+    return f;
+  })();
+
   // Pagination calculations
   const totalPages = Math.ceil(filteredLeads.length / LEADS_PER_PAGE);
   const startIndex = (currentPage - 1) * LEADS_PER_PAGE;
@@ -323,26 +345,23 @@ const AssignedLeads = () => {
     setCurrentPage(1);
   }, [activeTab, leadTypeFilter, courseFilter, statusFilter, cityFilter, assignedFilter]);
 
-  // Calculate raw and qualified counts
-  const rawCount = assignedLeads.filter(lead => isRawLead(lead)).length;
-  const qualifiedCount = assignedLeads.filter(lead => !isRawLead(lead)).length;
+  // All counts based on filtered data (not full list)
+  const rawCount = filteredForStats.filter(lead => isRawLead(lead)).length;
+  const qualifiedCount = filteredForStats.filter(lead => !isRawLead(lead)).length;
+  const mbbsCount = filteredForStats.filter(lead => lead.course?.toLowerCase() === 'mbbs').length;
+  const otherCount = filteredForStats.filter(lead => lead.course?.toLowerCase() === 'other').length;
 
-  // Calculate MBBS and Other counts
-  const mbbsCount = assignedLeads.filter(lead => lead.course?.toLowerCase() === 'mbbs').length;
-  const otherCount = assignedLeads.filter(lead => lead.course?.toLowerCase() === 'other').length;
-
-  // Calculate counts for tabs (Converted leads removed - see Converted Leads page)
   const counts = {
-    all: assignedLeads.length,
-    'Interested': assignedLeads.filter(l => l.status === 'Interested').length,
-    'Follow Up': assignedLeads.filter(l => l.status === 'Follow Up').length,
-    'Call Back': assignedLeads.filter(l => l.status === 'Call Back').length,
-    'Office Visit': assignedLeads.filter(l => l.status === 'Office Visit').length,
-    'After Result / Counseling': assignedLeads.filter(l => l.status === 'After Result / Counseling').length,
-    'Other Course': assignedLeads.filter(l => l.status === 'Other Course').length,
-    'Not Interested': assignedLeads.filter(l => l.status === 'Not Interested').length,
-    'Drop': assignedLeads.filter(l => l.status === 'Drop').length,
-    'Invalid Lead': assignedLeads.filter(l => l.status === 'Invalid Lead').length,
+    all: filteredForStats.length,
+    'Interested': filteredForStats.filter(l => l.status === 'Interested').length,
+    'Follow Up': filteredForStats.filter(l => l.status === 'Follow Up').length,
+    'Call Back': filteredForStats.filter(l => l.status === 'Call Back').length,
+    'Office Visit': filteredForStats.filter(l => l.status === 'Office Visit').length,
+    'After Result / Counseling': filteredForStats.filter(l => l.status === 'After Result / Counseling').length,
+    'Other Course': filteredForStats.filter(l => l.status === 'Other Course').length,
+    'Not Interested': filteredForStats.filter(l => l.status === 'Not Interested').length,
+    'Drop': filteredForStats.filter(l => l.status === 'Drop').length,
+    'Invalid Lead': filteredForStats.filter(l => l.status === 'Invalid Lead').length,
   };
 
   const tabs = [
