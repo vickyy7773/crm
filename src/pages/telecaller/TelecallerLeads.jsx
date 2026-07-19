@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Phone, Search, Filter, AlertCircle, Target, MapPin,
   Clock, Calendar, TrendingUp, CheckCircle,
-  RefreshCw, X, Edit2, UserCircle, UserPlus, MessageSquare, User
+  RefreshCw, X, Edit2, UserCircle, UserPlus, MessageSquare, User, Trash2
 } from 'lucide-react';
 import CallLogModal from '../../components/CallLogModal';
 import API_URL from '../../config/api';
@@ -38,6 +38,14 @@ const TelecallerLeads = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addFormData, setAddFormData] = useState({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' });
   const [addSaving, setAddSaving] = useState(false);
+
+  // Bulk delete state
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bdSearchTerm, setBdSearchTerm] = useState('');
+  const [bdStatusFilter, setBdStatusFilter] = useState('all');
+  const [bdCityFilter, setBdCityFilter] = useState('all');
+  const [bdSelectedIds, setBdSelectedIds] = useState([]);
+  const [bdDeleting, setBdDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -345,6 +353,44 @@ const TelecallerLeads = () => {
 
   // Unique cities and sub-statuses for filter dropdowns
   const uniqueCities = [...new Set(leads.map(l => l.city).filter(Boolean))].sort();
+  const bdUniqueStatuses = [...new Set(leads.map(l => l.status).filter(Boolean))].sort();
+
+  const bdFilteredLeads = leads.filter(lead => {
+    if (bdStatusFilter !== 'all' && lead.status !== bdStatusFilter) return false;
+    if (bdCityFilter !== 'all' && lead.city !== bdCityFilter) return false;
+    if (bdSearchTerm.trim()) {
+      const q = bdSearchTerm.toLowerCase();
+      return lead.name?.toLowerCase().includes(q) || lead.phone?.includes(q) || lead.city?.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const resetBdFilters = () => {
+    setBdStatusFilter('all'); setBdCityFilter('all');
+    setBdSearchTerm(''); setBdSelectedIds([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (bdSelectedIds.length === 0) { alert('Please select at least one lead to delete'); return; }
+    if (!confirm(`Permanently delete ${bdSelectedIds.length} lead(s)? This cannot be undone!`)) return;
+    try {
+      setBdDeleting(true);
+      let successCount = 0;
+      for (const id of bdSelectedIds) {
+        const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) successCount++;
+      }
+      alert(`${successCount} lead(s) deleted successfully!`);
+      setBulkDeleteModalOpen(false);
+      resetBdFilters();
+      fetchLeads();
+    } catch (err) {
+      alert('Failed to delete leads. Please try again.');
+    } finally {
+      setBdDeleting(false);
+    }
+  };
 
   // Stats
   const stats = {
@@ -499,15 +545,19 @@ const TelecallerLeads = () => {
 
         </div>
 
-        {/* Clear filters */}
-        {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all') && (
-          <button
-            onClick={() => { setSearchTerm(''); setStatusFilter('all'); setCityFilter('all'); }}
-            className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-semibold border border-purple-300 px-3 py-1 rounded-lg hover:bg-purple-50 transition-all"
-          >
-            Clear Filters
+        {/* Bottom row: clear filters + bulk delete */}
+        <div className="flex items-center justify-between mt-2">
+          {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all') ? (
+            <button onClick={() => { setSearchTerm(''); setStatusFilter('all'); setCityFilter('all'); }}
+              className="text-xs text-purple-600 hover:text-purple-700 font-semibold border border-purple-300 px-3 py-1 rounded-lg hover:bg-purple-50 transition-all">
+              Clear Filters
+            </button>
+          ) : <span />}
+          <button onClick={() => { resetBdFilters(); setBulkDeleteModalOpen(true); }}
+            className="flex items-center gap-1 text-xs text-red-700 font-semibold border border-red-300 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all">
+            <Trash2 size={12} /> Bulk Delete
           </button>
-        )}
+        </div>
       </div>
 
       {/* Leads Table */}
@@ -1081,6 +1131,106 @@ const TelecallerLeads = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Modal */}
+      {bulkDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center gap-2">
+                <Trash2 className="text-red-600" size={18} />
+                <h2 className="text-base font-bold text-gray-900">Bulk Delete Leads</h2>
+              </div>
+              <button onClick={() => setBulkDeleteModalOpen(false)} className="p-1.5 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+            </div>
+
+            <div className="p-4 space-y-3 overflow-y-auto flex-1">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <Trash2 className="text-red-600 flex-shrink-0 mt-0.5" size={14} />
+                <p className="text-red-700 text-xs font-medium">Permanent action — deleted leads cannot be recovered!</p>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center gap-1"><Filter size={11}/> Quick Select</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Not Interested', 'Drop', 'Invalid Lead'].map(status => (
+                    <button key={status} onClick={() => { setBdStatusFilter(status); setBdSelectedIds([]); }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${bdStatusFilter === status ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-300 hover:bg-red-50'}`}>
+                      {status} ({leads.filter(l => l.status === status).length})
+                    </button>
+                  ))}
+                  <button onClick={resetBdFilters} className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:bg-gray-50 transition-all">Clear</button>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-2 gap-2">
+                <select value={bdStatusFilter} onChange={e => { setBdStatusFilter(e.target.value); setBdSelectedIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Statuses</option>
+                  {bdUniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <select value={bdCityFilter} onChange={e => { setBdCityFilter(e.target.value); setBdSelectedIds([]); }}
+                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
+                  <option value="all">All Cities</option>
+                  {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+
+              <input type="text" placeholder="Search by name, phone, city..."
+                value={bdSearchTerm} onChange={e => { setBdSearchTerm(e.target.value); setBdSelectedIds([]); }}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-red-400"
+              />
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox"
+                    checked={bdFilteredLeads.length > 0 && bdSelectedIds.length === bdFilteredLeads.length}
+                    onChange={() => {
+                      if (bdSelectedIds.length === bdFilteredLeads.length && bdFilteredLeads.length > 0) setBdSelectedIds([]);
+                      else setBdSelectedIds(bdFilteredLeads.map(l => l.id));
+                    }}
+                    className="w-4 h-4 accent-red-600"
+                  />
+                  <span className="text-sm font-semibold text-gray-700">Select All ({bdFilteredLeads.length})</span>
+                </label>
+                {bdSelectedIds.length > 0 && (
+                  <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded-lg">{bdSelectedIds.length} selected</span>
+                )}
+              </div>
+
+              <div className="border border-gray-200 rounded-xl overflow-hidden max-h-[30vh] overflow-y-auto">
+                {bdFilteredLeads.length === 0 ? (
+                  <div className="p-6 text-center text-gray-400 text-sm">No leads found</div>
+                ) : (
+                  bdFilteredLeads.map((lead, idx) => (
+                    <label key={lead.id}
+                      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-all ${bdSelectedIds.includes(lead.id) ? 'bg-red-50 border-l-4 border-red-500' : 'hover:bg-gray-50'} ${idx !== 0 ? 'border-t border-gray-100' : ''}`}>
+                      <input type="checkbox" checked={bdSelectedIds.includes(lead.id)}
+                        onChange={() => setBdSelectedIds(prev => prev.includes(lead.id) ? prev.filter(i => i !== lead.id) : [...prev, lead.id])}
+                        className="w-4 h-4 accent-red-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{lead.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{lead.phone} · {lead.city || '—'} · {lead.status}</p>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border-t p-4 flex items-center justify-between rounded-b-2xl">
+              <button onClick={() => setBulkDeleteModalOpen(false)} className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all text-sm">Cancel</button>
+              <button onClick={handleBulkDelete} disabled={bdSelectedIds.length === 0 || bdDeleting}
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all text-sm disabled:opacity-50 flex items-center gap-2">
+                <Trash2 size={14} />
+                {bdDeleting ? 'Deleting...' : `Delete ${bdSelectedIds.length > 0 ? `${bdSelectedIds.length} Leads` : 'Selected'}`}
+              </button>
+            </div>
           </div>
         </div>
       )}
