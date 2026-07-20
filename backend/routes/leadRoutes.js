@@ -1032,8 +1032,8 @@ router.delete('/:id', async (req, res) => {
 
     // Log audit trail
     await logAudit({
-      userId: req.body.deletedBy || req.query.deletedBy || null,
-      userName: req.body.deletedByName || req.query.deletedByName || 'System',
+      userId: req.body?.deletedBy || req.query.deletedBy || null,
+      userName: req.body?.deletedByName || req.query.deletedByName || 'System',
       action: 'DELETE',
       entityType: 'Lead',
       entityId: leadId,

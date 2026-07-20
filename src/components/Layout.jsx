@@ -46,10 +46,17 @@ const Layout = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Keep-alive ping every 30s so server never sleeps
+  useEffect(() => {
+    const ping = () => fetch(`${API_URL}/health`).catch(() => {});
+    ping();
+    const interval = setInterval(ping, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch notifications and unread count
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [user]);
