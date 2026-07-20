@@ -46,32 +46,11 @@ const Layout = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Global connection status
-  const [serverOnline, setServerOnline] = useState(true);
-  const [showReconnected, setShowReconnected] = useState(false);
-  const wasOfflineRef = useRef(false);
-
-  // Keep-alive ping every 30s + connection banner
+  // Keep-alive ping every 30s — silent, user ko kuch nahi dikhta
   useEffect(() => {
-    const ping = async () => {
-      try {
-        const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(8000) });
-        if (res.ok) {
-          if (wasOfflineRef.current) {
-            wasOfflineRef.current = false;
-            setServerOnline(true);
-            setShowReconnected(true);
-            setTimeout(() => setShowReconnected(false), 3000);
-          }
-        }
-      } catch {
-        wasOfflineRef.current = true;
-        setServerOnline(false);
-      }
-    };
+    const ping = () => fetch(`${API_URL}/health`).catch(() => {});
     ping();
     const interval = setInterval(ping, 30000);
-    // Also ping immediately when tab becomes visible
     const onVisible = () => { if (document.visibilityState === 'visible') ping(); };
     document.addEventListener('visibilitychange', onVisible);
     return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVisible); };
@@ -235,22 +214,6 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Connection Status Banner */}
-      {!serverOnline && (
-        <div className="fixed top-0 left-0 right-0 z-[9999] bg-red-600 text-white text-center py-2 text-xs md:text-sm font-semibold flex items-center justify-center gap-2 shadow-lg">
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-          </svg>
-          Server se connection nahi — reconnect ho raha hai... please wait
-        </div>
-      )}
-      {showReconnected && (
-        <div className="fixed top-0 left-0 right-0 z-[9999] bg-green-600 text-white text-center py-2 text-xs md:text-sm font-semibold shadow-lg">
-          ✓ Connected! Ab kaam kar sakte ho.
-        </div>
-      )}
-
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
