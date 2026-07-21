@@ -408,12 +408,14 @@ const TelecallerLeads = () => {
       'Followup': 'bg-blue-100 text-blue-800 border-blue-300',
       'Follow Up': 'bg-blue-100 text-blue-800 border-blue-300',
       'Interested': 'bg-purple-100 text-purple-800 border-purple-300',
-      'Call Back': 'bg-orange-100 text-orange-800 border-orange-300',
       'Office Visit': 'bg-teal-100 text-teal-800 border-teal-300',
+      'Counseling Done': 'bg-emerald-100 text-emerald-800 border-emerald-300',
       'After Result / Counseling': 'bg-amber-100 text-amber-800 border-amber-300',
+      'India': 'bg-orange-100 text-orange-800 border-orange-300',
+      'Call Back': 'bg-yellow-100 text-yellow-800 border-yellow-300',
       'Other Course': 'bg-cyan-100 text-cyan-800 border-cyan-300',
-      'Not Interested': 'bg-gray-100 text-gray-800 border-gray-300',
       'Drop': 'bg-rose-100 text-rose-800 border-rose-300',
+      'Not Interested': 'bg-gray-100 text-gray-800 border-gray-300',
       'Invalid Lead': 'bg-red-100 text-red-800 border-red-300',
       'Converted': 'bg-green-100 text-green-800 border-green-300',
     };
@@ -514,17 +516,18 @@ const TelecallerLeads = () => {
               className="w-full px-2 py-1.5 border border-gray-200 rounded-lg focus:border-purple-500 outline-none text-xs font-medium bg-white"
             >
               <option value="all">All Status</option>
-              <option value="New">New</option>
-              <option value="Followup">Followup</option>
-              <option value="Follow Up">Follow Up</option>
               <option value="Interested">Interested</option>
-              <option value="Call Back">Call Back</option>
               <option value="Office Visit">Office Visit</option>
-              <option value="After Result / Counseling">After Result</option>
+              <option value="Counseling Done">Counseling Done</option>
+              <option value="Follow Up">Follow Up</option>
+              <option value="After Result / Counseling">After Result / Counseling</option>
+              <option value="India">India</option>
+              <option value="Call Back">Call Back</option>
               <option value="Other Course">Other Course</option>
-              <option value="Not Interested">Not Interested</option>
               <option value="Drop">Drop</option>
+              <option value="Not Interested">Not Interested</option>
               <option value="Invalid Lead">Invalid Lead</option>
+              <option value="Converted">Converted</option>
             </select>
           </div>
 

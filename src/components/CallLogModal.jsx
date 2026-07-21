@@ -6,10 +6,19 @@ import API_URL from '../config/api';
 // Sub-options for each Call Outcome
 const outcomeSubOptions = {
   'Interested': [
-    { value: 'India', label: '🇮🇳 India' },
     { value: 'Abroad', label: '🌍 Abroad' },
     { value: 'Counselling Only', label: '💬 Counselling Only' },
     { value: 'BDS / BAMS', label: '🦷 BDS / BAMS' },
+  ],
+  'Office Visit': [
+    { value: 'Address Shared', label: '📍 Address Shared' },
+    { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
+    { value: 'Visit Done', label: '✅ Visit Done' },
+  ],
+  'Counseling Done': [
+    { value: 'Admission Likely', label: '✅ Admission Likely' },
+    { value: 'Documents Pending', label: '📄 Documents Pending' },
+    { value: 'Follow-up Needed', label: '🔄 Follow-up Needed' },
   ],
   'Follow Up': [
     { value: 'Details Shared', label: '📋 Details Shared' },
@@ -17,20 +26,20 @@ const outcomeSubOptions = {
     { value: 'Documents Pending', label: '📄 Documents Pending' },
     { value: 'Meeting Planned', label: '📅 Meeting Planned' },
   ],
+  'After Result / Counseling': [
+    { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
+    { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
+  ],
+  'India': [
+    { value: 'Government College', label: '🏛️ Government College' },
+    { value: 'Private College', label: '🏥 Private College' },
+    { value: 'Deemed University', label: '🎓 Deemed University' },
+  ],
   'Call Back': [
     { value: 'Not Reachable', label: '📴 Not Reachable' },
     { value: 'Busy', label: '📵 Busy' },
     { value: 'Call Back 2-3 Days', label: '🔄 Call Back 2–3 Days' },
     { value: 'Call Back Next Week', label: '📆 Call Back Next Week' },
-  ],
-  'Office Visit': [
-    { value: 'Address Shared', label: '📍 Address Shared' },
-    { value: 'Visit Scheduled', label: '📅 Visit Scheduled' },
-    { value: 'Visit Done', label: '✅ Visit Done' },
-  ],
-  'After Result / Counseling': [
-    { value: 'Waiting NEET Result', label: '⏳ Waiting NEET Result' },
-    { value: 'Waiting Counseling', label: '🎓 Waiting Counseling' },
   ],
   'Other Course': [
     { value: 'B.Tech / Biotech', label: '🔧 B.Tech / Biotech' },
@@ -54,10 +63,15 @@ const outcomeSubOptions = {
     { value: 'Not Reachable', label: '📴 Not Reachable' },
     { value: 'Fake Inquiry', label: '🚫 Fake Inquiry' },
   ],
+  'Converted': [
+    { value: 'MBBS Abroad', label: '🌍 MBBS Abroad' },
+    { value: 'MBBS India', label: '🇮🇳 MBBS India' },
+    { value: 'Other Course', label: '📚 Other Course' },
+  ],
 };
 
 // Outcomes that need follow-up date
-const followUpOutcomes = ['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling'];
+const followUpOutcomes = ['Interested', 'Follow Up', 'Call Back', 'Office Visit', 'After Result / Counseling', 'Counseling Done', 'India'];
 
 // Outcomes where follow-up is required
 const requiredFollowUpOutcomes = ['Call Back', 'Follow Up'];
@@ -191,14 +205,17 @@ const CallLogModal = ({ isOpen, onClose, lead, onSuccess }) => {
             >
               <option value="">-- Select Outcome --</option>
               <option value="Interested">⭐ Interested</option>
-              <option value="Follow Up">📋 Follow Up</option>
-              <option value="Call Back">🔄 Call Back</option>
               <option value="Office Visit">🏢 Office Visit</option>
+              <option value="Counseling Done">🤝 Counseling Done</option>
+              <option value="Follow Up">📋 Follow Up</option>
               <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+              <option value="India">🇮🇳 India</option>
+              <option value="Call Back">🔄 Call Back</option>
               <option value="Other Course">📚 Other Course</option>
-              <option value="Not Interested">✖ Not Interested</option>
               <option value="Drop">❌ Drop</option>
+              <option value="Not Interested">✖ Not Interested</option>
               <option value="Invalid Lead">🚫 Invalid Lead</option>
+              <option value="Converted">🎉 Converted</option>
             </select>
           </div>
 
