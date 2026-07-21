@@ -360,6 +360,12 @@ const TelecallerLeads = () => {
     }
   };
 
+  const normalizeStatus = (status) => {
+    if (!status) return '';
+    if (status === 'Followup' || status === 'Follow up') return 'Follow Up';
+    return status;
+  };
+
   // Filtered leads
   const filteredLeads = leads.filter((lead) => {
     const q = searchTerm.toLowerCase();
@@ -371,7 +377,10 @@ const TelecallerLeads = () => {
 
     const matchCity = cityFilter === 'all' || lead.city === cityFilter;
 
-    return matchSearch && matchCity;
+    const leadStatus = normalizeStatus(lead.status);
+    const matchStatus = statusFilter === 'all' || leadStatus === statusFilter;
+
+    return matchSearch && matchCity && matchStatus;
   });
 
   // Unique cities and sub-statuses for filter dropdowns
@@ -418,7 +427,7 @@ const TelecallerLeads = () => {
   // Stats
   const stats = {
     total: leads.length,
-    followup: leads.filter(l => l.status === 'Follow Up' || l.status === 'Followup').length,
+    followup: leads.filter(l => normalizeStatus(l.status) === 'Follow Up').length,
     interested: leads.filter(l => l.status === 'Interested').length,
     callBack: leads.filter(l => l.status === 'Call Back').length,
     overdue: leads.filter(l => l.next_followup_date && new Date(l.next_followup_date) < new Date()).length,
@@ -426,9 +435,9 @@ const TelecallerLeads = () => {
   };
 
   const getStatusBadge = (status) => {
+    const normalized = normalizeStatus(status);
     const statusColors = {
       'New': 'bg-blue-100 text-blue-800 border-blue-300',
-      'Followup': 'bg-blue-100 text-blue-800 border-blue-300',
       'Follow Up': 'bg-blue-100 text-blue-800 border-blue-300',
       'Interested': 'bg-purple-100 text-purple-800 border-purple-300',
       'Office Visit': 'bg-teal-100 text-teal-800 border-teal-300',
@@ -444,8 +453,8 @@ const TelecallerLeads = () => {
     };
 
     return (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusColors[status] || 'bg-gray-100 text-gray-800'}`}>
-        {status}
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusColors[normalized] || 'bg-gray-100 text-gray-800'}`}>
+        {normalized}
       </span>
     );
   };
