@@ -1006,17 +1006,20 @@ const TelecallerLeads = () => {
                   >
                     <option value="">-- Select --</option>
                     <option value="Interested">⭐ Interested</option>
-                    <option value="Follow Up">📋 Follow Up</option>
-                    <option value="Call Back">🔄 Call Back</option>
                     <option value="Office Visit">🏢 Office Visit</option>
+                    <option value="Counseling Done">🤝 Counseling Done</option>
+                    <option value="Follow Up">📋 Follow Up</option>
                     <option value="After Result / Counseling">🎓 After Result / Counseling</option>
+                    <option value="India">🇮🇳 India</option>
+                    <option value="Call Back">🔄 Call Back</option>
                     <option value="Other Course">📚 Other Course</option>
-                    <option value="Not Interested">✖ Not Interested</option>
                     <option value="Drop">❌ Drop</option>
+                    <option value="Not Interested">✖ Not Interested</option>
                     <option value="Invalid Lead">🚫 Invalid Lead</option>
+                    <option value="Converted">🎉 Converted</option>
                   </select>
                 </div>
-                {['Call Back', 'Follow Up', 'Interested', 'Office Visit', 'After Result / Counseling'].includes(callLogData.callOutcome) && (
+                {['Call Back', 'Follow Up', 'Interested', 'Office Visit', 'After Result / Counseling', 'Counseling Done', 'India'].includes(callLogData.callOutcome) && (
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Follow-up Date {['Call Back', 'Follow Up'].includes(callLogData.callOutcome) && <span className="text-red-500">*</span>}
