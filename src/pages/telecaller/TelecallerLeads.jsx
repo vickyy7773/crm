@@ -36,7 +36,8 @@ const TelecallerLeads = () => {
 
   // Add Lead modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [addFormData, setAddFormData] = useState({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' });
+  const [newLeadType, setNewLeadType] = useState('raw');
+  const [addFormData, setAddFormData] = useState({ name: '', fatherName: '', phone: '', city: '', source: '', status: 'Followup', neetPrevious: '', neet2026: '', score: '', course: '', destination: '', nextFollowUpDate: '', remark: '' });
   const [addSaving, setAddSaving] = useState(false);
 
   // Bulk delete state
@@ -288,6 +289,11 @@ const TelecallerLeads = () => {
   };
 
 
+  const resetAddForm = () => {
+    setNewLeadType('raw');
+    setAddFormData({ name: '', fatherName: '', phone: '', city: '', source: '', status: 'Followup', neetPrevious: '', neet2026: '', score: '', course: '', destination: '', nextFollowUpDate: '', remark: '' });
+  };
+
   // Add new lead (auto-assigned to this telecaller)
   const handleAddLead = async (e) => {
     e.preventDefault();
@@ -297,25 +303,42 @@ const TelecallerLeads = () => {
     }
     setAddSaving(true);
     try {
-      // Create lead
+      const leadData = {
+        name: addFormData.name,
+        father_name: addFormData.fatherName || null,
+        phone: addFormData.phone,
+        city: addFormData.city || null,
+        source: addFormData.source || null,
+        status: newLeadType === 'qualified' ? (addFormData.status || 'Followup') : 'Followup',
+        neet: (addFormData.course === 'MBBS' || addFormData.course === 'BAMS/BDS')
+          ? ([addFormData.neetPrevious, addFormData.neet2026].filter(Boolean).join(' | 2026: ') || null)
+          : null,
+        other_score: addFormData.course === 'Other' ? (addFormData.score || null) : null,
+        course: newLeadType === 'qualified' ? (addFormData.course || null) : null,
+        destination: newLeadType === 'qualified' ? (addFormData.destination || null) : null,
+        remark: addFormData.remark || null,
+      };
+
       const response = await fetch(`${API_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: addFormData.name,
-          father_name: addFormData.father_name || null,
-          phone: addFormData.phone,
-          neet: addFormData.neet || null,
-          city: addFormData.city || null,
-          remark: addFormData.remark || null,
-          status: 'Followup',
-        })
+        body: JSON.stringify(leadData)
       });
       const result = await response.json();
+
       if (!result.success) {
         alert('Failed to add lead: ' + result.message);
         setAddSaving(false);
         return;
+      }
+
+      // Set follow-up date if provided
+      if (addFormData.nextFollowUpDate) {
+        await fetch(`${API_URL}/leads/${result.data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ next_followup_date: addFormData.nextFollowUpDate })
+        });
       }
 
       // Auto-assign to this telecaller
@@ -327,7 +350,7 @@ const TelecallerLeads = () => {
 
       alert('Lead added and assigned to you successfully!');
       setAddModalOpen(false);
-      setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' });
+      resetAddForm();
       fetchLeads();
     } catch (err) {
       console.error('Error adding lead:', err);
@@ -1031,104 +1054,243 @@ const TelecallerLeads = () => {
       )}
       {/* Add Lead Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <UserPlus size={20} />
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center border-2 border-white/30">
+                    <UserPlus size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Add {newLeadType === 'raw' ? 'Raw' : 'Qualified'} Lead</h2>
+                    <p className="text-purple-100 text-sm">Will be auto-assigned to you • Name & Phone required</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold">Add New Lead</h2>
-                  <p className="text-purple-100 text-xs">Will be auto-assigned to you</p>
-                </div>
+                <button
+                  onClick={() => { setAddModalOpen(false); resetAddForm(); }}
+                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                >
+                  <X size={20} />
+                </button>
               </div>
-              <button onClick={() => { setAddModalOpen(false); setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' }); }} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
-                <X size={16} />
-              </button>
             </div>
 
             {/* Body */}
-            <form onSubmit={handleAddLead} className="p-5 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Student Name *</label>
-                  <input
-                    type="text"
-                    value={addFormData.name}
-                    onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="Full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
-                  <input
-                    type="text"
-                    value={addFormData.father_name}
-                    onChange={(e) => setAddFormData({ ...addFormData, father_name: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="Father's full name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number *</label>
-                  <input
-                    type="text"
-                    value={addFormData.phone}
-                    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="10-digit number"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Score</label>
-                  <input
-                    type="text"
-                    value={addFormData.neet}
-                    onChange={(e) => setAddFormData({ ...addFormData, neet: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="e.g. 520"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
-                  <input
-                    type="text"
-                    value={addFormData.city}
-                    onChange={(e) => setAddFormData({ ...addFormData, city: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="City name"
-                  />
+            <form onSubmit={handleAddLead} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* Lead Type Selection */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-purple-300">
+                <label className="block text-sm font-bold text-gray-800 mb-2">Select Lead Type</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNewLeadType('raw')}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
+                      newLeadType === 'raw'
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    🆕 Raw Lead
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewLeadType('qualified')}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
+                      newLeadType === 'qualified'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    ⭐ Qualified Lead
+                  </button>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
-                <textarea
-                  value={addFormData.remark}
-                  onChange={(e) => setAddFormData({ ...addFormData, remark: e.target.value })}
-                  rows={3}
-                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none resize-none"
-                  placeholder="Add remarks..."
-                />
+
+              {/* Lead Fields */}
+              <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Student Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={addFormData.name}
+                      onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Student name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Father's Name</label>
+                    <input
+                      type="text"
+                      value={addFormData.fatherName}
+                      onChange={(e) => setAddFormData({ ...addFormData, fatherName: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Father's name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={addFormData.phone}
+                      onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                      maxLength="10"
+                      minLength="10"
+                      pattern="[0-9]{10}"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="10-digit mobile"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={addFormData.city}
+                      onChange={(e) => setAddFormData({ ...addFormData, city: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="City name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Source</label>
+                    <input
+                      type="text"
+                      value={addFormData.source}
+                      onChange={(e) => setAddFormData({ ...addFormData, source: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="e.g. Google, Facebook, Referral"
+                    />
+                  </div>
+
+                  {/* Qualified Lead Additional Fields */}
+                  {newLeadType === 'qualified' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+                        <select
+                          value={addFormData.status || 'Followup'}
+                          onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="Interested">Interested</option>
+                          <option value="Office Visit">Office Visit</option>
+                          <option value="Counseling Done">Counseling Done</option>
+                          <option value="Follow Up">Follow Up</option>
+                          <option value="After Result / Counseling">After Result / Counseling</option>
+                          <option value="India">India</option>
+                          <option value="Call Back">Call Back</option>
+                          <option value="Other Course">Other Course</option>
+                          <option value="Drop">Drop</option>
+                          <option value="Not Interested">Not Interested</option>
+                          <option value="Invalid Lead">Invalid Lead</option>
+                          <option value="Converted">Converted</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
+                        <select
+                          value={addFormData.course}
+                          onChange={(e) => setAddFormData({ ...addFormData, course: e.target.value, neetPrevious: '', neet2026: '', score: '' })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="">-- Select Course --</option>
+                          <option value="MBBS">MBBS</option>
+                          <option value="BAMS/BDS">BAMS / BDS</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      {(addFormData.course === 'MBBS' || addFormData.course === 'BAMS/BDS') && (
+                        <>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">NEET Previous Year</label>
+                            <input
+                              type="text"
+                              value={addFormData.neetPrevious}
+                              onChange={(e) => setAddFormData({ ...addFormData, neetPrevious: e.target.value })}
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                              placeholder="Previous NEET score"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">NEET 2026</label>
+                            <input
+                              type="text"
+                              value={addFormData.neet2026}
+                              onChange={(e) => setAddFormData({ ...addFormData, neet2026: e.target.value })}
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                              placeholder="NEET 2026 score"
+                            />
+                          </div>
+                        </>
+                      )}
+                      {addFormData.course === 'Other' && (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Score</label>
+                          <input
+                            type="text"
+                            value={addFormData.score || ''}
+                            onChange={(e) => setAddFormData({ ...addFormData, score: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                            placeholder="Enter exam score"
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Interested Location</label>
+                        <select
+                          value={addFormData.destination}
+                          onChange={(e) => setAddFormData({ ...addFormData, destination: e.target.value })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        >
+                          <option value="">-- Select --</option>
+                          <option value="India">India</option>
+                          <option value="Abroad">Abroad</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Follow Up</label>
+                        <input
+                          type="datetime-local"
+                          value={addFormData.nextFollowUpDate}
+                          onChange={(e) => setAddFormData({ ...addFormData, nextFollowUpDate: e.target.value })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Remark - common for both */}
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Remark</label>
+                    <textarea
+                      value={addFormData.remark}
+                      onChange={(e) => setAddFormData({ ...addFormData, remark: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
+                      placeholder="Any additional notes..."
+                      rows="2"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Footer */}
-              <div className="flex justify-end gap-3 pt-1">
+              <div className="flex justify-end gap-3 pt-4 border-t">
                 <button
                   type="button"
-                  onClick={() => { setAddModalOpen(false); setAddFormData({ name: '', father_name: '', phone: '', neet: '', city: '', remark: '' }); }}
-                  className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold text-sm transition-all"
+                  onClick={() => { setAddModalOpen(false); resetAddForm(); }}
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={addSaving}
-                  className="px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold text-sm transition-all shadow-sm disabled:opacity-50"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all shadow-sm disabled:opacity-50"
                 >
                   {addSaving ? 'Adding...' : 'Add Lead'}
                 </button>
