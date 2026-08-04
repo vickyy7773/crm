@@ -52,32 +52,30 @@ const TelecallerLeads = () => {
     if (user) {
       fetchLeads();
     }
-  }, [user, statusFilter]);
+  }, [user?.id, statusFilter]);
 
-  // Background refresh every 4 min — keeps data live while user is on a call
-  // Modal open check uses ref so interval always has latest value
+  // Background refresh every 4 min — silent, no loading spinner
   const editModalOpenRef = useRef(false);
   useEffect(() => { editModalOpenRef.current = editModalOpen; }, [editModalOpen]);
 
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(() => {
-      // Always refresh leads list silently; modal form data is separate state so it's safe
-      fetchLeads();
+      fetchLeads(true);
     }, 4 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [user, statusFilter]);
+  }, [user?.id, statusFilter]);
 
-  // Also re-fetch on tab focus (coming back after switching apps)
+  // Re-fetch on tab focus — silent, no loading spinner
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && user) {
-        fetchLeads();
+        fetchLeads(true);
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, statusFilter]);
+  }, [user?.id, statusFilter]);
 
   // Handle highlight from notification click
   useEffect(() => {
@@ -103,10 +101,10 @@ const TelecallerLeads = () => {
     }
   }, [highlightedLeadId, leads]);
 
-  const fetchLeads = async () => {
+  const fetchLeads = async (silent = false) => {
     try {
-      setLoading(true);
-      const url = `${API_URL}/leads/assigned/${user.id}${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`;
+      if (!silent) setLoading(true);
+      const url = `${API_URL}/leads/assigned/${user.id}${statusFilter !== 'all' ? `?status=${encodeURIComponent(statusFilter)}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -117,7 +115,7 @@ const TelecallerLeads = () => {
     } catch (error) {
       console.error('Error fetching leads:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
