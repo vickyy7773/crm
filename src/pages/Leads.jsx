@@ -2054,16 +2054,6 @@ const Leads = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Father Name</label>
-                        <input
-                          type="text"
-                          value={newStudent.fatherName}
-                          onChange={(e) => setNewStudent({...newStudent, fatherName: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none"
-                          placeholder="Father's name"
-                        />
-                      </div>
-                      <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Course Type</label>
                         <select
                           value={newStudent.course}
