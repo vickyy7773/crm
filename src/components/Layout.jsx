@@ -363,13 +363,6 @@ const Layout = () => {
                 My Leads
               </NavItem>
 
-              <NavItem to="/telecaller/leads" icon={Clock}>
-                Follow-ups
-              </NavItem>
-
-              <NavItem to="/converted-leads" icon={Award}>
-                Converted Leads
-              </NavItem>
             </>
           )}
         </nav>
