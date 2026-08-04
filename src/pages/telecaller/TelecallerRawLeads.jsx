@@ -414,10 +414,6 @@ const TelecallerRawLeads = () => {
             className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold transition-all">
             <UserPlus size={13} /> Add Lead
           </button>
-          <button onClick={() => { resetBdFilters(); setBulkDeleteModalOpen(true); }}
-            className="flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold transition-all">
-            <Trash2 size={13} /> Bulk Delete
-          </button>
         </div>
       </div>
 
@@ -1007,86 +1003,6 @@ const TelecallerRawLeads = () => {
       )}
 
       {/* Bulk Delete Modal */}
-      {bulkDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <Trash2 className="text-red-600" size={18} />
-                <h2 className="text-base font-bold text-gray-900">Bulk Delete Raw Leads</h2>
-              </div>
-              <button onClick={() => setBulkDeleteModalOpen(false)} className="p-1.5 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
-            </div>
-
-            <div className="p-4 space-y-3 overflow-y-auto flex-1">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                <Trash2 className="text-red-600 flex-shrink-0 mt-0.5" size={14} />
-                <p className="text-red-700 text-xs font-medium">Permanent action — deleted leads cannot be recovered!</p>
-              </div>
-
-              {/* Filters */}
-              <div className="grid grid-cols-2 gap-2">
-                <select value={bdCityFilter} onChange={e => { setBdCityFilter(e.target.value); setBdSelectedIds([]); }}
-                  className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white outline-none focus:border-red-400">
-                  <option value="all">All Cities</option>
-                  {bdUniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <button onClick={resetBdFilters} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:bg-gray-50 transition-all">Clear</button>
-              </div>
-
-              <input type="text" placeholder="Search by name, phone, city..."
-                value={bdSearchTerm} onChange={e => { setBdSearchTerm(e.target.value); setBdSelectedIds([]); }}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-red-400"
-              />
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox"
-                    checked={bdFilteredLeads.length > 0 && bdSelectedIds.length === bdFilteredLeads.length}
-                    onChange={() => {
-                      if (bdSelectedIds.length === bdFilteredLeads.length && bdFilteredLeads.length > 0) setBdSelectedIds([]);
-                      else setBdSelectedIds(bdFilteredLeads.map(l => l.id));
-                    }}
-                    className="w-4 h-4 accent-red-600"
-                  />
-                  <span className="text-sm font-semibold text-gray-700">Select All ({bdFilteredLeads.length})</span>
-                </label>
-                {bdSelectedIds.length > 0 && (
-                  <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded-lg">{bdSelectedIds.length} selected</span>
-                )}
-              </div>
-
-              <div className="border border-gray-200 rounded-xl overflow-hidden max-h-[30vh] overflow-y-auto">
-                {bdFilteredLeads.length === 0 ? (
-                  <div className="p-6 text-center text-gray-400 text-sm">No leads found</div>
-                ) : (
-                  bdFilteredLeads.map((lead, idx) => (
-                    <label key={lead.id}
-                      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-all ${bdSelectedIds.includes(lead.id) ? 'bg-red-50 border-l-4 border-red-500' : 'hover:bg-gray-50'} ${idx !== 0 ? 'border-t border-gray-100' : ''}`}>
-                      <input type="checkbox" checked={bdSelectedIds.includes(lead.id)}
-                        onChange={() => setBdSelectedIds(prev => prev.includes(lead.id) ? prev.filter(i => i !== lead.id) : [...prev, lead.id])}
-                        className="w-4 h-4 accent-red-600 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">{lead.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{lead.phone} · {lead.city || '—'} · {lead.status}</p>
-                      </div>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="bg-gray-50 border-t p-4 flex items-center justify-between rounded-b-2xl">
-              <button onClick={() => setBulkDeleteModalOpen(false)} className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all text-sm">Cancel</button>
-              <button onClick={handleBulkDelete} disabled={bdSelectedIds.length === 0 || bdDeleting}
-                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all text-sm disabled:opacity-50 flex items-center gap-2">
-                <Trash2 size={14} />
-                {bdDeleting ? 'Deleting...' : `Delete ${bdSelectedIds.length > 0 ? `${bdSelectedIds.length} Leads` : 'Selected'}`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
