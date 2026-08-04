@@ -110,7 +110,14 @@ const TelecallerLeads = () => {
 
       if (data.success) {
         const nonConvertedLeads = data.data.filter(lead => lead.status !== 'Converted');
-        setLeads(nonConvertedLeads);
+        if (silent) {
+          // Save scroll position, update data, restore scroll after render
+          const scrollY = window.scrollY;
+          setLeads(nonConvertedLeads);
+          requestAnimationFrame(() => { window.scrollTo(0, scrollY); });
+        } else {
+          setLeads(nonConvertedLeads);
+        }
       }
     } catch (error) {
       console.error('Error fetching leads:', error);
