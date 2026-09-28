@@ -1,8 +1,20 @@
 <?php
+// Hostinger blocks localhost TCP, so talk to the backend through its Unix socket
+define('BACKEND_SOCKET', '/home/u591726268/crm-backend.sock');
+
+function backendHealthy() {
+    $ch = curl_init('http://localhost/api/health');
+    curl_setopt($ch, CURLOPT_UNIX_SOCKET_PATH, BACKEND_SOCKET);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    $health = curl_exec($ch);
+    curl_close($ch);
+    return (bool) $health;
+}
+
 // Auto-restart backend if not running
 function ensureBackendRunning() {
-    $health = @file_get_contents('http://127.0.0.1:5000/api/health');
-    if (!$health) {
+    if (!backendHealthy()) {
         $node_path = '/opt/alt/alt-nodejs20/root/usr/bin';
         $pm2 = '/home/u591726268/node_modules/.bin/pm2';
         $dir = '/home/u591726268/domains/crmpulseeducation.in/backend';
@@ -25,7 +37,7 @@ ensureBackendRunning();
 $path = isset($_GET['_path']) ? $_GET['_path'] : '/';
 unset($_GET['_path']);
 $query = http_build_query($_GET);
-$target = 'http://127.0.0.1:5000/api' . $path . ($query ? '?' . $query : '');
+$target = 'http://localhost/api' . $path . ($query ? '?' . $query : '');
 
 $method = $_SERVER['REQUEST_METHOD'];
 $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
@@ -37,6 +49,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $target);
+curl_setopt($ch, CURLOPT_UNIX_SOCKET_PATH, BACKEND_SOCKET);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 curl_setopt($ch, CURLOPT_TIMEOUT, 60);
@@ -70,6 +83,14 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 $responseContentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 curl_close($ch);
+
+if ($raw === false) {
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+    http_response_code(503);
+    echo json_encode(['success' => false, 'message' => 'Backend server is not responding, please try again in a minute']);
+    exit();
+}
 
 $response = substr($raw, $headerSize);
 
