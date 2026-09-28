@@ -6,7 +6,7 @@ function ensureBackendRunning() {
         $node_path = '/opt/alt/alt-nodejs20/root/usr/bin';
         $pm2 = '/home/u591726268/node_modules/.bin/pm2';
         $dir = '/home/u591726268/domains/crmpulseeducation.in/backend';
-        $cmd = "export PATH={$node_path}:\$PATH && cd {$dir} && {$pm2} start server.js --name crm-backend >> /home/u591726268/backend.log 2>&1";
+        $cmd = "export HOME=/home/u591726268 PM2_HOME=/home/u591726268/.pm2 PATH={$node_path}:\$PATH && cd {$dir} && (nohup {$pm2} resurrect >> /home/u591726268/backend.log 2>&1 || nohup {$pm2} start server.js --name crm-backend >> /home/u591726268/backend.log 2>&1)";
         $desc = [['pipe','r'],['pipe','w'],['pipe','w']];
         $proc = proc_open('/bin/bash', $desc, $pipes);
         if (is_resource($proc)) {
